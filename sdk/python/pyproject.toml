@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "browsai-sdk"
+version = "0.1.0"
+description = "Transport-neutral client for BrowsAI"
+requires-python = ">=3.10"

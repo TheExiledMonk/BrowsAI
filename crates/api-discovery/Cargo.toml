@@ -1,0 +1,17 @@
+[package]
+name = "browsai-api-discovery"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+browsai-network = { path = "../network" }
+browsai-provenance = { path = "../provenance" }
+serde.workspace = true
+serde_json.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+browsai-profiles = { path = "../profiles" }

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "projectVersion": "0.1.0",
+  "variants": [
+    {
+      "name": "headless",
+      "cargoPackage": "browsai-cli",
+      "artifact": "browsai",
+      "mode": "executable",
+      "runtimeAssets": ["test-sites", "docs"]
+    },
+    {
+      "name": "desktop-shell",
+      "cargoPackage": "browsai-desktop",
+      "artifact": "libbrowsai_desktop",
+      "mode": "library",
+      "runtimeAssets": ["docs"]
+    }
+  ],
+  "targets": {
+    "linux": {"status": "supported", "sandboxPolicy": "sandbox policy is host-configured"},
+    "macos": {"status": "roadmap", "sandboxPolicy": "platform integration required"},
+    "windows": {"status": "roadmap", "sandboxPolicy": "platform integration required"}
+  }
+}

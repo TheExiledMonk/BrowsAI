@@ -1,0 +1,11 @@
+[package]
+name = "browsai-headless"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+browsai-engine-api = { path = "../../crates/engine-api" }
+browsai-engine-servo = { path = "../../crates/engine-servo" }
+url.workspace = true

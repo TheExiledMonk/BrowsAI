@@ -1,0 +1,17 @@
+[package]
+name = "browsai-action-planner"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+browsai-agent-tree = { path = "../agent-tree" }
+browsai-input = { path = "../input" }
+browsai-layout-observer = { path = "../layout-observer" }
+browsai-transactions = { path = "../transactions" }
+
+[dev-dependencies]
+browsai-provenance = { path = "../provenance" }
+serde_json.workspace = true

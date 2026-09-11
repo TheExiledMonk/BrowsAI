@@ -1,0 +1,17 @@
+[package]
+name = "browsai-semantic-ir"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+browsai-agent-tree = { path = "../agent-tree" }
+browsai-challenge-observer = { path = "../challenge-observer" }
+browsai-fingerprint = { path = "../fingerprint" }
+browsai-provenance = { path = "../provenance" }
+
+[dev-dependencies]
+serde_json.workspace = true
+url.workspace = true

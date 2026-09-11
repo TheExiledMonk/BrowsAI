@@ -1,0 +1,8 @@
+[
+  {
+    "id": "controlled-fixtures",
+    "kind": "repository",
+    "location": "test-sites/",
+    "license": "repository-owned"
+  }
+]

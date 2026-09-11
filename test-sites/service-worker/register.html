@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Service worker fixture</title>
+<output id="state">unregistered</output>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker/sw.js', {scope: '/service-worker/'})
+      .then(registration => {
+        document.querySelector('#state').textContent = 'registered';
+        const worker = registration.active || registration.waiting || registration.installing;
+        if (!worker) return;
+        const channel = new MessageChannel();
+        channel.port1.onmessage = event => {
+          document.querySelector('#state').textContent = 'worker:' + JSON.stringify(event.data);
+        };
+        worker.postMessage({type: 'probe'}, [channel.port2]);
+      })
+      .catch(error => document.querySelector('#state').textContent = `error:${error && error.name || 'unknown'}:${error && error.message || ''}`);
+  }
+</script>

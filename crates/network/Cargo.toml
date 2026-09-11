@@ -1,0 +1,17 @@
+[package]
+name = "browsai-network"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+url.workspace = true
+browsai-cookies = { path = "../cookies" }
+browsai-cache = { path = "../cache" }
+browsai-profiles = { path = "../profiles" }
+browsai-service-worker = { path = "../service-worker" }
+browsai-engine-api = { path = "../engine-api" }

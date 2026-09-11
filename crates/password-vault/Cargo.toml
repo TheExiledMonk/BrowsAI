@@ -1,0 +1,12 @@
+[package]
+name = "browsai-password-vault"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+browsai-credentials = { path = "../credentials" }
+browsai-profiles = { path = "../profiles" }
+browsai-secret-store = { path = "../secret-store" }
+

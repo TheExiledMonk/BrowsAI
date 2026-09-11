@@ -1,0 +1,4 @@
+{
+  "schema_version": 1,
+  "required": ["commit", "fixture", "snapshot_tokens", "query_tokens", "diff_tokens", "provenance_tokens", "task_tokens"]
+}

@@ -1,0 +1,5033 @@
+{
+  "runner_metadata": {
+    "binary": "target/debug/browsai",
+    "binary_mtime_ns": 1789062737442075411,
+    "binary_sha256": "f7d236933e40e435559456603709e6021cd34ea096cc926c3814243c0b9520ed",
+    "binary_size": 1500015272,
+    "resolved_binary": "/home/fabian/browsAI/target/debug/browsai"
+  },
+  "sites": {
+    "akadns.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.324,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.324,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://akadns.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://akadns.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://akadns.net/",
+          "about:blank",
+          "https://akadns.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://akadns.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://akadns.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://akadns.net/",
+          "about:blank",
+          "https://akadns.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://akadns.net/",
+          "history": [
+            "https://akadns.net/",
+            "about:blank",
+            "https://akadns.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://akadns.net",
+          "redirect_observed": true,
+          "requested_url": "https://akadns.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://akadns.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://akadns.net/"
+    },
+    "akamai.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.325,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.325,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://akamai.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://akamai.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://akamai.net/",
+          "about:blank",
+          "https://akamai.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://akamai.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://akamai.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://akamai.net/",
+          "about:blank",
+          "https://akamai.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://akamai.net/",
+          "history": [
+            "https://akamai.net/",
+            "about:blank",
+            "https://akamai.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://akamai.net",
+          "redirect_observed": true,
+          "requested_url": "https://akamai.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://akamai.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://akamai.net/"
+    },
+    "akamaiedge.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.332,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.332,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://akamaiedge.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://akamaiedge.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://akamaiedge.net/",
+          "about:blank",
+          "https://akamaiedge.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://akamaiedge.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://akamaiedge.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://akamaiedge.net/",
+          "about:blank",
+          "https://akamaiedge.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://akamaiedge.net/",
+          "history": [
+            "https://akamaiedge.net/",
+            "about:blank",
+            "https://akamaiedge.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://akamaiedge.net",
+          "redirect_observed": true,
+          "requested_url": "https://akamaiedge.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://akamaiedge.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://akamaiedge.net/"
+    },
+    "cloudflare.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 6.307,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 6.307,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 2,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": "KNOWN",
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://cloudflare.net/home/default.aspx",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": "UNKNOWN",
+        "origin": "https://cloudflare.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://cloudflare.net/",
+          "https://cloudflare.net/",
+          "https://www.cloudflare.com/",
+          "about:blank",
+          "https://cloudflare.net/home/default.aspx"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://cloudflare.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": "UNKNOWN",
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://cloudflare.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://cloudflare.net/",
+          "https://cloudflare.net/",
+          "https://www.cloudflare.com/",
+          "about:blank",
+          "https://cloudflare.net/home/default.aspx"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "SECURITY_OR_NETWORK_POLICY",
+        "security_error_decision": "blocked",
+        "signals": [
+          "security_error"
+        ],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "EXTERNAL_OR_SITE_POLICY",
+      "reproducibility": "UNMEASURED",
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 45.0,
+              "width": 177.0,
+              "x": 590.0,
+              "y": -100.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/0/0/0/0/0",
+            "name": "Skip to main content",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 18.0,
+              "width": 184.0,
+              "x": 25.0,
+              "y": 29.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/2/0/0/0/0",
+            "name": null,
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 59.0,
+              "x": 0.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/0",
+            "name": "Home",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 57.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/0/0",
+            "name": "News within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 187.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/1/0",
+            "name": "Events & Presentations within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 150.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/2/0",
+            "name": "Stock Information within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 91.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/3/0",
+            "name": "Financials within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 104.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/4/0",
+            "name": "Governance within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 66.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/5/0",
+            "name": "Impact within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 35.0,
+              "width": 92.0,
+              "x": 10.0,
+              "y": 10.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/3/0/0/0/1/6/0",
+            "name": "Resources within the Home section",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 19.0,
+              "width": 353.0,
+              "x": 36.0,
+              "y": 32.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/1/2/0/0/2/0/0/0/1/0/0/0/0/0/1/0",
+            "name": "Cloudflare Partners with OpenAI Daybreak Models to Redefine Vulnerability Management with AI-Powered Edge Defense ",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 19.0,
+              "width": 66.0,
+              "x": 36.0,
+              "y": 107.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/1/2/0/0/2/0/0/0/1/0/0/0/0/0/2/0",
+            "name": "Learn More",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/2/0/0/0/2/0/0/0/0/0/0/0/0/0/0",
+          "dom:0/1/2/0/0/0/2/0/0/0/0/0/2/0/0/0/0"
+        ],
+        "candidate_links_bytes": 80,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/1",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/0/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 54.0,
+              "width": 380.0,
+              "x": 775.0,
+              "y": 71.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/4/0/0/1/1",
+            "name": "Search query",
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/0/0/0/4/0/0/1/2",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/2/0/1/0/0/0/1",
+            "name": "Search query",
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/0/2/0/1/0/0/0/2",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 45.0,
+              "width": 360.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/0/0/0/0/2",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 14.0,
+              "x": -1.0,
+              "y": -1.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/1/0/1/0/0/0",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 14.0,
+              "x": -1.0,
+              "y": 14.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/1/0/1/0/0/3",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 14.0,
+              "x": -1.0,
+              "y": 30.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/1/0/1/0/0/6",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 14.0,
+              "x": -1.0,
+              "y": 45.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/1/0/1/0/0/9",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 14.0,
+              "x": -1.0,
+              "y": 61.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/1/0/1/0/0/12",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/2/1/0/3/0/0",
+            "name": "Captcha Text",
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/3",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/2/0/0/0/4",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/8/1/0/2/0/1/0/1",
+            "name": "Cookie list search",
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/8/1/0/2/0/1/3/0/2/0/0/0/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/8/1/0/2/1/0/0/1/0/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/8/1/0/2/1/0/0/1/1/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/8/1/0/2/1/0/0/1/2/0",
+            "name": null,
+            "visible": false
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/2/0/0/0/2/0/0/0/0/0/0/0/0/0/0",
+          "dom:0/1/2/0/0/0/2/0/0/0/0/0/2/0/0/0/0"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://cloudflare.net/home/default.aspx",
+          "history": [
+            "https://cloudflare.net/",
+            "https://cloudflare.net/",
+            "https://www.cloudflare.com/",
+            "about:blank",
+            "https://cloudflare.net/home/default.aspx"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://cloudflare.net",
+          "redirect_observed": true,
+          "requested_url": "https://cloudflare.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 724,
+        "probed_controls": [
+          "dom:0/1/2/0/0/0/2/0/2/0/0/0/2/0/0/1/1/3/0"
+        ],
+        "runtime_messages": [
+          "Warn: Studio jQuery 3.7.1 is now $tudio",
+          "Log: aadadasda {\"items\": [{\"title\": \"Cloudflare Partners with OpenAI Daybreak Models to Redefine Vulnerability Management with AI-Powered Edge Defense\", \"url\": \"/news/news-details/2026/Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense/default.aspx\", \"dateObj\": new Date(1788454800000), \"year\": 2026, \"date\": \"2026-09-03\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1850, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Expands Support for AI Coding Agents with Cursor Cloud Agents on Cloudflare Sandboxes\", \"url\": \"/news/news-details/2026/Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes/default.aspx\", \"dateObj\": new Date(1788364800000), \"year\": 2026, \"date\": \"2026-09-02\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1849, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Introduces Adaptive Intelligence; Reverses the Economics of Automated Cyber Attacks\", \"url\": \"/news/news-details/2026/Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks/default.aspx\", \"dateObj\": new Date(1788166800000), \"year\": 2026, \"date\": \"2026-08-31\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1848, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks\", \"body\": \"\", \u2026}], \"years\": [{\"year\": \"All\", \"value\": -1, \"items\": [{\"title\": \"Cloudflare Partners with OpenAI Daybreak Models to Redefine Vulnerability Management with AI-Powered Edge Defense\", \"url\": \"/news/news-details/2026/Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense/default.aspx\", \"dateObj\": new Date(1788454800000), \"year\": 2026, \"date\": \"2026-09-03\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1850, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Expands Support for AI Coding Agents with Cursor Cloud Agents on Cloudflare Sandboxes\", \"url\": \"/news/news-details/2026/Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes/default.aspx\", \"dateObj\": new Date(1788364800000), \"year\": 2026, \"date\": \"2026-09-02\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1849, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Introduces Adaptive Intelligence; Reverses the Economics of Automated Cyber Attacks\", \"url\": \"/news/news-details/2026/Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks/default.aspx\", \"dateObj\": new Date(1788166800000), \"year\": 2026, \"date\": \"2026-08-31\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1848, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks\", \"body\": \"\", \u2026}], \"active\": true}, {\"year\": 2026, \"value\": 2026, \"items\": [{\"title\": \"Cloudflare Partners with OpenAI Daybreak Models to Redefine Vulnerability Management with AI-Powered Edge Defense\", \"url\": \"/news/news-details/2026/Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense/default.aspx\", \"dateObj\": new Date(1788454800000), \"year\": 2026, \"date\": \"2026-09-03\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1850, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Expands Support for AI Coding Agents with Cursor Cloud Agents on Cloudflare Sandboxes\", \"url\": \"/news/news-details/2026/Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes/default.aspx\", \"dateObj\": new Date(1788364800000), \"year\": 2026, \"date\": \"2026-09-02\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1849, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Introduces Adaptive Intelligence; Reverses the Economics of Automated Cyber Attacks\", \"url\": \"/news/news-details/2026/Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks/default.aspx\", \"dateObj\": new Date(1788166800000), \"year\": 2026, \"date\": \"2026-08-31\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1848, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks\", \"body\": \"\", \u2026}]}, {\"year\": 2025, \"value\": 2025, \"items\": []}, {\"year\": 2024, \"value\": 2024, \"items\": []}, {\"year\": 2023, \"value\": 2023, \"items\": []}, {\"year\": 2022, \"value\": 2022, \"items\": []}, {\"year\": 2021, \"value\": 2021, \"items\": []}, {\"year\": 2020, \"value\": 2020, \"items\": []}, {\"year\": 2019, \"value\": 2019, \"items\": []}, {\"year\": 2018, \"value\": 2018, \"items\": []}, {\"year\": 2017, \"value\": 2017, \"items\": []}, {\"year\": 2016, \"value\": 2016, \"items\": []}, {\"year\": 2015, \"value\": 2015, \"items\": []}, {\"year\": 2014, \"value\": 2014, \"items\": []}, {\"year\": 2013, \"value\": 2013, \"items\": []}, \u2026], \"yearsWithItems\": [{\"year\": 2026, \"value\": 2026, \"items\": [{\"title\": \"Cloudflare Partners with OpenAI Daybreak Models to Redefine Vulnerability Management with AI-Powered Edge Defense\", \"url\": \"/news/news-details/2026/Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense/default.aspx\", \"dateObj\": new Date(1788454800000), \"year\": 2026, \"date\": \"2026-09-03\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1850, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Partners-with-OpenAI-Daybreak-Models-to-Redefine-Vulnerability-Management-with-AI-Powered-Edge-Defense\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Expands Support for AI Coding Agents with Cursor Cloud Agents on Cloudflare Sandboxes\", \"url\": \"/news/news-details/2026/Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes/default.aspx\", \"dateObj\": new Date(1788364800000), \"year\": 2026, \"date\": \"2026-09-02\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1849, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Expands-Support-for-AI-Coding-Agents-with-Cursor-Cloud-Agents-on-Cloudflare-Sandboxes\", \"body\": \"\", \u2026}, {\"title\": \"Cloudflare Introduces Adaptive Intelligence; Reverses the Economics of Automated Cyber Attacks\", \"url\": \"/news/news-details/2026/Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks/default.aspx\", \"dateObj\": new Date(1788166800000), \"year\": 2026, \"date\": \"2026-08-31\", \"tags\": [], \"category\": \"\", \"excludeFromLatest\": undefined, \"languageId\": 1, \"linkToPage\": \"00000000-0000-0000-0000-000000000000\", \"linkToUrl\": \"\", \"pressReleaseId\": 1848, \"shortDescription\": \"\", \"seoName\": \"Cloudflare-Introduces-Adaptive-Intelligence-Reverses-the-Economics-of-Automated-Cyber-Attacks\", \"body\": \"\", \u2026}]}]}",
+          "Log: en-US",
+          "Log: PDF d943cc70bfd5fc792f8248fce7123b96 [1.7 PDFium / PDFium] (PDF.js: 1.9.426)",
+          "Error: Error at https://cloudflare.net/home/default.aspx:1061:37 uncaught exception: SecurityError: The operation is insecure.",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"The operation is insecure.\",\"stack\":null,\"script_url\":\"https://cloudflare.net/home/default.aspx\",\"line\":1061,\"column\":37,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"SecurityError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}"
+        ],
+        "skipped_controls": [],
+        "url": "https://cloudflare.net/home/default.aspx"
+      },
+      "root_cause": "SECURITY_OR_NETWORK_POLICY",
+      "root_cause_id": "RC-011",
+      "runtime_events": [
+        {
+          "api": null,
+          "column": 37,
+          "exception_type": "SecurityError",
+          "initialization_stage": null,
+          "line": 1061,
+          "message": "Error at https://cloudflare.net/home/default.aspx:1061:37 uncaught exception: SecurityError: The operation is insecure.",
+          "missing_symbol": null,
+          "network_policy_signal": "security_error",
+          "raw": "Error: Error at https://cloudflare.net/home/default.aspx:1061:37 uncaught exception: SecurityError: The operation is insecure.",
+          "realm": "window-or-document",
+          "script_url": "https://cloudflare.net/home/default.aspx",
+          "security_context": null,
+          "security_mechanism": "restricted_api",
+          "stack": null
+        },
+        {
+          "api": null,
+          "column": 37,
+          "exception_type": "SecurityError",
+          "initialization_stage": "document-start",
+          "line": 1061,
+          "message": "The operation is insecure.",
+          "missing_symbol": null,
+          "network_policy_signal": "security_error",
+          "raw": "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"The operation is insecure.\",\"stack\":null,\"script_url\":\"https://cloudflare.net/home/default.aspx\",\"line\":1061,\"column\":37,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"SecurityError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}",
+          "realm": "window-or-document",
+          "script_url": "https://cloudflare.net/home/default.aspx",
+          "security_context": null,
+          "security_mechanism": "restricted_api",
+          "stack": null
+        }
+      ],
+      "runtime_events_bytes": 447,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "fail",
+      "url": "https://cloudflare.net/"
+    },
+    "cloudfront.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.341,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.341,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://cloudfront.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://cloudfront.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://cloudfront.net/",
+          "about:blank",
+          "https://cloudfront.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://cloudfront.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://cloudfront.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://cloudfront.net/",
+          "about:blank",
+          "https://cloudfront.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://cloudfront.net/",
+          "history": [
+            "https://cloudfront.net/",
+            "about:blank",
+            "https://cloudfront.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://cloudfront.net",
+          "redirect_observed": true,
+          "requested_url": "https://cloudfront.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://cloudfront.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://cloudfront.net/"
+    },
+    "domaincontrol.com": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.373,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.373,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://domaincontrol.com/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://domaincontrol.com",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://domaincontrol.com/",
+          "about:blank",
+          "https://domaincontrol.com/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://domaincontrol.com/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://domaincontrol.com",
+        "preflight": null,
+        "redirect_chain": [
+          "https://domaincontrol.com/",
+          "about:blank",
+          "https://domaincontrol.com/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://domaincontrol.com/",
+          "history": [
+            "https://domaincontrol.com/",
+            "about:blank",
+            "https://domaincontrol.com/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://domaincontrol.com",
+          "redirect_observed": true,
+          "requested_url": "https://domaincontrol.com/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://domaincontrol.com/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://domaincontrol.com/"
+    },
+    "dzen.ru": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 4.997,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 4.997,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://sso.dzen.ru",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://dzen.ru/",
+          "https://dzen.ru/",
+          "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391",
+          "https://dzen.ru/?is_autologin_ya=true",
+          "https://dzen.ru/?is_autologin_ya=true",
+          "about:blank",
+          "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://dzen.ru/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://sso.dzen.ru",
+        "preflight": null,
+        "redirect_chain": [
+          "https://dzen.ru/",
+          "https://dzen.ru/",
+          "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391",
+          "https://dzen.ru/?is_autologin_ya=true",
+          "https://dzen.ru/?is_autologin_ya=true",
+          "about:blank",
+          "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391",
+          "history": [
+            "https://dzen.ru/",
+            "https://dzen.ru/",
+            "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391",
+            "https://dzen.ru/?is_autologin_ya=true",
+            "https://dzen.ru/?is_autologin_ya=true",
+            "about:blank",
+            "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://sso.dzen.ru",
+          "redirect_observed": true,
+          "requested_url": "https://dzen.ru/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 5,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://sso.dzen.ru/install?uuid=fdafde50-93d1-4c6f-833a-9167289c4391"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://dzen.ru/"
+    },
+    "gandi.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 7.631,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 7.631,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://www.gandi.net/en-US",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://www.gandi.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://gandi.net/",
+          "https://gandi.net/",
+          "https://gandi.net/",
+          "about:blank",
+          "https://www.gandi.net/en-US"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://gandi.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://www.gandi.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://gandi.net/",
+          "https://gandi.net/",
+          "https://gandi.net/",
+          "about:blank",
+          "https://www.gandi.net/en-US"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": true,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 64.0,
+              "width": 198.0,
+              "x": 0.0,
+              "y": -200.0
+            },
+            "id": "dom:0/1/2/0",
+            "name": "Skip to main content",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 123.0,
+              "x": 80.0,
+              "y": 22.0
+            },
+            "id": "dom:0/1/3/1/0/0/1",
+            "name": "Go to Home",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 143.0,
+              "x": 28.0,
+              "y": 27.0
+            },
+            "id": "dom:0/1/3/1/1/0/0",
+            "name": "Create a website",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 86.0,
+              "x": 203.0,
+              "y": 27.0
+            },
+            "id": "dom:0/1/3/1/1/1/0",
+            "name": "Products",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 105.0,
+              "x": 321.0,
+              "y": 27.0
+            },
+            "id": "dom:0/1/3/1/1/2/0",
+            "name": "Businesses",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 79.0,
+              "x": 458.0,
+              "y": 27.0
+            },
+            "id": "dom:0/1/3/1/1/3/0",
+            "name": "Discounts",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 63.0,
+              "x": 704.0,
+              "y": 27.0
+            },
+            "id": "dom:0/1/3/1/1/4/0",
+            "name": "Blog",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 63.0,
+              "x": 799.0,
+              "y": 27.0
+            },
+            "id": "dom:0/1/3/1/1/5/0",
+            "name": "Help",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 71.0,
+              "x": 894.0,
+              "y": 22.0
+            },
+            "id": "dom:0/1/3/1/1/6/0",
+            "name": "Log in",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 48.0,
+              "width": 48.0,
+              "x": 252.0,
+              "y": 198.0
+            },
+            "id": "dom:0/1/4/0/0/2/0/1",
+            "name": "Submit search",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 1087.0,
+              "x": 240.0,
+              "y": 362.0
+            },
+            "id": "dom:0/1/4/0/0/4",
+            "name": "\ud83d\udd12 Get ahead of shorter TLS/SSL certificate lifespans: discover our automation solution for simpler, more secure certificate management",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 48.0,
+              "width": 160.0,
+              "x": 40.0,
+              "y": 274.0
+            },
+            "id": "dom:0/1/5/0/0/0/1/0/1/0",
+            "name": "Create a website",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/2/0",
+          "dom:0/1/3/1/0/0/1"
+        ],
+        "candidate_links_bytes": 34,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 28.0,
+              "width": 168.0,
+              "x": 556.0,
+              "y": 158.0
+            },
+            "id": "dom:0/1/4/0/0/2/0/0",
+            "name": "Try a word or a domain name",
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 44.0,
+              "width": 970.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/6/0/0/0/4/3/0/0",
+            "name": "Email Address",
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/6/0/0/0/4/5/0/0/0/0/0/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/6/0/0/0/4/5/0/0/2",
+            "name": null,
+            "visible": false
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/2/0",
+          "dom:0/1/3/1/0/0/1"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://www.gandi.net/en-US",
+          "history": [
+            "https://gandi.net/",
+            "https://gandi.net/",
+            "https://gandi.net/",
+            "about:blank",
+            "https://www.gandi.net/en-US"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://www.gandi.net",
+          "redirect_observed": true,
+          "requested_url": "https://gandi.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 1001,
+        "probed_controls": [
+          "dom:0/1/3/1/1/0/0",
+          "dom:0/1/3/1/1/1/0",
+          "dom:0/1/3/1/1/2/0"
+        ],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://www.gandi.net/en-US"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://gandi.net/"
+    },
+    "goo.gl": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.782,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.782,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://goo.gl/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://goo.gl",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://goo.gl/",
+          "https://firebase.google.com/",
+          "about:blank",
+          "https://goo.gl/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://goo.gl/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://goo.gl",
+        "preflight": null,
+        "redirect_chain": [
+          "https://goo.gl/",
+          "https://firebase.google.com/",
+          "about:blank",
+          "https://goo.gl/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 119.0,
+              "width": 616.0,
+              "x": 332.0,
+              "y": 229.0
+            },
+            "id": "dom:0/1/2/0",
+            "name": null,
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [
+          "dom:0/1/2/0"
+        ],
+        "candidate_links_bytes": 14,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/2/0"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://goo.gl/",
+          "history": [
+            "https://goo.gl/",
+            "https://firebase.google.com/",
+            "about:blank",
+            "https://goo.gl/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://goo.gl",
+          "redirect_observed": true,
+          "requested_url": "https://goo.gl/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 14,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://goo.gl/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://goo.gl/"
+    },
+    "googledomains.com": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 3.087,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 3.087,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://domains.google/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://domains.google",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://googledomains.com/",
+          "https://googledomains.com/",
+          "about:blank",
+          "https://domains.google/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://googledomains.com/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://domains.google",
+        "preflight": null,
+        "redirect_chain": [
+          "https://googledomains.com/",
+          "https://googledomains.com/",
+          "about:blank",
+          "https://domains.google/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 23.0,
+              "width": 106.0,
+              "x": 125.0,
+              "y": 301.0
+            },
+            "id": "dom:0/1/0/1/0/0/0/0/1/0/2",
+            "name": "Squarespace",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 23.0,
+              "width": 118.0,
+              "x": 312.0,
+              "y": 357.0
+            },
+            "id": "dom:0/1/0/1/0/0/0/0/1/0/5",
+            "name": "Cloud support",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 15.0,
+              "width": 41.0,
+              "x": 95.0,
+              "y": 713.0
+            },
+            "id": "dom:0/1/0/2/0/0/0/0/0",
+            "name": "Google",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 15.0,
+              "width": 77.0,
+              "x": 170.0,
+              "y": 713.0
+            },
+            "id": "dom:0/1/0/2/0/0/0/1/0",
+            "name": "About Google",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 15.0,
+              "width": 38.0,
+              "x": 281.0,
+              "y": 713.0
+            },
+            "id": "dom:0/1/0/2/0/0/0/2/0",
+            "name": "Privacy",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 15.0,
+              "width": 32.0,
+              "x": 353.0,
+              "y": 713.0
+            },
+            "id": "dom:0/1/0/2/0/0/0/3/0",
+            "name": "Terms",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [
+          "dom:0/1/0/1/0/0/0/0/1/0/2",
+          "dom:0/1/0/1/0/0/0/0/1/0/5"
+        ],
+        "candidate_links_bytes": 56,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/0/1/0/0/0/0/1/0/2",
+          "dom:0/1/0/1/0/0/0/0/1/0/5"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://domains.google/",
+          "history": [
+            "https://googledomains.com/",
+            "https://googledomains.com/",
+            "about:blank",
+            "https://domains.google/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://domains.google",
+          "redirect_observed": true,
+          "requested_url": "https://googledomains.com/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 71,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://domains.google/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://googledomains.com/"
+    },
+    "gtld-servers.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.526,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.526,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://gtld-servers.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://gtld-servers.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://gtld-servers.net/",
+          "about:blank",
+          "https://gtld-servers.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://gtld-servers.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://gtld-servers.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://gtld-servers.net/",
+          "about:blank",
+          "https://gtld-servers.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://gtld-servers.net/",
+          "history": [
+            "https://gtld-servers.net/",
+            "about:blank",
+            "https://gtld-servers.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://gtld-servers.net",
+          "redirect_observed": true,
+          "requested_url": "https://gtld-servers.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://gtld-servers.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://gtld-servers.net/"
+    },
+    "mail.ru": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 19.327,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "WEBSITE_SCRIPT",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 19.327,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "navigation_commit",
+        "network_state": "HeadParsed",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 5,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": "KNOWN",
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://mail.ru/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "HeadParsed",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://mail.ru",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://mail.ru/",
+          "https://mail.ru/",
+          "https://mail.ru/",
+          "https://mail.ru/?autologin=no",
+          "about:blank",
+          "https://mail.ru/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://mail.ru/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://mail.ru",
+        "preflight": null,
+        "redirect_chain": [
+          "https://mail.ru/",
+          "https://mail.ru/",
+          "https://mail.ru/",
+          "https://mail.ru/?autologin=no",
+          "about:blank",
+          "https://mail.ru/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "SITE_DOM_ASSUMPTION",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "RUNTIME_OR_SCRIPT",
+      "reproducibility": "UNMEASURED",
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 54.0,
+              "width": 93.0,
+              "x": 0.0,
+              "y": 4.0
+            },
+            "id": "dom:0/0",
+            "name": null,
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 75.0,
+              "x": 133.0,
+              "y": 13.0
+            },
+            "id": "dom:0/1",
+            "name": "\u041f\u043e\u0447\u0442\u0430",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 86.0,
+              "x": 210.0,
+              "y": 13.0
+            },
+            "id": "dom:0/2",
+            "name": "\u041e\u0431\u043b\u0430\u043a\u043e",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 53.0,
+              "x": 297.0,
+              "y": 13.0
+            },
+            "id": "dom:0/3",
+            "name": "\u041e\u041a",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 51.0,
+              "x": 353.0,
+              "y": 13.0
+            },
+            "id": "dom:0/4",
+            "name": "VK",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 94.0,
+              "x": 406.0,
+              "y": 13.0
+            },
+            "id": "dom:0/5",
+            "name": "\u041d\u043e\u0432\u043e\u0441\u0442\u0438",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 117.0,
+              "x": 502.0,
+              "y": 13.0
+            },
+            "id": "dom:0/6",
+            "name": "\u0417\u043d\u0430\u043a\u043e\u043c\u0441\u0442\u0432\u0430",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 101.0,
+              "x": 621.0,
+              "y": 13.0
+            },
+            "id": "dom:0/7",
+            "name": "\u041c\u043e\u0439 \u041c\u0438\u0440",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 69.0,
+              "x": 723.0,
+              "y": 13.0
+            },
+            "id": "dom:0/8",
+            "name": "\u0418\u0433\u0440\u044b",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 153.0,
+              "x": 794.0,
+              "y": 13.0
+            },
+            "id": "dom:0/10",
+            "name": "\u0412\u0441\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u044b",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 124.0,
+              "x": 988.0,
+              "y": 13.0
+            },
+            "id": "dom:0/11",
+            "name": "\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 36.0,
+              "width": 84.0,
+              "x": 1116.0,
+              "y": 13.0
+            },
+            "id": "dom:0/12",
+            "name": "\u0412\u043e\u0439\u0442\u0438",
+            "role": "Button"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/0",
+          "dom:0/1"
+        ],
+        "candidate_links_bytes": 20,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/28",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/29",
+            "name": null,
+            "visible": false
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/0",
+          "dom:0/1"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "HeadParsed",
+        "navigation": {
+          "final_url": "https://mail.ru/",
+          "history": [
+            "https://mail.ru/",
+            "https://mail.ru/",
+            "https://mail.ru/",
+            "https://mail.ru/?autologin=no",
+            "about:blank",
+            "https://mail.ru/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://mail.ru",
+          "redirect_observed": true,
+          "requested_url": "https://mail.ru/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 188,
+        "probed_controls": [
+          "dom:0/1/5/0/0/1/0/1/1/0/0",
+          "dom:0/1/5/0/0/1/0/4/1/0",
+          "dom:0/1/5/1/2/0/0/0/0/3/3"
+        ],
+        "runtime_messages": [
+          "Error: Error at https://mail.ru/?autologin=no:108:11871 JSON.parse: unexpected character at line 1 column 1 of the JSON data",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"JSON.parse: unexpected character at line 1 column 1 of the JSON data\",\"stack\":\"ee@core-logger.min.js:108:11871\\n@core-logger-init.min.js:113:80\\n@core-logger-init.min.js:113:121\\n\",\"script_url\":\"https://mail.ru/?autologin=no\",\"line\":108,\"column\":11871,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"SyntaxError\",\"error_constructor\":\"SyntaxError\",\"initialization_stage\":\"document-start\"}",
+          "Warn: No valid entry type provided to observe().",
+          "Error: Error at :0:0 ResizeObserver loop completed with undelivered notifications.",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"ResizeObserver loop completed with undelivered notifications.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":null,\"error_constructor\":null,\"initialization_stage\":\"document-start\"}",
+          "Error: Error at :0:0 ResizeObserver loop completed with undelivered notifications.",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"ResizeObserver loop completed with undelivered notifications.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":null,\"error_constructor\":null,\"initialization_stage\":\"document-start\"}",
+          "Warn: No valid entry type provided to observe().",
+          "Error: Error at :0:0 ResizeObserver loop completed with undelivered notifications.",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"ResizeObserver loop completed with undelivered notifications.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":null,\"error_constructor\":null,\"initialization_stage\":\"document-start\"}",
+          "Error: Error at :0:0 ResizeObserver loop completed with undelivered notifications.",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"ResizeObserver loop completed with undelivered notifications.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":null,\"error_constructor\":null,\"initialization_stage\":\"document-start\"}",
+          "Warn: No valid entry type provided to observe().",
+          "Error: (new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "Error: (new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "Error: (new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))"
+        ],
+        "skipped_controls": [],
+        "url": "https://mail.ru/"
+      },
+      "root_cause": "SITE_DOM_ASSUMPTION",
+      "root_cause_id": "RC-012",
+      "runtime_events": [
+        {
+          "api": null,
+          "column": 11871,
+          "exception_type": "Error",
+          "initialization_stage": null,
+          "line": 108,
+          "message": "Error at https://mail.ru/?autologin=no:108:11871 JSON.parse: unexpected character at line 1 column 1 of the JSON data",
+          "missing_symbol": null,
+          "network_policy_signal": null,
+          "raw": "Error: Error at https://mail.ru/?autologin=no:108:11871 JSON.parse: unexpected character at line 1 column 1 of the JSON data",
+          "realm": "window-or-document",
+          "script_url": "https://mail.ru/?autologin=no",
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        },
+        {
+          "api": null,
+          "column": 11871,
+          "exception_type": "SyntaxError",
+          "initialization_stage": "document-start",
+          "line": 108,
+          "message": "JSON.parse: unexpected character at line 1 column 1 of the JSON data",
+          "missing_symbol": null,
+          "network_policy_signal": null,
+          "raw": "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"JSON.parse: unexpected character at line 1 column 1 of the JSON data\",\"stack\":\"ee@core-logger.min.js:108:11871\\n@core-logger-init.min.js:113:80\\n@core-logger-init.min.js:113:121\\n\",\"script_url\":\"https://mail.ru/?autologin=no\",\"line\":108,\"column\":11871,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"SyntaxError\",\"error_constructor\":\"SyntaxError\",\"initialization_stage\":\"document-start\"}",
+          "realm": "window-or-document",
+          "script_url": "https://mail.ru/?autologin=no",
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": "ee@core-logger.min.js:108:11871\n@core-logger-init.min.js:113:80\n@core-logger-init.min.js:113:121\n"
+        },
+        {
+          "api": "e.thrown",
+          "column": null,
+          "exception_type": "TypeError",
+          "initialization_stage": null,
+          "line": null,
+          "message": "(new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "missing_symbol": "e.thrown",
+          "network_policy_signal": null,
+          "raw": "Error: (new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "realm": "window-or-document",
+          "script_url": null,
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        },
+        {
+          "api": "e.thrown",
+          "column": null,
+          "exception_type": "TypeError",
+          "initialization_stage": null,
+          "line": null,
+          "message": "(new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "missing_symbol": "e.thrown",
+          "network_policy_signal": null,
+          "raw": "Error: (new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "realm": "window-or-document",
+          "script_url": null,
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        },
+        {
+          "api": "e.thrown",
+          "column": null,
+          "exception_type": "TypeError",
+          "initialization_stage": null,
+          "line": null,
+          "message": "(new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "missing_symbol": "e.thrown",
+          "network_policy_signal": null,
+          "raw": "Error: (new TypeError(\"can't access property \\\"stack\\\", e.thrown is undefined\", \"https://static.dzeninfra.ru/s3/zen-apps/video-player-core/1.150.1/one.modern.bundle.js\", 1))",
+          "realm": "window-or-document",
+          "script_url": null,
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        }
+      ],
+      "runtime_events_bytes": 1092,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "fail",
+      "url": "https://mail.ru/"
+    },
+    "myfritz.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 9.418,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 9.418,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://sso.myfritz.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://sso.myfritz.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://myfritz.net/",
+          "https://myfritz.net/",
+          "https://sso.myfritz.net/realms/myfritz/protocol/openid-connect/auth?client_id=box-discovery-webapp&redirect_uri=https%3A%2F%2Fwww.myfritz.net%2Fdevices%2F&state=7f2dccd4-ce8b-4444-9466-710d57316ae7&response_mode=fragment&response_type=code&scope=openid&nonce=c021fbfc-46ad-46af-9137-ed5da7c1f5d1&code_challenge=eTEYZv-vIYAWnfYqvvWjSvcwVyLMnamU8zIcdZZHrYU&code_challenge_method=S256",
+          "https://www.myfritz.net/",
+          "about:blank",
+          "https://www.myfritz.net/devices/",
+          "https://sso.myfritz.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://myfritz.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://sso.myfritz.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://myfritz.net/",
+          "https://myfritz.net/",
+          "https://sso.myfritz.net/realms/myfritz/protocol/openid-connect/auth?client_id=box-discovery-webapp&redirect_uri=https%3A%2F%2Fwww.myfritz.net%2Fdevices%2F&state=7f2dccd4-ce8b-4444-9466-710d57316ae7&response_mode=fragment&response_type=code&scope=openid&nonce=c021fbfc-46ad-46af-9137-ed5da7c1f5d1&code_challenge=eTEYZv-vIYAWnfYqvvWjSvcwVyLMnamU8zIcdZZHrYU&code_challenge_method=S256",
+          "https://www.myfritz.net/",
+          "about:blank",
+          "https://www.myfritz.net/devices/",
+          "https://sso.myfritz.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 60.0,
+              "width": 116.0,
+              "x": 164.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/0/0/0",
+            "name": "\n\t\t\t\t\n\t\t\t",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 60.0,
+              "width": 24.0,
+              "x": 1086.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/0/0/2",
+            "name": "\n        \t\t\n\t\t\t",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 20.0,
+              "width": 32.0,
+              "x": 235.0,
+              "y": 162.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/3/1/0",
+            "name": "here",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 25.0,
+              "x": 279.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/5/0/1/1",
+            "name": "[REDACTED]",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 304.0,
+              "x": 488.0,
+              "y": 324.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/5/0/3/1",
+            "name": "\n                            Log In\n                        ",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 48.0,
+              "width": 304.0,
+              "x": 488.0,
+              "y": 370.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/5/0/3/2/0",
+            "name": "[REDACTED]",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 20.0,
+              "width": 217.0,
+              "x": 890.0,
+              "y": 484.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/6/0/0/0",
+            "name": "Information about registration",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 18.0,
+              "width": 82.0,
+              "x": 62.0,
+              "y": 11.0
+            },
+            "id": "dom:0/1/2/0/1/0/0/0",
+            "name": "FRITZ!\u00a0GmbH",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 18.0,
+              "width": 47.0,
+              "x": 161.0,
+              "y": 11.0
+            },
+            "id": "dom:0/1/2/0/1/0/1/0",
+            "name": "Imprint",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 18.0,
+              "width": 67.0,
+              "x": 225.0,
+              "y": 11.0
+            },
+            "id": "dom:0/1/2/0/1/0/2/0",
+            "name": "Contact Us",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 18.0,
+              "width": 97.0,
+              "x": 309.0,
+              "y": 11.0
+            },
+            "id": "dom:0/1/2/0/1/0/3/0",
+            "name": "Data Protection",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 18.0,
+              "width": 80.0,
+              "x": 423.0,
+              "y": 11.0
+            },
+            "id": "dom:0/1/2/0/1/0/4/0",
+            "name": "Terms of Use",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/0/0/0",
+          "dom:0/1/0/0/2"
+        ],
+        "candidate_links_bytes": 32,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 304.0,
+              "x": 488.0,
+              "y": 232.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/5/0/0",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 38.0,
+              "width": 304.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/5/0/1/0",
+            "name": null,
+            "visible": true
+          },
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/1/0/0/0/0/0/5/0/2",
+            "name": null,
+            "visible": false
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/0/0/0",
+          "dom:0/1/0/0/2"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://sso.myfritz.net/",
+          "history": [
+            "https://myfritz.net/",
+            "https://myfritz.net/",
+            "https://sso.myfritz.net/realms/myfritz/protocol/openid-connect/auth?client_id=box-discovery-webapp&redirect_uri=https%3A%2F%2Fwww.myfritz.net%2Fdevices%2F&state=7f2dccd4-ce8b-4444-9466-710d57316ae7&response_mode=fragment&response_type=code&scope=openid&nonce=c021fbfc-46ad-46af-9137-ed5da7c1f5d1&code_challenge=eTEYZv-vIYAWnfYqvvWjSvcwVyLMnamU8zIcdZZHrYU&code_challenge_method=S256",
+            "https://www.myfritz.net/",
+            "about:blank",
+            "https://www.myfritz.net/devices/",
+            "https://sso.myfritz.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://sso.myfritz.net",
+          "redirect_observed": true,
+          "requested_url": "https://myfritz.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 115,
+        "probed_controls": [
+          "dom:0/1/1/0/0/0/0/0/5/0/1/1"
+        ],
+        "runtime_messages": [],
+        "skipped_controls": [
+          "dom:0/1/1/0/0/0/0/0/5/0/3/1"
+        ],
+        "url": "https://sso.myfritz.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://myfritz.net/"
+    },
+    "nginx.org": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 5.027,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 5.027,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://nginx.org/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://nginx.org",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://nginx.org/",
+          "https://go.f5.net/nginxcommunitycall",
+          "about:blank",
+          "https://nginx.org/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://nginx.org/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://nginx.org",
+        "preflight": null,
+        "redirect_chain": [
+          "https://nginx.org/",
+          "https://go.f5.net/nginxcommunitycall",
+          "about:blank",
+          "https://nginx.org/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 173.0,
+              "x": 445.0,
+              "y": 3.0
+            },
+            "id": "dom:0/1/0/0/0",
+            "name": "NGINX Community Call",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 62.0,
+              "x": 980.0,
+              "y": 143.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/1/0",
+            "name": "\u0440\u0443\u0441\u0441\u043a\u0438\u0439",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 40.0,
+              "x": 980.0,
+              "y": 188.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/3/0",
+            "name": "news",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 45.0,
+              "x": 980.0,
+              "y": 210.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/4/0",
+            "name": "about",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 76.0,
+              "x": 980.0,
+              "y": 233.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/5/0",
+            "name": "download",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 60.0,
+              "x": 980.0,
+              "y": 255.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/6/0",
+            "name": "security",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 117.0,
+              "x": 980.0,
+              "y": 277.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/7/0",
+            "name": "documentation",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 25.0,
+              "x": 980.0,
+              "y": 300.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/8/0",
+            "name": "faq",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 47.0,
+              "x": 980.0,
+              "y": 322.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/9/0",
+            "name": "books",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 86.0,
+              "x": 980.0,
+              "y": 345.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/10/0",
+            "name": "community",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 79.0,
+              "x": 980.0,
+              "y": 367.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/11/0",
+            "name": "enterprise",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 22.0,
+              "width": 138.0,
+              "x": 980.0,
+              "y": 412.0
+            },
+            "id": "dom:0/1/1/0/2/1/0/13/0",
+            "name": "community forum (new)",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/0/0/0",
+          "dom:0/1/1/0/2/1/0/1/0"
+        ],
+        "candidate_links_bytes": 40,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/1/0/0",
+            "name": null,
+            "visible": false
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/0/0/0",
+          "dom:0/1/1/0/2/1/0/1/0"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://nginx.org/",
+          "history": [
+            "https://nginx.org/",
+            "https://go.f5.net/nginxcommunitycall",
+            "about:blank",
+            "https://nginx.org/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://nginx.org",
+          "redirect_observed": true,
+          "requested_url": "https://nginx.org/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 165,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://nginx.org/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://nginx.org/"
+    },
+    "pv-cdn.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.293,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.293,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://pv-cdn.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://pv-cdn.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://pv-cdn.net/",
+          "about:blank",
+          "https://pv-cdn.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://pv-cdn.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://pv-cdn.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://pv-cdn.net/",
+          "about:blank",
+          "https://pv-cdn.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://pv-cdn.net/",
+          "history": [
+            "https://pv-cdn.net/",
+            "about:blank",
+            "https://pv-cdn.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://pv-cdn.net",
+          "redirect_observed": true,
+          "requested_url": "https://pv-cdn.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://pv-cdn.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://pv-cdn.net/"
+    },
+    "trafficmanager.net": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 2.332,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 2.332,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://trafficmanager.net/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://trafficmanager.net",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://trafficmanager.net/",
+          "about:blank",
+          "https://trafficmanager.net/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://trafficmanager.net/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://trafficmanager.net",
+        "preflight": null,
+        "redirect_chain": [
+          "https://trafficmanager.net/",
+          "about:blank",
+          "https://trafficmanager.net/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://trafficmanager.net/",
+          "history": [
+            "https://trafficmanager.net/",
+            "about:blank",
+            "https://trafficmanager.net/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://trafficmanager.net",
+          "redirect_observed": true,
+          "requested_url": "https://trafficmanager.net/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://trafficmanager.net/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://trafficmanager.net/"
+    },
+    "wa.me": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 3.815,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 3.815,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "whatsapp://chat/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "null",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://wa.me/",
+          "https://wa.me/",
+          "whatsapp://chat/",
+          "about:blank",
+          "whatsapp://chat/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://wa.me/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "null",
+        "preflight": null,
+        "redirect_chain": [
+          "https://wa.me/",
+          "https://wa.me/",
+          "whatsapp://chat/",
+          "about:blank",
+          "whatsapp://chat/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": null,
+        "candidate_controls_truncated": false,
+        "candidate_links": [],
+        "candidate_links_bytes": 0,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": null,
+        "candidate_links_truncated": false,
+        "candidate_textboxes": [],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "whatsapp://chat/",
+          "history": [
+            "https://wa.me/",
+            "https://wa.me/",
+            "whatsapp://chat/",
+            "about:blank",
+            "whatsapp://chat/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "null",
+          "redirect_observed": true,
+          "requested_url": "https://wa.me/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 6,
+        "probed_controls": [],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "whatsapp://chat/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://wa.me/"
+    },
+    "wordpress.org": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 10.203,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 10.203,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://wordpress.org/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://wordpress.org",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://wordpress.org/",
+          "https://wordpress.org/",
+          "about:blank",
+          "https://wordpress.org/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://wordpress.org/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://wordpress.org",
+        "preflight": null,
+        "redirect_chain": [
+          "https://wordpress.org/",
+          "https://wordpress.org/",
+          "about:blank",
+          "https://wordpress.org/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 1.0,
+              "width": 1.0,
+              "x": -1.0,
+              "y": -1.0
+            },
+            "id": "dom:0/1/2",
+            "name": "Skip to content",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 60.0,
+              "width": 70.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/0/0",
+            "name": "\n\t\t\n\tWordPress.org\n\t\n\t\n\t",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 59.0,
+              "width": 86.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/0/0",
+            "name": "Showcase",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 59.0,
+              "width": 67.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/1/0",
+            "name": "Plugins",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 59.0,
+              "width": 72.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/2/0",
+            "name": "Themes",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 59.0,
+              "width": 70.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/3/0",
+            "name": "Hosting",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 59.0,
+              "width": 57.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/4/0",
+            "name": "News",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 59.0,
+              "width": 109.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/5/0",
+            "name": "Resources submenu",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 44.0,
+              "width": 131.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/5/2/0/0",
+            "name": "Learn WordPress",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 44.0,
+              "width": 119.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/5/2/1/0",
+            "name": "Documentation",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 44.0,
+              "width": 85.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/5/2/2/0",
+            "name": "Education",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 44.0,
+              "width": 67.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/1/1/0/0/1/0/5/2/3/0",
+            "name": "Forums",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/2",
+          "dom:0/1/3/0/0/0"
+        ],
+        "candidate_links_bytes": 30,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/3/0/2/1/0/0/1/0/1/0",
+            "name": null,
+            "visible": false
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/2",
+          "dom:0/1/3/0/0/0"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://wordpress.org/",
+          "history": [
+            "https://wordpress.org/",
+            "https://wordpress.org/",
+            "about:blank",
+            "https://wordpress.org/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://wordpress.org",
+          "redirect_observed": true,
+          "requested_url": "https://wordpress.org/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 662,
+        "probed_controls": [
+          "dom:0/1/3/0/1/1/0/0/1/0/5/0",
+          "dom:0/1/3/0/1/1/0/0/1/0/6/0",
+          "dom:0/1/3/0/2/0"
+        ],
+        "runtime_messages": [],
+        "skipped_controls": [],
+        "url": "https://wordpress.org/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://wordpress.org/"
+    },
+    "x.com": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 4.887,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "UNKNOWN",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 4.887,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "document_load",
+        "network_state": "Complete",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 0,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": null,
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://x.com/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "Complete",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://x.com",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://x.com/",
+          "about:blank",
+          "https://x.com/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://x.com/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://x.com",
+        "preflight": null,
+        "redirect_chain": [
+          "https://x.com/",
+          "about:blank",
+          "https://x.com/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "NONE",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "PASS",
+      "reproducibility": null,
+      "result": {
+        "agent_tree_truncated": false,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 46.0,
+              "width": 384.0,
+              "x": 36.0,
+              "y": 211.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/0/0",
+            "name": "Continue with phone",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 40.0,
+              "width": 334.0,
+              "x": 36.0,
+              "y": 277.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/0/1/0/0",
+            "name": "Continue with Google",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 48.0,
+              "width": 384.0,
+              "x": 36.0,
+              "y": 343.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/0/2",
+            "name": "Continue with Apple",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 48.0,
+              "width": 384.0,
+              "x": 36.0,
+              "y": 534.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/2/2",
+            "name": "Continue",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 117.0,
+              "x": 292.0,
+              "y": 604.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/3/0",
+            "name": "Terms of Service",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 14.0,
+              "width": 78.0,
+              "x": 258.0,
+              "y": 622.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/3/2",
+            "name": "Cookie Use.",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 32.0,
+              "x": 253.0,
+              "y": 695.0
+            },
+            "id": "dom:0/1/0/2/0/0/0",
+            "name": "About",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 53.0,
+              "x": 296.0,
+              "y": 695.0
+            },
+            "id": "dom:0/1/0/2/0/1/0",
+            "name": "Get App",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 26.0,
+              "x": 360.0,
+              "y": 695.0
+            },
+            "id": "dom:0/1/0/2/0/2/0",
+            "name": "Grok",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 24.0,
+              "x": 397.0,
+              "y": 695.0
+            },
+            "id": "dom:0/1/0/2/0/3/0",
+            "name": "Help",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 31.0,
+              "x": 432.0,
+              "y": 695.0
+            },
+            "id": "dom:0/1/0/2/0/4/0",
+            "name": "Terms",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 38.0,
+              "x": 474.0,
+              "y": 695.0
+            },
+            "id": "dom:0/1/0/2/0/5/0",
+            "name": "Privacy",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/0/0/0/0/2/0/0/0/0",
+          "dom:0/1/0/0/0/0/2/0/0/0/1/0/0"
+        ],
+        "candidate_links_bytes": 60,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/2/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 20.0,
+              "width": 364.0,
+              "x": 0.0,
+              "y": 22.0
+            },
+            "id": "dom:0/1/0/0/0/0/2/0/0/2/1/0/2",
+            "name": null,
+            "visible": true
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/0/0/0/0/2/0/0/0/0",
+          "dom:0/1/0/0/0/0/2/0/0/0/1/0/0"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "Complete",
+        "navigation": {
+          "final_url": "https://x.com/",
+          "history": [
+            "https://x.com/",
+            "about:blank",
+            "https://x.com/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://x.com",
+          "redirect_observed": true,
+          "requested_url": "https://x.com/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 468,
+        "probed_controls": [
+          "dom:0/1/0/0/0/0/2/0/2/2"
+        ],
+        "runtime_messages": [
+          "Error: Error at :0:1 uncaught exception: undefined",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"error\",\"message\":\"uncaught exception: undefined\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":1,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":null,\"error_constructor\":null,\"initialization_stage\":\"document-start\"}",
+          "Debug: (new Error(\"\", \"https://abs.twimg.com/x-web/x-web/assets/castle.umd-DFNJGy1i.js\", 6))"
+        ],
+        "skipped_controls": [],
+        "url": "https://x.com/"
+      },
+      "root_cause": "NONE",
+      "root_cause_id": null,
+      "runtime_events": [],
+      "runtime_events_bytes": 0,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "pass",
+      "url": "https://x.com/"
+    },
+    "youtu.be": {
+      "certificate_validation_bypassed": false,
+      "elapsed_seconds": 19.349,
+      "error": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+      "error_source": "WEBSITE_SCRIPT",
+      "execution": {
+        "attempts": 1,
+        "diagnostics_error": null,
+        "dom_state": {
+          "body_length": null,
+          "html_length": null,
+          "ready_state": null
+        },
+        "elapsed_seconds": 19.349,
+        "last_observed_stage": "evaluation",
+        "last_successful_stage": "navigation_commit",
+        "network_state": "HeadParsed",
+        "pending_requests": null,
+        "pending_scripts": null,
+        "pending_tasks": null,
+        "process_heartbeat": {
+          "last_stage": "evaluation",
+          "marker_count": 8,
+          "observed": true
+        },
+        "runtime_error_count": 3,
+        "semantic_generation": null,
+        "stage_history": [
+          "startup",
+          "navigation",
+          "navigation",
+          "stability",
+          "dom_projection",
+          "interaction",
+          "interaction",
+          "evaluation"
+        ],
+        "timed_out": false,
+        "timeout_seconds": 90,
+        "timeout_subtype": null
+      },
+      "exit_code": 0,
+      "external_block": false,
+      "failure_label": "KNOWN",
+      "navigation": {
+        "document_created": false,
+        "failure_reason": "BROWSAI_STAGE:startup\nBROWSAI_STAGE:navigation\nBROWSAI_STAGE:navigation_complete\nBROWSAI_STAGE:stability\nBROWSAI_STAGE:dom_projection\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:interaction\nBROWSAI_STAGE:evaluation",
+        "final_url": "https://www.youtube.com/",
+        "http_status": null,
+        "initiator": null,
+        "load_status": "HeadParsed",
+        "mime_type": null,
+        "navigation_cause": "REDIRECT_LOOP",
+        "navigation_committed": false,
+        "network_policy_classification": null,
+        "origin": "https://www.youtube.com",
+        "process_exit_code": 0,
+        "redirect_chain": [
+          "https://youtu.be/",
+          "https://youtu.be/",
+          "about:blank",
+          "https://www.youtube.com/"
+        ],
+        "redirect_loop_observed": true,
+        "redirect_observed": true,
+        "requested_url": "https://youtu.be/",
+        "resource_type": "main_frame",
+        "stage": "redirect_loop"
+      },
+      "network_policy": {
+        "classification": null,
+        "cors_decision": null,
+        "credentials_mode": null,
+        "csp_decision": null,
+        "missing_fields": [
+          "target_origin",
+          "request_mode",
+          "credentials_mode",
+          "request_headers",
+          "preflight",
+          "response_headers"
+        ],
+        "page_origin": "https://www.youtube.com",
+        "preflight": null,
+        "redirect_chain": [
+          "https://youtu.be/",
+          "https://youtu.be/",
+          "about:blank",
+          "https://www.youtube.com/"
+        ],
+        "request_headers": null,
+        "request_mode": null,
+        "response_headers": null,
+        "root_cause": "GENERAL_JS_API",
+        "security_error_decision": null,
+        "signals": [],
+        "target_origin": null,
+        "telemetry_complete": false
+      },
+      "outcome_class": "RUNTIME_OR_SCRIPT",
+      "reproducibility": "UNMEASURED",
+      "result": {
+        "agent_tree_truncated": true,
+        "candidate_controls": [
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 24.0,
+              "x": 8.0,
+              "y": 8.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/0/2/0",
+            "name": "Guide",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 56.0,
+              "width": 123.0,
+              "x": 56.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/0/3/0",
+            "name": "YouTube Home",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 40.0,
+              "width": 127.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/0/4/0/0/0",
+            "name": "Skip navigation",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 40.0,
+              "width": 64.0,
+              "x": 572.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/1/0/1/0/1",
+            "name": "Search",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 40.0,
+              "width": 40.0,
+              "x": 938.0,
+              "y": 8.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/1/2/0/0/0",
+            "name": "Search with your voice",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 24.0,
+              "x": 8.0,
+              "y": 8.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/2/1/0/1/0/0/0",
+            "name": "Settings",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 40.0,
+              "width": 40.0,
+              "x": 1113.0,
+              "y": 8.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/2/1/0/1/0",
+            "name": null,
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 40.0,
+              "width": 103.0,
+              "x": 1161.0,
+              "y": 8.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/2/1/1/0/0",
+            "name": "Sign in",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 24.0,
+              "x": 8.0,
+              "y": 8.0
+            },
+            "id": "dom:0/1/4/5/2/1/0/1/0/0/0",
+            "name": "\n            \n          ",
+            "role": "Button"
+          },
+          {
+            "geometry": {
+              "height": 56.0,
+              "width": 123.0,
+              "x": 56.0,
+              "y": 120.0
+            },
+            "id": "dom:0/1/4/5/2/1/0/1/0/1/0",
+            "name": "YouTube Home",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 46.0,
+              "width": 64.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/4/5/3/0/0/0",
+            "name": "Home",
+            "role": "Link"
+          },
+          {
+            "geometry": {
+              "height": 46.0,
+              "width": 64.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/4/5/3/0/1/0",
+            "name": "Shorts",
+            "role": "Link"
+          }
+        ],
+        "candidate_controls_cursor": 0,
+        "candidate_controls_limit": 12,
+        "candidate_controls_next_cursor": "12",
+        "candidate_controls_truncated": true,
+        "candidate_links": [
+          "dom:0/1/4/5/1/0/4/0/3/0",
+          "dom:0/1/4/5/1/0/4/2/1/0/1/0"
+        ],
+        "candidate_links_bytes": 56,
+        "candidate_links_cursor": 0,
+        "candidate_links_duration_ms": 0,
+        "candidate_links_limit": 2,
+        "candidate_links_max_bytes": 16384,
+        "candidate_links_max_duration_ms": 250,
+        "candidate_links_next_cursor": "2",
+        "candidate_links_truncated": true,
+        "candidate_textboxes": [
+          {
+            "geometry": {
+              "height": 0.0,
+              "width": 0.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/1/0/0",
+            "name": null,
+            "visible": false
+          },
+          {
+            "geometry": {
+              "height": 24.0,
+              "width": 515.0,
+              "x": 16.0,
+              "y": 7.0
+            },
+            "id": "dom:0/1/4/5/1/0/4/1/0/1/0/0/0/0",
+            "name": null,
+            "visible": true
+          }
+        ],
+        "candidate_textboxes_cursor": 0,
+        "candidate_textboxes_limit": 50,
+        "candidate_textboxes_next_cursor": null,
+        "candidate_textboxes_truncated": false,
+        "clicked_links": [
+          "dom:0/1/4/5/1/0/4/0/3/0",
+          "dom:0/1/4/5/1/0/4/2/1/0/1/0"
+        ],
+        "diagnostics": {
+          "diagnostics_mode": "snapshot-only",
+          "document_available": true
+        },
+        "load_status": "HeadParsed",
+        "navigation": {
+          "final_url": "https://www.youtube.com/",
+          "history": [
+            "https://youtu.be/",
+            "https://youtu.be/",
+            "about:blank",
+            "https://www.youtube.com/"
+          ],
+          "history_truncated": false,
+          "http_status": null,
+          "initiator": null,
+          "mime_type": null,
+          "origin": "https://www.youtube.com",
+          "redirect_observed": true,
+          "requested_url": "https://youtu.be/",
+          "resource_type": "main_frame"
+        },
+        "node_count": 1001,
+        "probed_controls": [
+          "dom:0/2",
+          "dom:0/4",
+          "dom:0/9"
+        ],
+        "runtime_messages": [
+          "Info: LegacyDataMixin will be applied to all legacy elements.\nSet `_legacyUndefinedCheck: true` on element class to enable.",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"unhandledrejection\",\"message\":\"Provided data is inadequate.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"DataError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"unhandledrejection\",\"message\":\"Provided data is inadequate.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"DataError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}",
+          "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"unhandledrejection\",\"message\":\"Provided data is inadequate.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"DataError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}"
+        ],
+        "skipped_controls": [],
+        "url": "https://www.youtube.com/"
+      },
+      "root_cause": "GENERAL_JS_API",
+      "root_cause_id": "RC-012",
+      "runtime_events": [
+        {
+          "api": null,
+          "column": null,
+          "exception_type": "Error",
+          "initialization_stage": "document-start",
+          "line": null,
+          "message": "Provided data is inadequate.",
+          "missing_symbol": null,
+          "network_policy_signal": null,
+          "raw": "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"unhandledrejection\",\"message\":\"Provided data is inadequate.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"DataError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}",
+          "realm": "window-or-document",
+          "script_url": null,
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        },
+        {
+          "api": null,
+          "column": null,
+          "exception_type": "Error",
+          "initialization_stage": "document-start",
+          "line": null,
+          "message": "Provided data is inadequate.",
+          "missing_symbol": null,
+          "network_policy_signal": null,
+          "raw": "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"unhandledrejection\",\"message\":\"Provided data is inadequate.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"DataError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}",
+          "realm": "window-or-document",
+          "script_url": null,
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        },
+        {
+          "api": null,
+          "column": null,
+          "exception_type": "Error",
+          "initialization_stage": "document-start",
+          "line": null,
+          "message": "Provided data is inadequate.",
+          "missing_symbol": null,
+          "network_policy_signal": null,
+          "raw": "Error: BROWSAI_RUNTIME_EVENT {\"kind\":\"unhandledrejection\",\"message\":\"Provided data is inadequate.\",\"stack\":null,\"script_url\":null,\"line\":null,\"column\":null,\"realm\":\"window-or-document\",\"api\":null,\"error_name\":\"DataError\",\"error_constructor\":\"DOMException\",\"initialization_stage\":\"document-start\"}",
+          "realm": "window-or-document",
+          "script_url": null,
+          "security_context": null,
+          "security_mechanism": null,
+          "stack": null
+        }
+      ],
+      "runtime_events_bytes": 888,
+      "runtime_events_limit": 100,
+      "runtime_events_truncated": false,
+      "status": "fail",
+      "url": "https://youtu.be/"
+    }
+  }
+}

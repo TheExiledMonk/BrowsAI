@@ -1,0 +1,6 @@
+{
+  "id": "storage-origin-profile-partitioning",
+  "api": "Storage",
+  "input": {"profile": "work", "origin": "https://example.test", "key": "theme", "value": "dark"},
+  "expected": {"visible_to_same_profile_origin": true, "visible_to_other_origin": false}
+}

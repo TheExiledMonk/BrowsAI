@@ -1,0 +1,14 @@
+[package]
+name = "browsai-engine-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+url.workspace = true
+browsai-input = { path = "../input" }
+browsai-state = { path = "../state" }
+thiserror.workspace = true

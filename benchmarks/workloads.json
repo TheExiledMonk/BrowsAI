@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "workloads": [
+    { "name": "startup", "command": ["version"] },
+    { "name": "navigation", "command": ["headless", "https://example.test/"] },
+    { "name": "dom_observation", "package": "browsai-dom-observer" },
+    { "name": "layout", "package": "browsai-layout-observer" },
+    { "name": "semantic_compilation", "package": "browsai-semantic-compiler" },
+    { "name": "snapshots", "package": "browsai-state" },
+    { "name": "diffs", "package": "browsai-diff" },
+    { "name": "native_input", "package": "browsai-action-planner" },
+    { "name": "ipc", "package": "browsai-ipc" },
+    { "name": "storage", "package": "browsai-storage" },
+    { "name": "concurrency", "package": "browsai-agent-runtime" },
+    { "name": "recovery", "package": "browsai-recovery" },
+    { "name": "snapshot_query_diff_size", "command": ["query", "https://example.test/"] },
+    { "name": "provenance_overhead", "package": "browsai-provenance" },
+    { "name": "pagination", "package": "browsai-agent-protocol" },
+    { "name": "agent_task_cost", "package": "browsai-agent-runtime" }
+  ]
+}

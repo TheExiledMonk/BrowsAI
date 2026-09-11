@@ -1,0 +1,13 @@
+[package]
+name = "browsai-fingerprint"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+url.workspace = true
+thiserror.workspace = true
+browsai-engine-api = { path = "../engine-api" }

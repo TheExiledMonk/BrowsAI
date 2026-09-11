@@ -1,0 +1,9 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>WebSocket fixture</title>
+<output id="state">connecting</output>
+<script>
+  const socket = new WebSocket('ws://example.test/events');
+  socket.onopen = () => socket.send('subscribe');
+  socket.onmessage = event => document.querySelector('#state').textContent = event.data;
+</script>

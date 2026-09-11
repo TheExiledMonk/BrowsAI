@@ -1,0 +1,37 @@
+[package]
+name = "browsai-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+live-browser = ["browsai-engine-servo/servo-runtime"]
+
+[dependencies]
+browsai-agent-protocol = { path = "../../crates/agent-protocol" }
+browsai-agent-runtime = { path = "../../crates/agent-runtime" }
+browsai-agent-tree = { path = "../../crates/agent-tree" }
+browsai-action-planner = { path = "../../crates/action-planner" }
+browsai-audit = { path = "../../crates/audit" }
+browsai-challenge-observer = { path = "../../crates/challenge-observer" }
+browsai-compatibility-check = { path = "../../crates/compatibility-check" }
+browsai-engine-api = { path = "../../crates/engine-api" }
+browsai-engine-servo = { path = "../../crates/engine-servo" }
+browsai-input = { path = "../../crates/input" }
+browsai-layout-observer = { path = "../../crates/layout-observer" }
+browsai-logging = { path = "../../crates/logging" }
+browsai-profiles = { path = "../../crates/profiles" }
+browsai-provenance = { path = "../../crates/provenance" }
+browsai-recovery = { path = "../../crates/recovery" }
+browsai-sandbox = { path = "../../crates/sandbox" }
+browsai-state = { path = "../../crates/state" }
+browsai-workspace = { path = "../../crates/workspace" }
+serde_json.workspace = true
+uuid.workspace = true
+url.workspace = true
+
+[[bin]]
+name = "browsai"
+path = "src/main.rs"

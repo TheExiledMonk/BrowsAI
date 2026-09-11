@@ -1,0 +1,6 @@
+{
+  "controlled": {
+    "description": "Local deterministic compatibility fixtures",
+    "features": ["navigation", "dom", "layout", "semantic-ir", "native-input"]
+  }
+}

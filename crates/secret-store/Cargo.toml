@@ -1,0 +1,16 @@
+[package]
+name = "browsai-secret-store"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+chacha20poly1305.workspace = true
+serde.workspace = true
+uuid.workspace = true
+zeroize.workspace = true
+browsai-profiles = { path = "../profiles" }
+
+[dev-dependencies]
+serde_json.workspace = true

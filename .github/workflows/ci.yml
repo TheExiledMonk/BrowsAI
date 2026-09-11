@@ -1,0 +1,35 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo test --workspace --all-features --no-fail-fast
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 scripts/audit_todo.py
+      - run: python3 scripts/validate_test_sites.py
+      - run: python3 scripts/run_fixture_suite.py --check-only
+      - run: python3 -m json.tool test-sites/conformance/forms/basic.json >/dev/null
+      - run: python3 -m json.tool test-sites/conformance/storage/partitioning.json >/dev/null
+      - run: python3 benchmarks/validate.py benchmarks/example-result.json
+      - run: python3 benchmarks/run.py --check-only
+      - run: python3 scripts/validate_packaging.py
+      - run: python3 scripts/validate_release.py
+      - run: python3 scripts/generate_sbom.py --output /tmp/browsai-sbom.json
+      - run: python3 -m json.tool /tmp/browsai-sbom.json >/dev/null
+      - run: PYTHONPATH=sdk/python python3 -m unittest benchmarks/test_validate.py sdk/python/test_sdk.py
+      - run: python3 -m py_compile sdk/python/browsai_sdk/__init__.py

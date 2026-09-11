@@ -1,0 +1,8 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Open shadow DOM fixture</title>
+<custom-card></custom-card>
+<script>
+  const root = document.querySelector('custom-card').attachShadow({mode: 'open'});
+  root.innerHTML = '<button aria-label="Shadow action">Activate</button>';
+</script>

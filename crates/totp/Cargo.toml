@@ -1,0 +1,15 @@
+[package]
+name = "browsai-totp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+data-encoding.workspace = true
+hmac.workspace = true
+sha1.workspace = true
+uuid.workspace = true
+browsai-profiles = { path = "../profiles" }
+browsai-secret-store = { path = "../secret-store" }
+

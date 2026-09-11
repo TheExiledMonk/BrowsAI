@@ -1,0 +1,2 @@
+id,url,domain,category,priority,enabled
+site-000001,https://example.test,example.test,controlled,100,true

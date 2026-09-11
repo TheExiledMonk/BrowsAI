@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    { "path": "html/basic.html", "feature": "navigation" },
+    { "path": "css/visibility.html", "feature": "snapshots" },
+    { "path": "javascript/async.html", "feature": "page_evaluation" }
+  ]
+}

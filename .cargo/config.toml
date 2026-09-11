@@ -1,0 +1,6 @@
+[env]
+# Servo's style worker uses a 512 KiB stack by default. Real-world pages
+# such as Google result destinations can exhaust that stack while resolving
+# deeply nested/generated styles. Keep the runtime configuration reproducible
+# for every Cargo build, while allowing an explicit environment override.
+SERVO_STYLE_THREAD_STACK_SIZE_KB = { value = "8192", force = false }

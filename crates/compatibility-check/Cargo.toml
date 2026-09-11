@@ -1,0 +1,18 @@
+[package]
+name = "browsai-compatibility-check"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+browsai-metrics = { path = "../metrics" }
+browsai-transactions = { path = "../transactions" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+url.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

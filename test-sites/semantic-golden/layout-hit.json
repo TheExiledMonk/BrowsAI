@@ -1,0 +1,9 @@
+{
+  "viewport": {"width": 100.0, "height": 100.0},
+  "point": {"x": 10.0, "y": 10.0},
+  "expected_hit": 2,
+  "boxes": [
+    {"node_id": 1, "x": 0.0, "y": 0.0, "width": 50.0, "height": 50.0, "z_index": 1},
+    {"node_id": 2, "x": 0.0, "y": 0.0, "width": 50.0, "height": 50.0, "z_index": 2}
+  ]
+}

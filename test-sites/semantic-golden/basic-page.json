@@ -1,0 +1,11 @@
+{
+  "id": "basic-page",
+  "roles": ["Page", "Heading", "Paragraph", "Button"],
+  "labels": ["Example"],
+  "relationship_kinds": [],
+  "visible": true,
+  "enabled": true,
+  "geometry_count": 0,
+  "confidence": 1.0,
+  "provenance": ["Dom", "Layout"]
+}

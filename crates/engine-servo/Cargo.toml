@@ -1,0 +1,28 @@
+[package]
+name = "browsai-engine-servo"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+servo-runtime = ["dep:servo"]
+
+[dependencies]
+serde_json.workspace = true
+url.workspace = true
+dpi = "0.1"
+euclid = "0.22"
+thiserror.workspace = true
+browsai-agent-tree = { path = "../agent-tree" }
+browsai-provenance = { path = "../provenance" }
+browsai-engine-api = { path = "../engine-api" }
+browsai-input = { path = "../input" }
+browsai-state = { path = "../state" }
+servo = { version = "0.5", optional = true }
+
+[dev-dependencies]
+serde.workspace = true
+data-encoding.workspace = true
+sha1.workspace = true

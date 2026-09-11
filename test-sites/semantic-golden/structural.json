@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "include_invisible": false,
+  "expected_roles": ["Page", "Button"]
+}

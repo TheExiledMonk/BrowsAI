@@ -1,0 +1,6 @@
+{
+  "id": "forms-basic",
+  "api": "Forms",
+  "input": {"label": "Email", "value": "user@example.test"},
+  "expected": {"normalized": "user@example.test"}
+}

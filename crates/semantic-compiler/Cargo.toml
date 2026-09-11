@@ -1,0 +1,14 @@
+[package]
+name = "browsai-semantic-compiler"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+browsai-agent-tree = { path = "../agent-tree" }
+browsai-dom-observer = { path = "../dom-observer" }
+browsai-layout-observer = { path = "../layout-observer" }
+browsai-provenance = { path = "../provenance" }
+browsai-semantic-ir = { path = "../semantic-ir" }
+browsai-runtime-observer = { path = "../runtime-observer" }

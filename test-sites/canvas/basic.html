@@ -1,0 +1,9 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Canvas fixture</title>
+<canvas id="chart" width="120" height="80" aria-label="Sample chart"></canvas>
+<script>
+  const context = document.querySelector('#chart').getContext('2d');
+  context.fillStyle = '#3366cc';
+  context.fillRect(10, 10, 100, 50);
+</script>

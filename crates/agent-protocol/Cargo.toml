@@ -1,0 +1,14 @@
+[package]
+name = "browsai-agent-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+browsai-agent-tree = { path = "../agent-tree" }
+browsai-provenance = { path = "../provenance" }
+serde_json.workspace = true
+uuid.workspace = true
+url.workspace = true

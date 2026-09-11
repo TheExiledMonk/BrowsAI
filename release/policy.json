@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "required_ci_gates": [
+    "cargo fmt --all -- --check",
+    "cargo clippy --workspace --all-targets --all-features -- -D warnings",
+    "cargo test --workspace --all-features --no-fail-fast",
+    "python3 scripts/validate_test_sites.py",
+    "python3 scripts/validate_packaging.py",
+    "python3 scripts/generate_sbom.py"
+  ],
+  "dependency_policy": "Cargo.lock and generated SBOM are release inputs",
+  "signing_required": true,
+  "artifact_variants": ["headless", "desktop-shell"],
+  "rollback_document": "docs/release.md",
+  "migration_document": "docs/operations.md",
+  "changelog": "CHANGELOG.md"
+}

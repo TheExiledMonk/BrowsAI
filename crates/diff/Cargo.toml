@@ -1,0 +1,16 @@
+[package]
+name = "browsai-diff"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+browsai-state = { path = "../state" }
+browsai-agent-tree = { path = "../agent-tree" }
+
+[dev-dependencies]
+url.workspace = true
+browsai-provenance = { path = "../provenance" }

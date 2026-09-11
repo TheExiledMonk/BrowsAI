@@ -1,0 +1,16 @@
+[package]
+name = "browsai-application-ir"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+browsai-agent-tree = { path = "../agent-tree" }
+browsai-api-discovery = { path = "../api-discovery" }
+browsai-provenance = { path = "../provenance" }
+
+[dev-dependencies]
+uuid.workspace = true
+serde_json.workspace = true

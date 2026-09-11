@@ -1,0 +1,8 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>JavaScript async fixture</title>
+<output id="state">pending</output>
+<script>
+  queueMicrotask(() => document.querySelector('#state').textContent = 'microtask');
+  Promise.resolve().then(() => document.querySelector('#state').setAttribute('data-promise', 'settled'));
+</script>

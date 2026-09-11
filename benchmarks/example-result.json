@@ -1,0 +1,13 @@
+{
+  "commit": "working-tree",
+  "fixture": "headless-basic-v1",
+  "workload": "snapshot",
+  "sample_count": 10,
+  "median": 1.2,
+  "p95": 2.1,
+  "snapshot_tokens": 120,
+  "query_tokens": 40,
+  "diff_tokens": 18,
+  "provenance_tokens": 12,
+  "task_tokens": 190
+}

@@ -1,0 +1,11 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Worker fixture</title>
+<output id="result">waiting</output>
+<script>
+  const worker = new Worker(URL.createObjectURL(new Blob([
+    'self.onmessage = e => self.postMessage(e.data + 1)'
+  ], {type: 'text/javascript'})));
+  worker.onmessage = e => document.querySelector('#result').textContent = e.data;
+  worker.postMessage(1);
+</script>

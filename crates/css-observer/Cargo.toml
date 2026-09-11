@@ -1,0 +1,13 @@
+[package]
+name = "browsai-css-observer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+browsai-dom-observer = { path = "../dom-observer" }
+
+[dev-dependencies]
+serde_json.workspace = true
