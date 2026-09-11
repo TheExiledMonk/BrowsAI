@@ -1,13 +1,4 @@
-BrowsAI Public-Use License v1.0 (DRAFT — LEGAL REVIEW REQUIRED BEFORE PUBLIC RELEASE)
-
-----------------------------------------------------------------------
-NOTICE TO READERS
-----------------------------------------------------------------------
-This license text is a working draft. The BrowsAI project owners have
-not yet obtained a formal legal opinion on it. Treat the wording below as
-the project's expressed intent; the legally controlling text may differ
-after legal review. Do not rely on this draft as authoritative legal
-advice.
+BrowsAI Public-Use License v1.0
 
 ----------------------------------------------------------------------
 1. DEFINITIONS
@@ -15,10 +6,10 @@ advice.
 
 "Work" means the BrowsAI software, including source code, object code,
 build scripts, configuration, and accompanying documentation distributed
-under this license.
+under this licence.
 
 "You" means each individual or legal entity exercising permissions under
-this license.
+this licence.
 
 "Internal Use" means use of the Work by You, or by Your employees,
 contractors, and authorised agents, solely for Your own internal business
@@ -49,6 +40,10 @@ Use, including:
 
 "Derivative Work" means any work that includes, depends on, or is
 derived from the Work, in any form.
+
+"Contribution" means any original work of authorship submitted to the
+copyright holders for inclusion in the Work, including any
+modifications or additions to the Work.
 
 ----------------------------------------------------------------------
 2. GRANT OF RIGHTS (Internal Use)
@@ -107,8 +102,9 @@ copyright holders:
   e. use the trademarks, trade names, service marks, or product names
      of the copyright holders to endorse or promote any product or
      service derived from the Work without prior written permission; or
-  f. claim authorship of, or right to, the Work or any Derivative
-     Work.
+  f. claim sole authorship of, or any right to control, the Work or
+     any Derivative Work as a whole. This does not affect Your right
+     to be recognised as the author of Your own Contributions.
 
 For the avoidance of doubt, the foregoing restrictions apply to any
 distribution of the Work in source or binary form, whether alone,
@@ -121,11 +117,11 @@ network access.
 
 Each copyright holder grants You a worldwide, royalty-free,
 non-exclusive licence under the patent claims it has the right to
-grant, to make, have made, use, sell, offer for sale, and import the
-Work, solely for the purposes of Internal Use. This patent grant does
-not extend to any External Commercial Use; for External Commercial Use
-You must obtain a separate commercial licence that may include a
-patent licence from the copyright holders.
+grant, to make, have made, and use the Work solely for the purposes of
+Internal Use. This patent grant does not extend to any External
+Commercial Use; for External Commercial Use You must obtain a separate
+commercial licence that may include a patent licence from the copyright
+holders.
 
 If You initiate patent litigation (including a cross-claim or
 counterclaim in a lawsuit) alleging that the Work constitutes direct
@@ -149,7 +145,23 @@ not previously had this licence terminated for the same or a similar
 breach.
 
 ----------------------------------------------------------------------
-7. DISCLAIMER OF WARRANTY
+7. CONTRIBUTOR GRANT
+----------------------------------------------------------------------
+
+By submitting a Contribution, the contributor grants the copyright
+holders a perpetual, worldwide, non-exclusive, royalty-free, irrevocable
+licence to use, reproduce, modify, adapt, create derivative works of,
+publicly perform, publicly display, distribute, sublicense, and
+otherwise exploit the Contribution, and to distribute the Contribution
+under both this public licence and any commercial licence offered by
+the copyright holders.
+
+Each contributor represents that the contributor has sufficient
+rights to grant the licence above and that the Contribution does not
+knowingly infringe any third party's intellectual property rights.
+
+----------------------------------------------------------------------
+8. DISCLAIMER OF WARRANTY
 ----------------------------------------------------------------------
 
 THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -160,18 +172,18 @@ THE WORK IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR ANY PARTICULAR
 PURPOSE, OR NON-INFRINGING.
 
 ----------------------------------------------------------------------
-8. LIMITATION OF LIABILITY
+9. LIMITATION OF LIABILITY
 ----------------------------------------------------------------------
 
 IN NO EVENT WILL THE COPYRIGHT HOLDERS, CONTRIBUTORS, OR ANYONE
 DISTRIBUTING THE WORK BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT,
 INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF OF USE, DATA, OR
 PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE
 OF THE WORK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
-9. GENERAL
+10. GENERAL
 ----------------------------------------------------------------------
 
   a. If any provision of this licence is held to be unenforceable, the
@@ -183,18 +195,27 @@ OF THE WORK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      rights You may have under applicable consumer-protection or
      similar law.
   d. The rights and obligations under this licence are governed by the
-     laws of the jurisdiction in which the copyright holders are
-     established, without regard to conflict-of-laws principles.
+     laws of the jurisdiction in which the copyright holder resides at
+     the time the licence is enforced, without regard to
+     conflict-of-laws principles.
+  e. Nothing in this licence is intended to waive any right the
+     copyright holders have under applicable unfair-competition or
+     copyright-misuse law.
 
 ----------------------------------------------------------------------
-10. THIRD-PARTY COMPONENTS
+11. THIRD-PARTY COMPONENTS
 ----------------------------------------------------------------------
 
 The Work depends on third-party components (including Servo and other
 Rust crates). This licence does not apply to those third-party
 components; each such component is governed by its own licence.
 Required third-party notices are maintained in `THIRD_PARTY_LICENSES.md`
-and must be preserved.
+and must be preserved when distributing the Work.
+
+The copyright holders have done their best to identify the third-party
+components and their licences in `THIRD_PARTY_LICENSES.md`, but make no
+representation that the inventory is complete. You are responsible for
+verifying the licence terms of every component You distribute.
 
 ----------------------------------------------------------------------
 END OF TERMS

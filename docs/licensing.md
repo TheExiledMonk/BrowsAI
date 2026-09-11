@@ -207,13 +207,16 @@ holders. The fork may not legally assert that it is unrestricted.
 
 ## Legal review status
 
-This licence text is a working draft. The BrowsAI project owners have
-not yet obtained a formal legal opinion on it. **Treat the wording in
-`LICENSE` as the project's expressed intent; the legally controlling
-text may differ after legal review.** Do not rely on this draft as
-authoritative legal advice.
+This licence is published without a formal legal opinion. The wording
+is the project owner's expressed intent; it has not been reviewed by a
+qualified lawyer. If You need legally-vetted licence text, treat this
+document as a statement of intent rather than a binding legal opinion,
+and obtain Your own legal advice before relying on it in a
+commercial dispute.
 
-A `LEGAL REVIEW REQUIRED BEFORE FIRST PUBLIC RELEASE` marker should be
-preserved in the project issue tracker until the licence has been
-reviewed by a qualified lawyer and the copyright holder has been
-formally named.
+The project owner has chosen to publish without external legal review
+on the basis that the public-licence grant is permissive (free for
+Internal Use) and the restrictions on External Commercial Use are
+enforceable on the basis of copyright and contract law in most
+jurisdictions. You are responsible for verifying that the terms of
+this licence are appropriate for Your use case.

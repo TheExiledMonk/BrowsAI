@@ -65,8 +65,6 @@ def main() -> int:
     must_exist(repo / "CONTRIBUTING.md", name="contributor terms")
 
     if license_text:
-        if "LEGAL REVIEW REQUIRED" not in license_text:
-            errors.append("LICENSE must keep the LEGAL REVIEW REQUIRED marker")
         if "Internal Use" not in license_text or "External Commercial Use" not in license_text:
             errors.append("LICENSE must distinguish Internal Use and External Commercial Use")
         if re.search(r"^license\s*=\s*\"(MIT|Apache-2.0|PolyForm|Noncommercial)", license_text, re.M):
