@@ -177,3 +177,26 @@ cargo run -p browsai-cli -- version  # sanity check
 ```
 
 The `agent-runtime` and `challenge-observer` crates host the public solve-pathway API. Host applications that want to auto-solve visible challenges should depend on those two crates plus `browsai-engine-api` for the `PageSnapshot` and `PageId` types.
+
+## License
+
+BrowsAI is source-available.
+
+You may use, modify, evaluate, and deploy BrowsAI for personal,
+research, educational, and internal organisational purposes, including
+internal use within commercial companies.
+
+A separate commercial licence is required if BrowsAI is embedded in,
+distributed with, hosted as part of, or materially powers a commercial
+product or paid service offered to third parties.
+
+See [LICENSE](LICENSE) for the full public licence terms and
+[LICENSE-COMMERCIAL.md](LICENSE-COMMERCIAL.md) for commercial licensing
+information.
+
+This summary is informational. If the wording in this README conflicts
+with `LICENSE`, `LICENSE` controls.
+
+Third-party component licences are tracked in
+[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) and
+[docs/licensing.md](docs/licensing.md).
