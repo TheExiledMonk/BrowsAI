@@ -1,5 +1,5 @@
 use browsai_agent_runtime::{
-    solve_observed_challenges, AgentRuntime, SOLVE_NEAR_THRESHOLD_PX, TakeoverManager,
+    solve_observed_challenges, AgentRuntime, TakeoverManager, SOLVE_NEAR_THRESHOLD_PX,
 };
 use browsai_agent_tree::{
     AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole, StructuralRole,
@@ -160,7 +160,10 @@ fn solve_observed_challenges_uses_discrete_click_within_threshold() {
         .iter()
         .filter(|e| matches!(e, NativeInputEvent::PointerMove { .. }))
         .count();
-    assert_eq!(move_count, 0, "cursor is within threshold; no move events expected");
+    assert_eq!(
+        move_count, 0,
+        "cursor is within threshold; no move events expected"
+    );
 }
 
 #[test]

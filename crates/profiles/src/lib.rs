@@ -478,8 +478,14 @@ impl ProfileVariant {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ProfileInconsistency {
-    UserAgentClaimsBrowser { claimed: String, declared: String },
-    PlatformMismatch { ua_platform: String, declared: String },
+    UserAgentClaimsBrowser {
+        claimed: String,
+        declared: String,
+    },
+    PlatformMismatch {
+        ua_platform: String,
+        declared: String,
+    },
 }
 
 impl std::fmt::Display for ProfileInconsistency {
@@ -663,13 +669,12 @@ impl ProfileManager {
         catalog: &FingerprintCatalog,
         fingerprint_id: &FingerprintId,
     ) -> Result<bool, FingerprintInconsistency> {
-        let fingerprint = catalog
-            .get(fingerprint_id)
-            .cloned()
-            .ok_or_else(|| FingerprintInconsistency::UserAgentClaimsBrowser {
+        let fingerprint = catalog.get(fingerprint_id).cloned().ok_or_else(|| {
+            FingerprintInconsistency::UserAgentClaimsBrowser {
                 claimed: "fingerprint-not-found".into(),
                 declared: fingerprint_id.to_string(),
-            })?;
+            }
+        })?;
         fingerprint.is_consistent()?;
         let identity: ProfileIdentity = fingerprint.into_profile_identity();
         let config = ProfileConfig {
@@ -696,11 +701,12 @@ impl ProfileManager {
                 .collect(),
             accept_language: identity.accept_language,
         };
-        self.try_update_config(id, config)
-            .map_err(|_| FingerprintInconsistency::UserAgentClaimsBrowser {
+        self.try_update_config(id, config).map_err(|_| {
+            FingerprintInconsistency::UserAgentClaimsBrowser {
                 claimed: "profile-rejected".into(),
                 declared: fingerprint_id.to_string(),
-            })
+            }
+        })
     }
 }
 

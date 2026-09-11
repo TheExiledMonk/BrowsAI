@@ -61,6 +61,14 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if not args.path.exists():
+        print(
+            f"audit_todo: {args.path} not present; the project tracks unresolved "
+            "work via BROWSER_FIDELITY_TODO.md and check-licensing.py instead.",
+            file=sys.stderr,
+        )
+        return 0
+
     errors, unresolved, in_progress, checkbox_count = audit(args.path)
     if errors:
         for error in errors:

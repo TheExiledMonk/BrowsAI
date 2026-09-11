@@ -72,9 +72,18 @@ impl Fingerprint {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum FingerprintInconsistency {
-    UserAgentClaimsBrowser { claimed: String, declared: String },
-    PlatformMismatch { ua_platform: String, declared: String },
-    WebglMismatch { ua_family: String, webgl_vendor: String },
+    UserAgentClaimsBrowser {
+        claimed: String,
+        declared: String,
+    },
+    PlatformMismatch {
+        ua_platform: String,
+        declared: String,
+    },
+    WebglMismatch {
+        ua_family: String,
+        webgl_vendor: String,
+    },
 }
 
 impl std::fmt::Display for FingerprintInconsistency {

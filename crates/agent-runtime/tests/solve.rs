@@ -1,6 +1,4 @@
-use browsai_agent_runtime::{
-    AgentRuntime, AgentRuntimeError, TakeoverManager, TakeoverState,
-};
+use browsai_agent_runtime::{AgentRuntime, AgentRuntimeError, TakeoverManager, TakeoverState};
 use browsai_input::{MouseTrajectoryOptions, NativeInputEvent};
 use browsai_sandbox::{Capability, SandboxPolicy};
 
@@ -13,10 +11,7 @@ fn policy_with_solve() -> SandboxPolicy {
 #[test]
 fn solve_requires_active_human_takeover() {
     let mut runtime = AgentRuntime::new(policy_with_solve());
-    let session = runtime.open(
-        [Capability::SolveChallenge],
-        Default::default(),
-    );
+    let session = runtime.open([Capability::SolveChallenge], Default::default());
     runtime.start(session).unwrap();
     let mut takeovers = TakeoverManager::default();
     let tid = takeovers.request("agent-a", "challenge: hcaptcha", 50, 10);
@@ -134,7 +129,10 @@ fn challenge_click_requires_active_human_takeover_and_carries_target_metadata() 
         .unwrap();
     assert_eq!(event.provider, "recaptcha");
     assert_eq!(event.page_id, Some(7));
-    assert_eq!(event.target_node_id.as_deref(), Some("challenge:recaptcha:0"));
+    assert_eq!(
+        event.target_node_id.as_deref(),
+        Some("challenge:recaptcha:0")
+    );
     assert_eq!(event.capability_used, "SolveChallenge");
     assert!(event.takeover_id.is_some());
 }
@@ -197,8 +195,14 @@ fn challenge_click_with_trajectory_returns_move_sequence_and_click() {
     let (ex, ey) = *moves.last().unwrap();
     assert!((ex - 200.0).abs() < 5.0, "ex was {ex}");
     assert!((ey - 220.0).abs() < 5.0, "ey was {ey}");
-    assert!(matches!(events[events.len() - 2], NativeInputEvent::PointerDown { .. }));
-    assert!(matches!(events[events.len() - 1], NativeInputEvent::PointerUp { .. }));
+    assert!(matches!(
+        events[events.len() - 2],
+        NativeInputEvent::PointerDown { .. }
+    ));
+    assert!(matches!(
+        events[events.len() - 1],
+        NativeInputEvent::PointerUp { .. }
+    ));
 }
 
 #[test]

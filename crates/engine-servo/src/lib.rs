@@ -821,27 +821,27 @@ impl ServoRuntime {
         let preferences = servo::Preferences {
             dom_offscreen_canvas_enabled: true,
             dom_fontface_enabled: true,
-        // Servo has a native IntersectionObserver implementation, but the
-        // feature is disabled by default. Enable it for all browsing contexts.
+            // Servo has a native IntersectionObserver implementation, but the
+            // feature is disabled by default. Enable it for all browsing contexts.
             dom_intersection_observer_enabled: true,
-        // ServiceWorker registration obtains its storage key through the
-        // native storage/IndexedDB preference. Keep the real storage path
-        // enabled so registration does not fail before reaching the worker
-        // manager.
+            // ServiceWorker registration obtains its storage key through the
+            // native storage/IndexedDB preference. Keep the real storage path
+            // enabled so registration does not fail before reaching the worker
+            // manager.
             dom_indexeddb_enabled: true,
-        // Servo includes a native ServiceWorker manager and realm. Keep it
-        // enabled so pages observe the real container/registration contract;
-        // the compatibility shim only annotates genuine absence or failure.
+            // Servo includes a native ServiceWorker manager and realm. Keep it
+            // enabled so pages observe the real container/registration contract;
+            // the compatibility shim only annotates genuine absence or failure.
             dom_serviceworker_enabled: true,
-        // Expose Servo's native Permissions surface so feature-detection
-        // code does not mistake an agent runtime for a browser without it.
+            // Expose Servo's native Permissions surface so feature-detection
+            // code does not mistake an agent runtime for a browser without it.
             dom_permissions_enabled: true,
-        // Do not inherit a bare POSIX locale such as `C`/`c` into browser
-        // language surfaces. Servo uses this preference for navigator.language
-        // and the default Accept-Language header, so one override keeps the
-        // HTTP, Navigator, and Intl environments coherent. The locale is
-        // resolved from the supplied `ProfileIdentity`; legacy env-var
-        // overrides remain as a fallback that emits a deprecation warning.
+            // Do not inherit a bare POSIX locale such as `C`/`c` into browser
+            // language surfaces. Servo uses this preference for navigator.language
+            // and the default Accept-Language header, so one override keeps the
+            // HTTP, Navigator, and Intl environments coherent. The locale is
+            // resolved from the supplied `ProfileIdentity`; legacy env-var
+            // overrides remain as a fallback that emits a deprecation warning.
             intl_locale_override: {
                 let legacy = std::env::var("BROWSAI_LOCALE").ok();
                 if legacy.is_some() {

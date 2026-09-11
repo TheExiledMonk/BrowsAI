@@ -1,7 +1,7 @@
+use browsai_agent_tree::AgentRenderTree;
 use browsai_challenge_observer::{ChallengeKind, ChallengeObservation, ChallengeObservationSet};
 use browsai_provenance::{ProvenanceSource, SourceKind};
 use browsai_semantic_ir::SemanticIr;
-use browsai_agent_tree::AgentRenderTree;
 use url::Url;
 
 #[test]
@@ -36,8 +36,7 @@ fn challenge_observations_become_agent_tree_summary_nodes() {
         ],
     };
     let tree = AgentRenderTree::new_page("https://example.test/login");
-    let ir = SemanticIr::from_structural(tree)
-        .with_challenge_observations(&observations);
+    let ir = SemanticIr::from_structural(tree).with_challenge_observations(&observations);
     assert!(ir.challenge_present());
     let providers = ir.challenge_providers();
     assert!(providers.contains(&"hcaptcha".to_string()));

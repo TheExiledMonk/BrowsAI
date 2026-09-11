@@ -95,7 +95,13 @@ pub struct HumanMouseTrajectory {
     pub events: Vec<NativeInputEvent>,
 }
 
-fn bezier_point(p0: (f64, f64), p1: (f64, f64), p2: (f64, f64), p3: (f64, f64), t: f64) -> (f64, f64) {
+fn bezier_point(
+    p0: (f64, f64),
+    p1: (f64, f64),
+    p2: (f64, f64),
+    p3: (f64, f64),
+    t: f64,
+) -> (f64, f64) {
     let one_minus_t = 1.0 - t;
     let a = one_minus_t * one_minus_t * one_minus_t;
     let b = 3.0 * one_minus_t * one_minus_t * t;
@@ -174,11 +180,21 @@ pub fn generate_human_trajectory(
     let mut rng = SplitMix64::new(seed);
     let amp = options.curve_amplitude.clamp(0.0, 1.0);
     let offset1 = perpendicular_offset(start, end, distance * amp * (0.6 + rng.next_unit() * 0.4));
-    let offset2 = perpendicular_offset(start, end, distance * amp * (0.6 + rng.next_unit() * 0.4) * -1.0);
+    let offset2 = perpendicular_offset(
+        start,
+        end,
+        distance * amp * (0.6 + rng.next_unit() * 0.4) * -1.0,
+    );
     let p0 = start;
     let p3 = end;
-    let p1 = (start.0 + dx * 0.25 + offset1.0, start.1 + dy * 0.25 + offset1.1);
-    let p2 = (start.0 + dx * 0.75 + offset2.0, start.1 + dy * 0.75 + offset2.1);
+    let p1 = (
+        start.0 + dx * 0.25 + offset1.0,
+        start.1 + dy * 0.25 + offset1.1,
+    );
+    let p2 = (
+        start.0 + dx * 0.75 + offset2.0,
+        start.1 + dy * 0.75 + offset2.1,
+    );
     let steps = options.steps.max(4);
     let mut events: Vec<NativeInputEvent> = Vec::with_capacity(steps + 4);
     let overshoot = options.overshoot_pixels.max(0.0);
@@ -187,7 +203,11 @@ pub fn generate_human_trajectory(
         let len = distance.max(1.0);
         let dir = (dx / len, dy / len);
         let perp = (-dir.1, dir.0);
-        let side = if rng.next_symmetric() >= 0.0 { 1.0 } else { -1.0 };
+        let side = if rng.next_symmetric() >= 0.0 {
+            1.0
+        } else {
+            -1.0
+        };
         let overshoot_amount = overshoot * (0.6 + rng.next_unit() * 0.8);
         (
             end.0 + dir.0 * overshoot_amount * 0.4 + perp.0 * overshoot_amount * 0.6 * side,
@@ -220,7 +240,10 @@ pub fn generate_human_trajectory(
                 point.1 + rng.next_symmetric() * jitter,
             );
         }
-        events.push(NativeInputEvent::PointerMove { x: point.0, y: point.1 });
+        events.push(NativeInputEvent::PointerMove {
+            x: point.0,
+            y: point.1,
+        });
     }
     let _ = options.duration_millis;
     let _ = options.pre_click_pause_millis;

@@ -672,10 +672,15 @@ fn profile_identity_supplies_default_headers_and_survives_worker_path() {
         Some("?0")
     );
     assert_eq!(
-        request.headers.get("sec-ch-ua-platform").map(String::as_str),
+        request
+            .headers
+            .get("sec-ch-ua-platform")
+            .map(String::as_str),
         Some("\"Linux x86_64\"")
     );
-    request.headers.insert("user-agent".into(), "caller-supplied".into());
+    request
+        .headers
+        .insert("user-agent".into(), "caller-supplied".into());
     NetworkStack::apply_profile_headers(&mut request.headers, Some(&identity));
     assert_eq!(
         request.headers.get("user-agent").map(String::as_str),

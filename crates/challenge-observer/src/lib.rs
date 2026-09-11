@@ -97,7 +97,10 @@ impl ChallengeObserver {
         Ok(())
     }
 
-    pub fn observe_document(&mut self, document: &RawDocument) -> Result<(), ChallengeObserverError> {
+    pub fn observe_document(
+        &mut self,
+        document: &RawDocument,
+    ) -> Result<(), ChallengeObserverError> {
         for observation in detect_from_document(document) {
             self.append(observation)?;
         }
@@ -131,7 +134,9 @@ impl ChallengeObserver {
 
     fn append(&mut self, observation: ChallengeObservation) -> Result<(), ChallengeObserverError> {
         if !(0.0..=1.0).contains(&observation.confidence) {
-            return Err(ChallengeObserverError::InvalidConfidence(observation.confidence));
+            return Err(ChallengeObserverError::InvalidConfidence(
+                observation.confidence,
+            ));
         }
         self.pending.observations.push(observation);
         Ok(())
@@ -144,7 +149,9 @@ fn detect_from_response(
 ) -> Option<ChallengeObservation> {
     let headers = &response.headers;
     let body = String::from_utf8_lossy(&response.body);
-    let server = header_value(headers, "server").unwrap_or_default().to_ascii_lowercase();
+    let server = header_value(headers, "server")
+        .unwrap_or_default()
+        .to_ascii_lowercase();
     let cf_ray = header_value(headers, "cf-ray").map(str::to_string);
     let akamai = header_value(headers, "x-akamai-transformed").map(str::to_string);
     let incapsula = headers
@@ -174,19 +181,28 @@ fn detect_from_response(
                 "cloudflare".to_string(),
                 ChallengeKind::AccessDenied,
                 0.7,
-                vec![("cf-ray".into(), ray), ("status".into(), response.status.to_string())],
+                vec![
+                    ("cf-ray".into(), ray),
+                    ("status".into(), response.status.to_string()),
+                ],
             )
         } else {
             return None;
         }
-    } else if server.contains("akamai") || akamai.is_some() || incapsula.as_deref() == Some("incapsula".into()) {
+    } else if server.contains("akamai")
+        || akamai.is_some()
+        || incapsula.as_deref() == Some("incapsula".into())
+    {
         let lower = body.to_ascii_lowercase();
         if lower.contains("_incapsula_resource") || lower.contains("incapsula") {
             (
                 "akamai".to_string(),
                 ChallengeKind::BrowserChallenge,
                 0.9,
-                vec![("server".into(), server), ("body-marker".into(), "_Incapsula_Resource".into())],
+                vec![
+                    ("server".into(), server),
+                    ("body-marker".into(), "_Incapsula_Resource".into()),
+                ],
             )
         } else if response.status == 403 {
             (
@@ -277,7 +293,9 @@ fn detect_from_document(document: &RawDocument) -> Vec<ChallengeObservation> {
             let observation = ChallengeObservation {
                 provider: provider_signal.provider,
                 kind: provider_signal.kind,
-                url: url.clone().unwrap_or_else(|| Url::parse("about:blank").expect("static")),
+                url: url
+                    .clone()
+                    .unwrap_or_else(|| Url::parse("about:blank").expect("static")),
                 evidence: provider_signal.evidence,
                 confidence: provider_signal.confidence,
                 provenance: vec![ProvenanceSource {
@@ -310,8 +328,16 @@ fn detect_provider_in_node(node: &RawNode) -> Vec<ProviderSignal> {
     let class_attr = node.attributes.get("class").cloned().unwrap_or_default();
     let src_attr = node.attributes.get("src").cloned().unwrap_or_default();
     let action_attr = node.attributes.get("action").cloned().unwrap_or_default();
-    let cf_marker_classes = ["cf-browser-verification", "cf-challenge-running", "cf-error-code", "cf-wrapper"];
-    if cf_marker_classes.iter().any(|c| class_attr.contains(c) || id_attr.contains(c)) {
+    let cf_marker_classes = [
+        "cf-browser-verification",
+        "cf-challenge-running",
+        "cf-error-code",
+        "cf-wrapper",
+    ];
+    if cf_marker_classes
+        .iter()
+        .any(|c| class_attr.contains(c) || id_attr.contains(c))
+    {
         signals.push(ProviderSignal {
             provider: "cloudflare".into(),
             kind: ChallengeKind::BrowserChallenge,
@@ -367,7 +393,11 @@ fn detect_provider_in_node(node: &RawNode) -> Vec<ProviderSignal> {
             confidence: 0.9,
         });
     }
-    let text_lower = node.text.as_deref().unwrap_or_default().to_ascii_lowercase();
+    let text_lower = node
+        .text
+        .as_deref()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
     if !text_lower.is_empty() {
         if text_lower.contains("verify you are human") || text_lower.contains("are you a robot") {
             signals.push(ProviderSignal {
@@ -389,7 +419,8 @@ fn detect_provider_in_node(node: &RawNode) -> Vec<ProviderSignal> {
                 }],
                 confidence: 0.65,
             });
-        } else if text_lower.contains("account locked") || text_lower.contains("account suspended") {
+        } else if text_lower.contains("account locked") || text_lower.contains("account suspended")
+        {
             signals.push(ProviderSignal {
                 provider: "site-policy".into(),
                 kind: ChallengeKind::AccountLocked,
@@ -441,19 +472,39 @@ fn detect_from_html_body(url: &Url, body: &str) -> Vec<ChallengeObservation> {
             None
         }
     };
-    if let Some(o) = probe("cloudflare", "cf-browser-verification", ChallengeKind::BrowserChallenge, 0.95) {
+    if let Some(o) = probe(
+        "cloudflare",
+        "cf-browser-verification",
+        ChallengeKind::BrowserChallenge,
+        0.95,
+    ) {
         observations.push(o);
     }
     if let Some(o) = probe("hcaptcha", "hcaptcha.com", ChallengeKind::Captcha, 0.9) {
         observations.push(o);
     }
-    if let Some(o) = probe("recaptcha", "google.com/recaptcha", ChallengeKind::Captcha, 0.9) {
+    if let Some(o) = probe(
+        "recaptcha",
+        "google.com/recaptcha",
+        ChallengeKind::Captcha,
+        0.9,
+    ) {
         observations.push(o);
     }
-    if let Some(o) = probe("cloudflare-turnstile", "challenges.cloudflare.com", ChallengeKind::Captcha, 0.9) {
+    if let Some(o) = probe(
+        "cloudflare-turnstile",
+        "challenges.cloudflare.com",
+        ChallengeKind::Captcha,
+        0.9,
+    ) {
         observations.push(o);
     }
-    if let Some(o) = probe("akamai", "_incapsula_resource", ChallengeKind::BrowserChallenge, 0.9) {
+    if let Some(o) = probe(
+        "akamai",
+        "_incapsula_resource",
+        ChallengeKind::BrowserChallenge,
+        0.9,
+    ) {
         observations.push(o);
     }
     if let Some(o) = probe("datadome", "datadome", ChallengeKind::BrowserChallenge, 0.8) {
@@ -549,7 +600,10 @@ mod tests {
         let mut observer = ChallengeObserver::new();
         observer.observe_document(&document).unwrap();
         let snapshot = observer.snapshot();
-        assert!(snapshot.observations.iter().any(|o| o.provider == "hcaptcha"));
+        assert!(snapshot
+            .observations
+            .iter()
+            .any(|o| o.provider == "hcaptcha"));
     }
 
     #[test]
@@ -626,7 +680,9 @@ mod tests {
             observer.observe_html_body(&url, html).unwrap();
             let observations = observer.snapshot().observations;
             assert!(
-                observations.iter().any(|o| &o.provider == expected_provider && o.kind == kind),
+                observations
+                    .iter()
+                    .any(|o| &o.provider == expected_provider && o.kind == kind),
                 "fixture {label} did not yield {expected_provider}/{kind:?}; got {:?}",
                 observations
                     .iter()

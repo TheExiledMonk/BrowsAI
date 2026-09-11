@@ -1,8 +1,6 @@
 use browsai_action_planner::{ActionPlanner, PlanningError};
 use browsai_agent_protocol::{PageQuery, PROTOCOL_VERSION};
-use browsai_agent_runtime::{
-    AgentRuntime, AgentSessionId, SolveAuditEvent, TakeoverManager,
-};
+use browsai_agent_runtime::{AgentRuntime, AgentSessionId, SolveAuditEvent, TakeoverManager};
 use browsai_agent_tree::{AgentNode, SemanticRole, StructuralRole};
 use browsai_compatibility_check::{
     run_site, CheckConfig, CheckRun, CorpusState, FailureCategory, FailureRecord, Phase, RunStore,
@@ -36,11 +34,7 @@ const AUTO_SOLVE_NEAR_THRESHOLD_PX: f64 = browsai_agent_runtime::SOLVE_NEAR_THRE
 /// with the cursor at (0, 0) when a page loads; we mimic that by drawing a
 /// fresh starting point from a deterministic per-page RNG so trajectories
 /// are not all identical.
-fn random_cursor_origin(
-    viewport: VirtualViewport,
-    url: &Url,
-    invocation_seed: u64,
-) -> (f64, f64) {
+fn random_cursor_origin(viewport: VirtualViewport, url: &Url, invocation_seed: u64) -> (f64, f64) {
     use browsai_input::SplitMix64;
     let url_seed = url.as_str().bytes().fold(0u64, |acc, byte| {
         acc.wrapping_mul(0x100000001B3).wrapping_add(byte as u64)
@@ -1379,7 +1373,9 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{auto_solve_challenges, bounded_option, bounded_string_page, random_cursor_origin, run};
+    use super::{
+        auto_solve_challenges, bounded_option, bounded_string_page, random_cursor_origin, run,
+    };
 
     #[test]
     fn bounded_projection_options_parse_and_enforce_limits() {
@@ -1610,7 +1606,8 @@ mod tests {
     fn auto_solve_uses_discrete_click_when_cursor_is_already_at_target() {
         use browsai_agent_runtime::{AgentRuntime, TakeoverManager};
         use browsai_agent_tree::{
-            AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole, StructuralRole,
+            AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole,
+            StructuralRole,
         };
         use browsai_engine_api::{BrowserEngine, ContextOptions, VirtualViewport};
         use browsai_engine_servo::ServoEngine;
@@ -1656,7 +1653,8 @@ mod tests {
         let page = engine.create_page(context).unwrap();
         let mut tree = AgentRenderTree::new_page("https://example.test/");
         // Center is (100 + 40, 200 + 40) = (140, 240).
-        tree.nodes.push(make_challenge_node("hcaptcha", 100.0, 200.0, 80.0, 80.0));
+        tree.nodes
+            .push(make_challenge_node("hcaptcha", 100.0, 200.0, 80.0, 80.0));
         let snapshot = PageSnapshot {
             schema_version: 1,
             id: 0,
@@ -1694,7 +1692,8 @@ mod tests {
     fn auto_solve_uses_trajectory_when_cursor_is_far_from_target() {
         use browsai_agent_runtime::{AgentRuntime, TakeoverManager};
         use browsai_agent_tree::{
-            AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole, StructuralRole,
+            AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole,
+            StructuralRole,
         };
         use browsai_engine_api::{BrowserEngine, ContextOptions, VirtualViewport};
         use browsai_engine_servo::ServoEngine;
@@ -1740,7 +1739,8 @@ mod tests {
         let page = engine.create_page(context).unwrap();
         let mut tree = AgentRenderTree::new_page("https://example.test/");
         // Far target: center (640, 360).
-        tree.nodes.push(make_challenge_node("recaptcha", 600.0, 320.0, 80.0, 80.0));
+        tree.nodes
+            .push(make_challenge_node("recaptcha", 600.0, 320.0, 80.0, 80.0));
         let snapshot = PageSnapshot {
             schema_version: 1,
             id: 0,
@@ -1779,7 +1779,8 @@ mod tests {
     fn auto_solve_challenges_dispatches_click_for_each_geometry_node() {
         use browsai_agent_runtime::{AgentRuntime, TakeoverManager};
         use browsai_agent_tree::{
-            AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole, StructuralRole,
+            AgentNode, AgentRenderTree, AgentValue, Geometry, NodeState, SemanticRole,
+            StructuralRole,
         };
         use browsai_engine_api::{BrowserEngine, ContextOptions, VirtualViewport};
         use browsai_engine_servo::ServoEngine;
@@ -1824,7 +1825,8 @@ mod tests {
             .unwrap();
         let page = engine.create_page(context).unwrap();
         let mut tree = AgentRenderTree::new_page("https://example.test/");
-        tree.nodes.push(make_challenge_node("hcaptcha", 100.0, 200.0, 80.0, 80.0));
+        tree.nodes
+            .push(make_challenge_node("hcaptcha", 100.0, 200.0, 80.0, 80.0));
         let snapshot = PageSnapshot {
             schema_version: 1,
             id: 0,

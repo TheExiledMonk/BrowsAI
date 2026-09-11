@@ -241,11 +241,7 @@ impl NetworkStack {
             return;
         };
         let mut entries: Vec<(String, String)> = Vec::new();
-        let has_header = |name: &str| {
-            headers
-                .keys()
-                .any(|key| key.eq_ignore_ascii_case(name))
-        };
+        let has_header = |name: &str| headers.keys().any(|key| key.eq_ignore_ascii_case(name));
         if !has_header("user-agent") {
             entries.push(("user-agent".into(), identity.user_agent.clone()));
         }
@@ -262,10 +258,7 @@ impl NetworkStack {
             ));
         }
         if !has_header("sec-ch-ua-platform") {
-            entries.push((
-                "sec-ch-ua-platform".into(),
-                identity.sec_ch_ua_platform(),
-            ));
+            entries.push(("sec-ch-ua-platform".into(), identity.sec_ch_ua_platform()));
         }
         for (name, value) in entries {
             headers.insert(name, value);

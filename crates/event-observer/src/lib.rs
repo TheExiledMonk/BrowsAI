@@ -5,32 +5,92 @@ use std::collections::VecDeque;
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ChangeEvent {
-    NodeAdded { node_id: String },
-    NodeRemoved { node_id: String },
-    NodeChanged { node_id: String },
-    StyleChanged { node_id: String },
-    LayoutChanged { node_id: String },
-    RuntimeTaskQueued { task_id: String },
-    MicrotaskQueued { task_id: String },
-    NavigationStarted { url: String },
-    NavigationCompleted { url: String },
-    RequestStarted { request_id: String },
-    RequestCompleted { request_id: String },
-    RequestFailed { request_id: String, error: String },
-    InputDispatched { event: String },
-    StorageChanged { origin: String, key: String },
-    PermissionChanged { origin: String, permission: String },
-    AgentStateChanged { session_id: String, state: String },
-    DialogOpened { node_id: String },
-    DialogClosed { node_id: String },
-    FocusChanged { node_id: Option<String> },
-    DownloadStarted { download_id: String },
-    PermissionRequested { permission: String },
-    CredentialRequired { origin: String },
-    TransactionDetected { category: String },
-    ChallengeObserved { provider: String, kind: String, url: String },
-    ChallengeCleared { provider: String },
-    ProfileInconsistency { fingerprint_id: String, kind: String, declared: String },
+    NodeAdded {
+        node_id: String,
+    },
+    NodeRemoved {
+        node_id: String,
+    },
+    NodeChanged {
+        node_id: String,
+    },
+    StyleChanged {
+        node_id: String,
+    },
+    LayoutChanged {
+        node_id: String,
+    },
+    RuntimeTaskQueued {
+        task_id: String,
+    },
+    MicrotaskQueued {
+        task_id: String,
+    },
+    NavigationStarted {
+        url: String,
+    },
+    NavigationCompleted {
+        url: String,
+    },
+    RequestStarted {
+        request_id: String,
+    },
+    RequestCompleted {
+        request_id: String,
+    },
+    RequestFailed {
+        request_id: String,
+        error: String,
+    },
+    InputDispatched {
+        event: String,
+    },
+    StorageChanged {
+        origin: String,
+        key: String,
+    },
+    PermissionChanged {
+        origin: String,
+        permission: String,
+    },
+    AgentStateChanged {
+        session_id: String,
+        state: String,
+    },
+    DialogOpened {
+        node_id: String,
+    },
+    DialogClosed {
+        node_id: String,
+    },
+    FocusChanged {
+        node_id: Option<String>,
+    },
+    DownloadStarted {
+        download_id: String,
+    },
+    PermissionRequested {
+        permission: String,
+    },
+    CredentialRequired {
+        origin: String,
+    },
+    TransactionDetected {
+        category: String,
+    },
+    ChallengeObserved {
+        provider: String,
+        kind: String,
+        url: String,
+    },
+    ChallengeCleared {
+        provider: String,
+    },
+    ProfileInconsistency {
+        fingerprint_id: String,
+        kind: String,
+        declared: String,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

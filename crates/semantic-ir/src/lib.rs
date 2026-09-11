@@ -55,12 +55,13 @@ impl SemanticIr {
     /// Adds a summary agent node for each challenge observation so the agent
     /// tree surfaces visible human-verification walls. The observer is
     /// observation-only; this method does not solve, mutate, or inject.
-    pub fn with_challenge_observations(
-        mut self,
-        observations: &ChallengeObservationSet,
-    ) -> Self {
+    pub fn with_challenge_observations(mut self, observations: &ChallengeObservationSet) -> Self {
         for observation in &observations.observations {
-            let node_id = format!("challenge:{}:{}", observation.provider, self.tree.nodes.len());
+            let node_id = format!(
+                "challenge:{}:{}",
+                observation.provider,
+                self.tree.nodes.len()
+            );
             let name = format!(
                 "challenge:{} ({:?})",
                 observation.provider, observation.kind
@@ -97,7 +98,11 @@ impl SemanticIr {
         let mut providers = Vec::new();
         for node in &self.tree.nodes {
             if matches!(node.semantic_role, Some(SemanticRole::Challenge)) {
-                if let Some(provider) = node.identity_key.as_deref().and_then(|key| key.strip_prefix("challenge:")) {
+                if let Some(provider) = node
+                    .identity_key
+                    .as_deref()
+                    .and_then(|key| key.strip_prefix("challenge:"))
+                {
                     if !providers.iter().any(|p| p == provider) {
                         providers.push(provider.to_string());
                     }
@@ -135,10 +140,7 @@ impl SemanticIr {
                 structural_role: StructuralRole::Region,
                 semantic_role: Some(SemanticRole::ProfileInconsistency),
                 application_type: None,
-                name: Some(format!(
-                    "profile-inconsistency:{}",
-                    fingerprint_id
-                )),
+                name: Some(format!("profile-inconsistency:{}", fingerprint_id)),
                 value: Some(browsai_agent_tree::AgentValue::Text(description.clone())),
                 description: Some(description),
                 state: browsai_agent_tree::NodeState::default(),
@@ -159,9 +161,10 @@ impl SemanticIr {
     }
 
     pub fn profile_inconsistency_present(&self) -> bool {
-        self.tree.nodes.iter().any(|node| {
-            matches!(node.semantic_role, Some(SemanticRole::ProfileInconsistency))
-        })
+        self.tree
+            .nodes
+            .iter()
+            .any(|node| matches!(node.semantic_role, Some(SemanticRole::ProfileInconsistency)))
     }
     pub fn node(&self, id: &str) -> Option<&AgentNode> {
         self.tree.find(id)
