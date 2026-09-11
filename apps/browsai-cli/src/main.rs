@@ -154,6 +154,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let fingerprint_id = string_option(args, "--fingerprint");
             let query_context = string_option(args, "--query");
             let snapshot_only = bool_flag(args, "--snapshot-only");
+            let stream = bool_flag(args, "--stream");
             let profile_identity = fingerprint_id
                 .as_deref()
                 .map(resolve_fingerprint)
@@ -175,10 +176,33 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let page = engine
                 .create_page(context)
                 .map_err(|error| error.to_string())?;
+            if stream {
+                emit_event(serde_json::json!({
+                    "type": "page-pending",
+                    "command": command,
+                    "url": url.as_str(),
+                }));
+            }
             let navigation = engine
                 .navigate(page, url)
                 .map_err(|error| error.to_string())?;
+            if stream {
+                emit_event(serde_json::json!({
+                    "type": "page",
+                    "command": command,
+                    "page": navigation.page,
+                    "url": navigation.url.as_str(),
+                }));
+            }
             if snapshot_only {
+                if stream {
+                    emit_event(serde_json::json!({
+                        "type": "snapshot-complete",
+                        "page": navigation.page,
+                        "node_count": 0,
+                        "mode": "snapshot-only",
+                    }));
+                }
                 return Ok(
                     serde_json::json!({"page": navigation.page, "url": navigation.url}).to_string(),
                 );
@@ -186,6 +210,15 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let mut snapshot = engine.snapshot(page).map_err(|error| error.to_string())?;
             if let Some(terms) = query_context.as_deref() {
                 let _ = apply_query_context(&mut snapshot, Some(terms));
+            }
+            if stream {
+                stream_snapshot_nodes(&snapshot, navigation.page);
+                emit_event(serde_json::json!({
+                    "type": "snapshot-complete",
+                    "page": navigation.page,
+                    "node_count": snapshot.tree.nodes.len(),
+                    "snapshot": snapshot.id,
+                }));
             }
             Ok(serde_json::json!({"page": navigation.page, "url": navigation.url, "snapshot": snapshot.id, "node_count": snapshot.tree.nodes.len()}).to_string())
         }
@@ -197,6 +230,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             .map_err(|error| error.to_string())?;
             let command_name = args.get(1).map(String::as_str).unwrap_or("query");
             let mut engine = ServoEngine::new();
+            let stream = bool_flag(args, "--stream");
             let context = engine
                 .create_context(ContextOptions {
                     headless: true,
@@ -209,10 +243,17 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let page = engine
                 .create_page(context)
                 .map_err(|error| error.to_string())?;
-            engine
+            let navigation = engine
                 .navigate(page, url)
                 .map_err(|error| error.to_string())?;
             let mut snapshot = engine.snapshot(page).map_err(|error| error.to_string())?;
+            if stream {
+                emit_event(serde_json::json!({
+                    "type": "page",
+                    "command": command_name,
+                    "url": navigation.url.as_str(),
+                }));
+            }
             let query = string_option(args, "--query");
             let roles_filter: Vec<String> = string_option(args, "--filter")
                 .map(|value| {
@@ -227,6 +268,9 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                 let boosted = apply_query_context(&mut snapshot, Some(terms));
                 let _ = boosted;
             }
+            if stream {
+                stream_snapshot_nodes(&snapshot, page);
+            }
             let cursor = bounded_option(args, "--cursor", 0, 100_000)?;
             let limit = bounded_option(args, "--limit", 100, 1_000)?.max(1);
             if command_name == "query" {
@@ -238,6 +282,14 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                             node.id == row.node_id && node_matches_role(node, &roles_filter)
                         })
                     });
+                    if stream {
+                        emit_event(serde_json::json!({
+                            "type": "snapshot-complete",
+                            "command": command_name,
+                            "node_count": snapshot.tree.nodes.len(),
+                            "result_count": results.len(),
+                        }));
+                    }
                     serde_json::to_string(&serde_json::json!({
                         "results": results,
                         "cursor": view.offset,
@@ -249,11 +301,25 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     }))
                     .map_err(|error| error.to_string())
                 } else {
+                    if stream {
+                        emit_event(serde_json::json!({
+                            "type": "snapshot-complete",
+                            "command": command_name,
+                            "node_count": snapshot.tree.nodes.len(),
+                        }));
+                    }
                     serde_json::to_string(&PageQuery::new(&snapshot.tree).render(None))
                         .map_err(|error| error.to_string())
                 }
             } else {
                 let view = PageQuery::new(&snapshot.tree).render_page(cursor, limit);
+                if stream {
+                    emit_event(serde_json::json!({
+                        "type": "snapshot-complete",
+                        "command": command_name,
+                        "node_count": snapshot.tree.nodes.len(),
+                    }));
+                }
                 serde_json::to_string(&view).map_err(|error| error.to_string())
             }
         }
@@ -1405,6 +1471,46 @@ fn bool_flag(args: &[String], name: &str) -> bool {
     args.iter().any(|arg| arg == name)
 }
 
+/// Streaming mode emits one NDJSON event per line on stdout so an agent
+/// can start reasoning on the first nodes while the rest are still
+/// being materialised. Each event is `{"type": "...", "schema_version": "browsai-agent-tree/1.0"}`.
+///
+/// Plugins can reject or fall back when the schema version is higher than
+/// the major they pin to.
+fn emit_event(event: serde_json::Value) {
+    let mut object = match event {
+        serde_json::Value::Object(map) => map,
+        other => {
+            let mut map = serde_json::Map::new();
+            map.insert("type".into(), serde_json::Value::String("message".into()));
+            map.insert("value".into(), other);
+            map
+        }
+    };
+    object
+        .entry("schema_version".to_string())
+        .or_insert_with(|| serde_json::Value::String("browsai-agent-tree/1.0".to_string()));
+    let with_version = serde_json::Value::Object(object);
+    if let Ok(line) = serde_json::to_string(&with_version) {
+        println!("{line}");
+    }
+}
+
+fn stream_snapshot_nodes(snapshot: &browsai_state::PageSnapshot, page: u64) {
+    for node in snapshot.tree.nodes.iter() {
+        emit_event(serde_json::json!({
+            "type": "node",
+            "page": page,
+            "node_id": node.id,
+            "name": node.name,
+            "role": format!("{:?}", node.structural_role),
+            "semantic_role": node.semantic_role.as_ref().map(|r| format!("{r:?}")),
+            "geometry": node.geometry,
+            "confidence": node.confidence.0,
+        }));
+    }
+}
+
 /// Filter helper retained for the agent tree: returns true when the node's
 /// structural role matches any of the requested role names.
 pub(crate) fn node_matches_role(node: &browsai_agent_tree::AgentNode, roles: &[String]) -> bool {
@@ -1557,9 +1663,16 @@ fn run(args: &[String]) -> Result<String, String> {
 fn main() {
     let args = env::args().collect::<Vec<_>>();
     let one_shot_live_runtime = args.get(1).is_some_and(|command| command == "live-open");
+    let streaming = args.iter().any(|argument| argument == "--stream")
+        && !matches!(
+            args.get(1).map(String::as_str),
+            Some("live-open") | Some("live-search")
+        );
     match run_internal(&args, one_shot_live_runtime) {
         Ok(output) => {
-            println!("{output}");
+            if !streaming && !output.is_empty() {
+                println!("{output}");
+            }
             if one_shot_live_runtime {
                 std::process::exit(0);
             }
@@ -1576,6 +1689,29 @@ mod tests {
     use super::{
         auto_solve_challenges, bounded_option, bounded_string_page, random_cursor_origin, run,
     };
+
+    fn browsai_binary() -> Option<std::path::PathBuf> {
+        if let Some(path) = std::env::var_os("CARGO_BIN_EXE_browsai") {
+            return Some(std::path::PathBuf::from(path));
+        }
+        let path_var = std::env::var_os("PATH").unwrap_or_default();
+        for directory_bytes in std::env::split_paths(&path_var) {
+            let candidate = directory_bytes.join("browsai");
+            if candidate.is_file() {
+                return Some(candidate);
+            }
+        }
+        let workspace_target = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("target")
+            .join("debug")
+            .join("browsai");
+        if workspace_target.is_file() {
+            return Some(workspace_target);
+        }
+        None
+    }
 
     #[test]
     fn bounded_projection_options_parse_and_enforce_limits() {
@@ -2006,6 +2142,67 @@ mod tests {
         assert_eq!(events.len(), 1);
         // The trajectory emits PointerMove events; assert at least one is dispatched.
         let _ = NativeInputEvent::PointerMove { x: 0.0, y: 0.0 };
+    }
+
+    #[test]
+    fn navigate_with_stream_emits_one_ndjson_event_per_node() {
+        let Some(bin) = browsai_binary() else {
+            eprintln!("browsai binary not found; skipping streaming test");
+            return;
+        };
+        let mut command = std::process::Command::new(bin);
+        command
+            .arg("navigate")
+            .arg("https://example.test")
+            .arg("--stream");
+        let output = command.output().expect("spawn browsai");
+        assert!(
+            output.status.success(),
+            "browsai navigate --stream failed: stderr = {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let lines: Vec<&str> = stdout.lines().filter(|line| !line.is_empty()).collect();
+        assert!(
+            lines.iter().any(|line| line.contains("\"type\":\"page\"")),
+            "missing page event; got: {stdout}"
+        );
+        assert!(
+            lines.iter().any(|line| line.contains("\"type\":\"node\"")),
+            "missing node event; got: {stdout}"
+        );
+        assert!(
+            lines
+                .iter()
+                .any(|line| line.contains("\"type\":\"snapshot-complete\"")),
+            "missing snapshot-complete event; got: {stdout}"
+        );
+        for line in lines.iter() {
+            let value: serde_json::Value =
+                serde_json::from_str(line).expect("each line is valid JSON");
+            assert!(
+                value.get("type").is_some(),
+                "every event has a type field; got: {line}"
+            );
+        }
+    }
+
+    #[test]
+    fn navigate_without_stream_returns_single_blob() {
+        let Some(bin) = browsai_binary() else {
+            eprintln!("browsai binary not found; skipping single-blob test");
+            return;
+        };
+        let output = std::process::Command::new(bin)
+            .arg("navigate")
+            .arg("https://example.test")
+            .output()
+            .expect("spawn browsai");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let parsed: serde_json::Value =
+            serde_json::from_str(stdout.trim()).expect("single JSON blob on stdout");
+        assert!(parsed.get("page").is_some());
+        assert!(parsed.get("url").is_some());
     }
 
     #[test]

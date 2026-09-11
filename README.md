@@ -200,3 +200,20 @@ with `LICENSE`, `LICENSE` controls.
 Third-party component licences are tracked in
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) and
 [docs/licensing.md](docs/licensing.md).
+
+## JSON schema for host integrations
+
+Every CLI response shape and every NDJSON streaming event emitted by
+`browsai` is documented in [docs/agent-tree-schema.md](docs/agent-tree-schema.md).
+The current schema version is `browsai-agent-tree/1.0`. Every event
+emitted in `--stream` mode carries a `schema_version` field so host
+integrations (the Helios plugin, IDE integrations, automation daemons)
+can pin to a schema version and reject responses that declare a
+higher major.
+
+Streaming events include `page-pending`, `page`, `node`, and
+`snapshot-complete`; see the schema doc for fields and the example
+stream. The deterministic-backend `live-open` and `live-search`
+commands honour `--auto-solve`, `--fingerprint=<id>`, and the randomized
+initial cursor path; the real-Servo path requires the
+`live-browser` Cargo feature.
