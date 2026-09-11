@@ -681,6 +681,7 @@ impl AgentRuntime {
     ///
     /// The returned `SolveAuditEvent` carries `page_id` and `target_node_id`
     /// so the audit trail records exactly what the caller dispatched.
+    #[allow(clippy::too_many_arguments)]
     pub fn attempt_challenge_click(
         &mut self,
         id: AgentSessionId,
@@ -711,6 +712,7 @@ impl AgentRuntime {
     /// the target, and a final `PointerDown` / `PointerUp`. See
     /// `crates/input/src/lib.rs` for the path algorithm and
     /// `docs/challenge-handling.md` for the operational rules.
+    #[allow(clippy::too_many_arguments)]
     pub fn attempt_challenge_click_with_trajectory(
         &mut self,
         id: AgentSessionId,
@@ -806,6 +808,7 @@ pub const SOLVE_NEAR_THRESHOLD_PX: f64 = 16.0;
 /// the CLI's `--auto-solve` flag. The CLI calls it for the `live-open`
 /// one-shot path; the headless and desktop apps can call it directly
 /// when their host policy allows unattended solve.
+#[allow(clippy::too_many_arguments)]
 pub fn solve_observed_challenges<D, F>(
     page_id: u64,
     snapshot: &browsai_state::PageSnapshot,

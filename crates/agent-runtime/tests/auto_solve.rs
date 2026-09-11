@@ -137,7 +137,10 @@ fn solve_observed_challenges_uses_discrete_click_within_threshold() {
     let snapshot = snapshot_with(vec![challenge_node("hcaptcha", 100.0, 200.0, 80.0, 80.0)]);
     let cursor_at_target = (140.0, 240.0); // center of the widget
     let distance_from_target = SOLVE_NEAR_THRESHOLD_PX;
-    let cursor_within_threshold = (140.0 + distance_from_target - 1.0, 240.0);
+    let cursor_within_threshold = (
+        cursor_at_target.0 + distance_from_target - 1.0,
+        cursor_at_target.1,
+    );
     let mut dispatched: Vec<NativeInputEvent> = Vec::new();
     let now = runtime.now_millis();
     let events = solve_observed_challenges(

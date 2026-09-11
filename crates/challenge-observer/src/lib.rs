@@ -191,7 +191,7 @@ fn detect_from_response(
         }
     } else if server.contains("akamai")
         || akamai.is_some()
-        || incapsula.as_deref() == Some("incapsula".into())
+        || incapsula.as_deref() == Some("incapsula")
     {
         let lower = body.to_ascii_lowercase();
         if lower.contains("_incapsula_resource") || lower.contains("incapsula") {
@@ -615,7 +615,7 @@ mod tests {
         // Allowed public methods (no auto-generated surface area beyond these):
         let _: Vec<Option<ChallengeObservation>> = vec![];
         let _ = observer.drain();
-        let _ = observer.clear();
+        observer.clear();
         let _ = observer.snapshot();
     }
 
@@ -682,7 +682,7 @@ mod tests {
             assert!(
                 observations
                     .iter()
-                    .any(|o| &o.provider == expected_provider && o.kind == kind),
+                    .any(|o| o.provider == expected_provider && o.kind == kind),
                 "fixture {label} did not yield {expected_provider}/{kind:?}; got {:?}",
                 observations
                     .iter()

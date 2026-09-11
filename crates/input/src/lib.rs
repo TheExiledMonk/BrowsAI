@@ -171,19 +171,19 @@ pub fn generate_human_trajectory(
     let dx = end.0 - start.0;
     let dy = end.1 - start.1;
     let distance = (dx * dx + dy * dy).sqrt();
-    let seed = (start.0.to_bits() as u64)
+    let seed = (start.0.to_bits())
         .wrapping_mul(0x9E3779B97F4A7C15)
-        .wrapping_add(start.1.to_bits() as u64)
-        .wrapping_add(end.0.to_bits() as u64)
+        .wrapping_add(start.1.to_bits())
+        .wrapping_add(end.0.to_bits())
         .wrapping_mul(0xBF58476D1CE4E5B9)
-        .wrapping_add(end.1.to_bits() as u64);
+        .wrapping_add(end.1.to_bits());
     let mut rng = SplitMix64::new(seed);
     let amp = options.curve_amplitude.clamp(0.0, 1.0);
     let offset1 = perpendicular_offset(start, end, distance * amp * (0.6 + rng.next_unit() * 0.4));
     let offset2 = perpendicular_offset(
         start,
         end,
-        distance * amp * (0.6 + rng.next_unit() * 0.4) * -1.0,
+        -(distance * amp * (0.6 + rng.next_unit() * 0.4)),
     );
     let p0 = start;
     let p3 = end;

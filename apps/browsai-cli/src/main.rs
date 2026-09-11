@@ -1,16 +1,14 @@
 use browsai_action_planner::{ActionPlanner, PlanningError};
 use browsai_agent_protocol::{PageQuery, PROTOCOL_VERSION};
 use browsai_agent_runtime::{AgentRuntime, AgentSessionId, SolveAuditEvent, TakeoverManager};
-use browsai_agent_tree::{AgentNode, SemanticRole, StructuralRole};
+use browsai_agent_tree::StructuralRole;
 use browsai_compatibility_check::{
     run_site, CheckConfig, CheckRun, CorpusState, FailureCategory, FailureRecord, Phase, RunStore,
     SiteExecutor, SiteRecord, SiteResult, SiteStatus, Subsystem, SubsystemResult,
 };
 use browsai_engine_api::{BrowserEngine, ContextOptions, VirtualViewport};
 use browsai_engine_servo::ServoEngine;
-use browsai_input::{
-    ActionType, AgentAction, MouseTrajectoryOptions, NativeInputDispatcher, NativeInputEvent,
-};
+use browsai_input::{ActionType, AgentAction, NativeInputDispatcher, NativeInputEvent};
 use browsai_sandbox::{Capability, SandboxPolicy};
 use browsai_state::PageSnapshot;
 use std::env;
@@ -27,6 +25,7 @@ unsafe extern "C" {
 /// position and a challenge widget center for the helper to take the
 /// discrete-click path. Anything farther triggers the humanized trajectory.
 /// Re-exported as `browsai_agent_runtime::SOLVE_NEAR_THRESHOLD_PX`.
+#[allow(dead_code)]
 const AUTO_SOLVE_NEAR_THRESHOLD_PX: f64 = browsai_agent_runtime::SOLVE_NEAR_THRESHOLD_PX;
 
 /// Return a random cursor origin inside the given viewport, seeded from the
@@ -48,6 +47,7 @@ fn random_cursor_origin(viewport: VirtualViewport, url: &Url, invocation_seed: u
     (x, y)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn auto_solve_challenges(
     engine: &mut ServoEngine,
     runtime: &mut AgentRuntime,

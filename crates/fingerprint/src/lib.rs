@@ -176,13 +176,11 @@ impl Fingerprint {
                         });
                     }
                 }
-                "safari" => {
-                    if chrome_like || firefox_like {
-                        return Err(FingerprintInconsistency::UserAgentClaimsBrowser {
-                            claimed: "safari".into(),
-                            declared: "chrome/firefox brands".into(),
-                        });
-                    }
+                "safari" if chrome_like || firefox_like => {
+                    return Err(FingerprintInconsistency::UserAgentClaimsBrowser {
+                        claimed: "safari".into(),
+                        declared: "chrome/firefox brands".into(),
+                    });
                 }
                 _ => {}
             }

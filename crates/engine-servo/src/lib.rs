@@ -967,11 +967,11 @@ impl ServoRuntime {
             None,
         )));
         user_content_manager.add_script(std::rc::Rc::new(servo::UserScript::new(
-            build_navigator_identity_script(&identity).into(),
+            build_navigator_identity_script(&identity),
             None,
         )));
         user_content_manager.add_script(std::rc::Rc::new(servo::UserScript::new(
-            build_screen_identity_script(viewport).into(),
+            build_screen_identity_script(viewport),
             None,
         )));
         user_content_manager.add_script(std::rc::Rc::new(servo::UserScript::new(
