@@ -27,12 +27,7 @@ which External Commercial Use is authorised. The internal-use grant in
 
 For commercial licensing inquiries, contact:
 
-> [COMMERCIAL CONTACT TO BE INSERTED]
-
-Until a commercial contact address is published here, please open an
-issue on the project's public issue tracker requesting commercial
-licensing, or contact the project owner through their published
-profile.
+> fabian@aegis-autonomous.com
 
 Pricing and commercial terms are not set out in this document; they are
 negotiated per-licensee.
