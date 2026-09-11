@@ -158,6 +158,25 @@ pub struct EngineCapabilities {
     pub engine_name: String,
     pub engine_version: Option<String>,
     pub features: std::collections::BTreeSet<EngineFeature>,
+    /// True when the engine was compiled with the live-runtime feature and
+    /// can drive a real browser (e.g. Servo embedder) rather than only the
+    /// deterministic backend.
+    pub live_browser_compiled: bool,
+    /// Command surface the host shell can introspect (used by the CLI's
+    /// `capabilities` command). Each entry includes the subcommand name,
+    /// the optional flag list, a short description, and an example payload
+    /// the host can show or test against.
+    pub commands: Vec<EngineCommand>,
+}
+
+/// One entry in `EngineCapabilities::commands`. Schemas the host shell
+/// can introspect at runtime instead of hard-coding CLI invocations.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct EngineCommand {
+    pub name: String,
+    pub args: Vec<String>,
+    pub returns: String,
+    pub example: Option<serde_json::Value>,
 }
 
 impl EngineCapabilities {

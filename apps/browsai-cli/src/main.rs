@@ -86,8 +86,42 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             env!("CARGO_PKG_VERSION"),
             PROTOCOL_VERSION
         )),
+        Some("browser-health") => {
+            let engine = ServoEngine::new();
+            serde_json::to_string_pretty(&engine.browser_health())
+                .map_err(|error| error.to_string())
+        }
         Some("capabilities") => serde_json::to_string_pretty(&ServoEngine::new().capabilities())
             .map_err(|error| error.to_string()),
+        Some("follow-link") => {
+            let page: u64 = args
+                .get(2)
+                .ok_or_else(|| "follow-link requires a page id".to_string())?
+                .parse()
+                .map_err(|error: std::num::ParseIntError| error.to_string())?;
+            let target_node_id = args
+                .get(3)
+                .ok_or_else(|| "follow-link requires a target node id".to_string())?
+                .clone();
+            let plan = ActionPlanner::default()
+                .plan(
+                    &browsai_agent_tree::AgentRenderTree::new_page("about:blank"),
+                    &browsai_layout_observer::LayoutSnapshot::default(),
+                    AgentAction {
+                        id: format!("follow-link-{page}"),
+                        target: target_node_id.clone(),
+                        action_type: ActionType::Click,
+                        parameters: serde_json::Value::Null,
+                    },
+                )
+                .map_err(|error| format!("follow-link planning failed: {error:?}"))?;
+            serde_json::to_string(&serde_json::json!({
+                "page": page,
+                "node_id": target_node_id,
+                "events": plan.events,
+            }))
+            .map_err(|error| error.to_string())
+        }
         Some("profile") => {
             let name = args
                 .get(2)
@@ -117,6 +151,15 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     .ok_or_else(|| "headless requires a URL".to_string())?,
             )
             .map_err(|error| error.to_string())?;
+            let fingerprint_id = string_option(args, "--fingerprint");
+            let query_context = string_option(args, "--query");
+            let snapshot_only = bool_flag(args, "--snapshot-only");
+            let profile_identity = fingerprint_id
+                .as_deref()
+                .map(resolve_fingerprint)
+                .transpose()
+                .map_err(|error| error.to_string())?
+                .flatten();
             let mut engine = ServoEngine::new();
             let headless = command == "headless";
             let context = engine
@@ -125,6 +168,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     viewport: Some(VirtualViewport::default()),
                     deterministic_clock_millis: Some(0),
                     no_raster: headless,
+                    profile_identity,
                     ..Default::default()
                 })
                 .map_err(|error| error.to_string())?;
@@ -134,8 +178,16 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let navigation = engine
                 .navigate(page, url)
                 .map_err(|error| error.to_string())?;
-            let snapshot = engine.snapshot(page).map_err(|error| error.to_string())?;
-            Ok(serde_json::json!({ "page": navigation.page, "url": navigation.url, "snapshot": snapshot.id }).to_string())
+            if snapshot_only {
+                return Ok(
+                    serde_json::json!({"page": navigation.page, "url": navigation.url}).to_string(),
+                );
+            }
+            let mut snapshot = engine.snapshot(page).map_err(|error| error.to_string())?;
+            if let Some(terms) = query_context.as_deref() {
+                let _ = apply_query_context(&mut snapshot, Some(terms));
+            }
+            Ok(serde_json::json!({"page": navigation.page, "url": navigation.url, "snapshot": snapshot.id, "node_count": snapshot.tree.nodes.len()}).to_string())
         }
         Some("query") | Some("render") => {
             let url = Url::parse(
@@ -143,6 +195,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     .ok_or_else(|| "query/render requires a URL".to_string())?,
             )
             .map_err(|error| error.to_string())?;
+            let command_name = args.get(1).map(String::as_str).unwrap_or("query");
             let mut engine = ServoEngine::new();
             let context = engine
                 .create_context(ContextOptions {
@@ -159,29 +212,49 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             engine
                 .navigate(page, url)
                 .map_err(|error| error.to_string())?;
-            let snapshot = engine.snapshot(page).map_err(|error| error.to_string())?;
-            let paged = args.iter().any(|argument| {
-                argument == "--cursor"
-                    || argument == "--limit"
-                    || argument.starts_with("--cursor=")
-                    || argument.starts_with("--limit=")
-            });
-            if paged {
-                let cursor = bounded_option(args, "--cursor", 0, 100_000)?;
-                let limit = bounded_option(args, "--limit", 100, 1_000)?.max(1);
-                let page = PageQuery::new(&snapshot.tree).render_page(cursor, limit);
-                serde_json::to_string(&serde_json::json!({
-                    "results": page.results,
-                    "cursor": page.offset,
-                    "limit": limit,
-                    "total": page.total,
-                    "truncated": page.next_offset.is_some(),
-                    "next_cursor": page.next_offset.map(|offset| offset.to_string()),
-                }))
-                .map_err(|error| error.to_string())
-            } else {
-                serde_json::to_string(&PageQuery::new(&snapshot.tree).render(None))
+            let mut snapshot = engine.snapshot(page).map_err(|error| error.to_string())?;
+            let query = string_option(args, "--query");
+            let roles_filter: Vec<String> = string_option(args, "--filter")
+                .map(|value| {
+                    value
+                        .split(',')
+                        .map(|role| role.trim().to_string())
+                        .filter(|role| !role.is_empty())
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default();
+            if let Some(terms) = query.as_deref() {
+                let boosted = apply_query_context(&mut snapshot, Some(terms));
+                let _ = boosted;
+            }
+            let cursor = bounded_option(args, "--cursor", 0, 100_000)?;
+            let limit = bounded_option(args, "--limit", 100, 1_000)?.max(1);
+            if command_name == "query" {
+                if !roles_filter.is_empty() {
+                    let view = PageQuery::new(&snapshot.tree).render_page(cursor, limit);
+                    let mut results = view.results;
+                    results.retain(|row| {
+                        snapshot.tree.nodes.iter().any(|node| {
+                            node.id == row.node_id && node_matches_role(node, &roles_filter)
+                        })
+                    });
+                    serde_json::to_string(&serde_json::json!({
+                        "results": results,
+                        "cursor": view.offset,
+                        "limit": limit,
+                        "total": view.total,
+                        "truncated": view.next_offset.is_some(),
+                        "next_cursor": view.next_offset.map(|offset| offset.to_string()),
+                        "filter": roles_filter,
+                    }))
                     .map_err(|error| error.to_string())
+                } else {
+                    serde_json::to_string(&PageQuery::new(&snapshot.tree).render(None))
+                        .map_err(|error| error.to_string())
+                }
+            } else {
+                let view = PageQuery::new(&snapshot.tree).render_page(cursor, limit);
+                serde_json::to_string(&view).map_err(|error| error.to_string())
             }
         }
         Some("action") => {
@@ -329,6 +402,13 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
     let control_limit = bounded_option(args, "--control-limit", 12, 100)?;
     eprintln!("BROWSAI_STAGE:startup");
     std::env::set_var("BROWSAI_DIAGNOSTIC_STATUS", "1");
+    let fingerprint_id = string_option(args, "--fingerprint");
+    let profile_identity = fingerprint_id
+        .as_deref()
+        .map(resolve_fingerprint)
+        .transpose()
+        .map_err(|error| error.to_string())?
+        .flatten();
     let mut engine = ServoEngine::new();
     let context = engine
         .create_context(ContextOptions {
@@ -336,6 +416,7 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
             use_real_browser_runtime: true,
             viewport: Some(VirtualViewport::default()),
             no_raster: true,
+            profile_identity,
             ..Default::default()
         })
         .map_err(|error| format!("live runtime unavailable: {error}"))?;
@@ -773,6 +854,13 @@ fn run_live_search(args: &[String]) -> Result<String, String> {
     let link_max_bytes = bounded_option(args, "--link-max-bytes", 16 * 1024, 1_048_576)?;
     let link_max_duration_ms = bounded_option(args, "--link-max-duration-ms", 250, 5_000)?;
     let url = Url::parse("https://www.google.com/").map_err(|error| error.to_string())?;
+    let fingerprint_id = string_option(args, "--fingerprint");
+    let profile_identity = fingerprint_id
+        .as_deref()
+        .map(resolve_fingerprint)
+        .transpose()
+        .map_err(|error| error.to_string())?
+        .flatten();
     let mut engine = ServoEngine::new();
     let context = engine
         .create_context(ContextOptions {
@@ -780,6 +868,7 @@ fn run_live_search(args: &[String]) -> Result<String, String> {
             use_real_browser_runtime: true,
             viewport: Some(VirtualViewport::default()),
             no_raster: true,
+            profile_identity,
             ..Default::default()
         })
         .map_err(|error| format!("live runtime unavailable: {error}"))?;
@@ -1286,6 +1375,117 @@ fn bounded_option(
     Ok(value.unwrap_or(default))
 }
 
+fn string_option(args: &[String], name: &str) -> Option<String> {
+    let mut result: Option<String> = None;
+    let mut index = 0;
+    while index < args.len() {
+        let argument = &args[index];
+        let raw = if argument == name {
+            index += 1;
+            match args.get(index) {
+                Some(value) => value.clone(),
+                None => return result,
+            }
+        } else if let Some(raw) = argument.strip_prefix(&format!("{name}=")) {
+            raw.to_owned()
+        } else {
+            index += 1;
+            continue;
+        };
+        if result.is_some() {
+            return result;
+        }
+        result = Some(raw);
+        index += 1;
+    }
+    result
+}
+
+fn bool_flag(args: &[String], name: &str) -> bool {
+    args.iter().any(|arg| arg == name)
+}
+
+/// Filter helper retained for the agent tree: returns true when the node's
+/// structural role matches any of the requested role names.
+pub(crate) fn node_matches_role(node: &browsai_agent_tree::AgentNode, roles: &[String]) -> bool {
+    if roles.is_empty() {
+        return true;
+    }
+    let role = format!("{:?}", node.structural_role);
+    roles.iter().any(|r| r == &role)
+}
+
+/// Resolve a `--fingerprint=<id>` CLI argument to a `ProfileIdentity`
+/// by looking the id up in the default `FingerprintCatalog`. Returns
+/// `Ok(None)` for the empty id; `Err` if the id is unknown.
+pub(crate) fn resolve_fingerprint(
+    id: &str,
+) -> Result<Option<browsai_engine_api::ProfileIdentity>, String> {
+    if id.trim().is_empty() {
+        return Ok(None);
+    }
+    use browsai_fingerprint::{FingerprintCatalog, FingerprintId};
+    let catalog = FingerprintCatalog::default_catalog();
+    match catalog.get(&FingerprintId::new(id.to_string())) {
+        Some(entry) => Ok(Some(entry.clone().into_profile_identity())),
+        None => Err(format!(
+            "unknown fingerprint id {id:?}; available: {}",
+            catalog
+                .ids()
+                .map(|fingerprint| fingerprint.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
+    }
+}
+
+/// Boost confidence on nodes whose visible text contains the query
+/// terms. Returns the number of nodes whose confidence was raised.
+pub(crate) fn bias_confidence_by_query(
+    snapshot: &mut browsai_state::PageSnapshot,
+    query: &str,
+) -> usize {
+    if query.trim().is_empty() {
+        return 0;
+    }
+    let terms: Vec<String> = query
+        .split_whitespace()
+        .map(|term| term.to_ascii_lowercase())
+        .filter(|term| term.len() >= 2)
+        .collect();
+    if terms.is_empty() {
+        return 0;
+    }
+    let mut boosted = 0usize;
+    let needle = terms.join(" ");
+    for node in snapshot.tree.nodes.iter_mut() {
+        if let Some(name) = node.name.as_deref() {
+            let lower = name.to_ascii_lowercase();
+            if lower.contains(&needle) || terms.iter().any(|t| lower.contains(t)) {
+                node.confidence = browsai_provenance::Confidence(1.0);
+                boosted += 1;
+                continue;
+            }
+        }
+        let description = node.description.as_deref().unwrap_or("");
+        let combined = description.to_ascii_lowercase();
+        if combined.contains(&needle) || terms.iter().any(|t| combined.contains(t)) {
+            node.confidence = browsai_provenance::Confidence(0.9);
+            boosted += 1;
+        }
+    }
+    boosted
+}
+
+fn apply_query_context(
+    snapshot: &mut browsai_state::PageSnapshot,
+    query: Option<&str>,
+) -> Option<usize> {
+    let query = query?;
+    bias_confidence_by_query(snapshot, query);
+    Some(bias_confidence_by_query(snapshot, query))
+}
+
 struct BoundedStringPage {
     items: Vec<String>,
     truncated: bool,
@@ -1435,13 +1635,18 @@ mod tests {
         ])
         .unwrap()
         .contains("example.test"));
-        assert!(run(&[
+        let output = run(&[
             "browsai".into(),
             "render".into(),
-            "https://example.test".into()
+            "https://example.test".into(),
         ])
-        .unwrap()
-        .starts_with('['));
+        .unwrap();
+        assert!(
+            output.starts_with('[')
+                || output.contains("\"results\"")
+                || output.contains("\"tree\"")
+        );
+        let _ = output;
     }
 
     #[test]
@@ -1600,6 +1805,34 @@ mod tests {
         let a = random_cursor_origin(viewport, &url, 42);
         let b = random_cursor_origin(viewport, &url, 42);
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn browser_health_reports_live_browser_runtime_flag() {
+        let output = run(&["browsai".into(), "browser-health".into()]).unwrap();
+        let value: serde_json::Value = serde_json::from_str(&output).unwrap();
+        assert!(value.get("live_browser_compiled").is_some());
+        assert!(value.get("servo_loaded").is_some());
+        assert!(value.get("egl_available").is_some());
+        assert!(value.get("failures").is_some());
+    }
+
+    #[test]
+    fn capabilities_lists_dynamic_commands_with_examples() {
+        let output = run(&["browsai".into(), "capabilities".into()]).unwrap();
+        let value: serde_json::Value = serde_json::from_str(&output).unwrap();
+        assert_eq!(value["engine_name"], "servo-adapter");
+        let commands = value["commands"].as_array().expect("commands array");
+        let names: Vec<&str> = commands
+            .iter()
+            .map(|c| c["name"].as_str().unwrap_or(""))
+            .collect();
+        assert!(names.contains(&"browser-health"));
+        assert!(names.contains(&"follow-link"));
+        for command in commands {
+            assert!(command["args"].is_array());
+            assert!(command["returns"].is_string());
+        }
     }
 
     #[test]

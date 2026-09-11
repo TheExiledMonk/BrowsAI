@@ -720,6 +720,7 @@ dependencies = [
  "browsai-compatibility-check",
  "browsai-engine-api",
  "browsai-engine-servo",
+ "browsai-fingerprint",
  "browsai-input",
  "browsai-layout-observer",
  "browsai-logging",

@@ -239,6 +239,8 @@ mod tests {
             engine_name: "test".into(),
             engine_version: Some("1".into()),
             features: [EngineFeature::NativeInput].into_iter().collect(),
+            live_browser_compiled: false,
+            commands: Vec::new(),
         });
         assert_eq!(matrix.status(WebApi::Forms), SupportStatus::Partial);
         assert_eq!(matrix.status(WebApi::Clipboard), SupportStatus::Unsupported);

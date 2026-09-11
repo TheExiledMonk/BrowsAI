@@ -16,6 +16,7 @@ browsai-agent-tree = { path = "../../crates/agent-tree" }
 browsai-action-planner = { path = "../../crates/action-planner" }
 browsai-audit = { path = "../../crates/audit" }
 browsai-challenge-observer = { path = "../../crates/challenge-observer" }
+browsai-fingerprint = { path = "../../crates/fingerprint" }
 browsai-compatibility-check = { path = "../../crates/compatibility-check" }
 browsai-engine-api = { path = "../../crates/engine-api" }
 browsai-engine-servo = { path = "../../crates/engine-servo" }

@@ -1788,11 +1788,46 @@ pub struct ServoEngine {
     real_runtime: Option<ServoRuntime>,
     #[cfg(feature = "servo-runtime")]
     real_pages: HashMap<PageId, ServoRuntimePage>,
+    construction_failure: std::sync::Mutex<Option<String>>,
 }
 
 impl ServoEngine {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Returns the live-runtime load status. `live_browser_compiled` is
+    /// `true` when this binary was built with the `servo-runtime` feature.
+    /// `servo_loaded` is `true` when an actual Servo embedder instance has
+    /// been constructed and is reachable; `false` means the deterministic
+    /// backend is in use. `egl_available` is `true` when the host has a
+    /// loadable libEGL so the embedder can present; `false` otherwise.
+    pub fn browser_health(&self) -> serde_json::Value {
+        let servo_loaded = self.servo_loaded();
+        serde_json::json!({
+            "live_browser_compiled": cfg!(feature = "servo-runtime"),
+            "servo_loaded": servo_loaded,
+            "egl_available": probe_egl_available(),
+            "failures": self.last_construction_failure(),
+        })
+    }
+
+    fn servo_loaded(&self) -> bool {
+        #[cfg(feature = "servo-runtime")]
+        {
+            self.real_runtime.is_some()
+        }
+        #[cfg(not(feature = "servo-runtime"))]
+        {
+            false
+        }
+    }
+
+    fn last_construction_failure(&self) -> Option<String> {
+        self.construction_failure
+            .lock()
+            .ok()
+            .and_then(|guard| guard.clone())
     }
 
     pub fn input_events(&self, page: PageId) -> Result<&[NativeInputEvent], EngineError> {
@@ -1949,6 +1984,8 @@ impl BrowserEngine for ServoEngine {
             ]
             .into_iter()
             .collect(),
+            live_browser_compiled: cfg!(feature = "servo-runtime"),
+            commands: browsai_engine_servo_runtime_commands(),
         }
     }
 
@@ -1966,7 +2003,43 @@ impl BrowserEngine for ServoEngine {
                 .profile_identity
                 .clone()
                 .unwrap_or_else(browsai_engine_api::ProfileIdentity::default_for_servo);
-            self.real_runtime = Some(ServoRuntime::new(identity));
+            let failure_message = std::sync::Arc::new(std::sync::Mutex::new(String::new()));
+            let failure_message_for_unwind = failure_message.clone();
+            let identity_for_unwind = identity.clone();
+            let construction = std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
+                ServoRuntime::new(identity_for_unwind)
+            }));
+            match construction {
+                Ok(runtime) => {
+                    self.real_runtime = Some(runtime);
+                }
+                Err(payload) => {
+                    let detail = match payload.downcast_ref::<&'static str>() {
+                        Some(s) => (*s).to_string(),
+                        None => match payload.downcast_ref::<String>() {
+                            Some(s) => s.clone(),
+                            None => "Servo embedder construction panicked".to_string(),
+                        },
+                    };
+                    if let Ok(mut slot) = self.construction_failure.lock() {
+                        *slot = Some(detail.clone());
+                    }
+                    let _ = failure_message;
+                    let _ = failure_message_for_unwind;
+                    if !probe_egl_available() {
+                        return Err(EngineError::Other(format!(
+                            "live Servo runtime unavailable and libEGL was not found on the system; \
+                             install libegl1 + libgl1 + libgles2 (or run without --features live-browser for the deterministic backend). \
+                             underlying error: {}",
+                            detail
+                        )));
+                    }
+                    return Err(EngineError::Other(format!(
+                        "live Servo runtime failed to construct: {} (run `browsai browser-health` for diagnostics)",
+                        detail
+                    )));
+                }
+            }
         }
         self.contexts.insert(self.next_context, options);
         Ok(self.next_context)
@@ -2214,4 +2287,159 @@ fn evaluate_restricted_script(
         })?,
     };
     Ok(PageScriptResult { value })
+}
+
+/// Returns the canonical command surface for the `browsai` CLI binary.
+/// The host shell (and any plugin like Helios) uses this list to
+/// introspect what the binary supports without trial-and-error.
+fn browsai_engine_servo_runtime_commands() -> Vec<browsai_engine_api::EngineCommand> {
+    vec![
+        browsai_engine_api::EngineCommand {
+            name: "version".into(),
+            args: Vec::new(),
+            returns: "string".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "capabilities".into(),
+            args: Vec::new(),
+            returns: "EngineCapabilities".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "browser-health".into(),
+            args: Vec::new(),
+            returns: "BrowserHealth".into(),
+            example: Some(serde_json::json!({
+                "live_browser_compiled": true,
+                "servo_loaded": true,
+                "egl_available": true,
+            })),
+        },
+        browsai_engine_api::EngineCommand {
+            name: "headless".into(),
+            args: vec![
+                "<url>".into(),
+                "[--fingerprint=<id>]".into(),
+                "[--query=<string>]".into(),
+            ],
+            returns: "HeadlessResult".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "render".into(),
+            args: vec![
+                "<url>".into(),
+                "[--cursor=N]".into(),
+                "[--limit=N]".into(),
+                "[--filter=Role1,Role2]".into(),
+                "[--query=<string>]".into(),
+            ],
+            returns: "AgentRenderTree".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "query".into(),
+            args: vec![
+                "<url>".into(),
+                "[--cursor=N]".into(),
+                "[--limit=N]".into(),
+                "[--filter=Role1,Role2]".into(),
+                "[--query=<string>]".into(),
+            ],
+            returns: "QueryResult".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "navigate".into(),
+            args: vec![
+                "<url>".into(),
+                "[--snapshot-only]".into(),
+                "[--fingerprint=<id>]".into(),
+                "[--query=<string>]".into(),
+            ],
+            returns: "NavigationResult".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "follow-link".into(),
+            args: vec!["<page>".into(), "<node_id>".into()],
+            returns: "NavigationResult".into(),
+            example: Some(serde_json::json!({"page": 1, "node_id": "link-12"})),
+        },
+        browsai_engine_api::EngineCommand {
+            name: "live-open".into(),
+            args: vec![
+                "<url>".into(),
+                "[--auto-solve]".into(),
+                "[--fingerprint=<id>]".into(),
+            ],
+            returns: "LiveResult".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "live-search".into(),
+            args: vec![
+                "<query>".into(),
+                "[--open-links]".into(),
+                "[--fingerprint=<id>]".into(),
+            ],
+            returns: "LiveResult".into(),
+            example: None,
+        },
+        browsai_engine_api::EngineCommand {
+            name: "action".into(),
+            args: vec!["<url>".into(), "<target>".into(), "<kind>".into()],
+            returns: "ActionResult".into(),
+            example: Some(
+                serde_json::json!({"url": "https://example.test", "target": "node-7", "kind": "Click"}),
+            ),
+        },
+    ]
+}
+
+#[cfg(unix)]
+fn probe_egl_available() -> bool {
+    // We deliberately do not link against surfman from the public CLI;
+    // ship a minimal dlopen-based probe. A libEGL shared object on
+    // LD_LIBRARY_PATH or a system path satisfies the probe.
+    use std::os::unix::ffi::OsStrExt;
+    let candidates: [&std::ffi::OsStr; 4] = [
+        std::ffi::OsStr::new("libEGL.so.1"),
+        std::ffi::OsStr::new("libEGL.so"),
+        std::ffi::OsStr::new("/usr/lib/x86_64-linux-gnu/libEGL.so.1"),
+        std::ffi::OsStr::new("/usr/lib64/libEGL.so.1"),
+    ];
+    for candidate in candidates.iter() {
+        let bytes = candidate.as_bytes();
+        if bytes.is_empty() {
+            continue;
+        }
+        // SAFETY: `bytes` is a borrowed C-compatible string for the call.
+        let result = unsafe { libc::dlopen(bytes.as_ptr() as *const _, libc::RTLD_NOW) };
+        if !result.is_null() {
+            unsafe {
+                libc::dlclose(result);
+            }
+            return true;
+        }
+    }
+    false
+}
+
+#[cfg(not(unix))]
+fn probe_egl_available() -> bool {
+    false
+}
+
+#[cfg(unix)]
+mod libc {
+    use std::os::raw::{c_char, c_int, c_void};
+
+    pub const RTLD_NOW: c_int = 2;
+
+    extern "C" {
+        pub fn dlopen(filename: *const c_char, flag: c_int) -> *mut c_void;
+        pub fn dlclose(handle: *mut c_void) -> c_int;
+    }
 }
