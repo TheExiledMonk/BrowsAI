@@ -849,13 +849,18 @@ impl ServoRuntime {
                         "warning: BROWSAI_LOCALE is deprecated; pass a ProfileIdentity via ContextOptions instead"
                     );
                 }
-                profile_identity
-                    .locale
-                    .clone()
-                    .filter(|value| !value.trim().is_empty())
-                    .or(legacy)
-                    .filter(|value| !value.trim().is_empty())
-                    .unwrap_or_else(|| "en-US".into())
+                let from_profile = profile_identity.locale.clone();
+                if !from_profile.trim().is_empty() {
+                    from_profile
+                } else if let Some(value) = legacy {
+                    if !value.trim().is_empty() {
+                        value
+                    } else {
+                        "en-US".into()
+                    }
+                } else {
+                    "en-US".into()
+                }
             },
             user_agent: {
                 let legacy = std::env::var("BROWSAI_USER_AGENT").ok();
@@ -864,18 +869,22 @@ impl ServoRuntime {
                         "warning: BROWSAI_USER_AGENT is deprecated; pass a ProfileIdentity via ContextOptions instead"
                     );
                 }
-                profile_identity
-                    .user_agent
-                    .clone()
-                    .filter(|value| !value.trim().is_empty())
-                    .or(legacy)
-                    .unwrap_or_else(|| {
-                    // Present the runtime as a current Chromium desktop browser to
-                    // sites that gate their application shell on the user-agent. Keep
-                    // this configurable so a caller can select a matching Chrome
-                    // release without rebuilding the engine.
+                let from_profile = profile_identity.user_agent.clone();
+                if !from_profile.trim().is_empty() {
+                    from_profile
+                } else if let Some(value) = legacy {
+                    if !value.trim().is_empty() {
+                        value
+                    } else {
+                        // Present the runtime as a current Chromium desktop browser to
+                        // sites that gate their application shell on the user-agent. Keep
+                        // this configurable so a caller can select a matching Chrome
+                        // release without rebuilding the engine.
                         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36".into()
-                    })
+                    }
+                } else {
+                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36".into()
+                }
             },
             ..Default::default()
         };
@@ -891,13 +900,18 @@ impl ServoRuntime {
                     "warning: BROWSAI_TIMEZONE is deprecated; pass a ProfileIdentity via ContextOptions instead"
                 );
             }
-            profile_identity
-                .timezone
-                .clone()
-                .filter(|value| !value.trim().is_empty())
-                .or(legacy)
-                .filter(|value| !value.trim().is_empty())
-                .unwrap_or_else(|| "UTC".into())
+            let from_profile = profile_identity.timezone.clone();
+            if !from_profile.trim().is_empty() {
+                from_profile
+            } else if let Some(value) = legacy {
+                if !value.trim().is_empty() {
+                    value
+                } else {
+                    "UTC".into()
+                }
+            } else {
+                "UTC".into()
+            }
         };
         std::env::set_var("TZ", timezone);
         Self {
@@ -1196,7 +1210,7 @@ impl ServoRuntime {
 #[cfg(feature = "servo-runtime")]
 impl Default for ServoRuntime {
     fn default() -> Self {
-        Self::new()
+        Self::new(browsai_engine_api::ProfileIdentity::default_for_servo())
     }
 }
 

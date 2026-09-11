@@ -1,0 +1,205 @@
+BrowsAI Public-Use License v1.0 (DRAFT — LEGAL REVIEW REQUIRED BEFORE PUBLIC RELEASE)
+
+----------------------------------------------------------------------
+NOTICE TO READERS
+----------------------------------------------------------------------
+This license text is a working draft. The BrowsAI project owners have
+not yet obtained a formal legal opinion on it. Treat the wording below as
+the project's expressed intent; the legally controlling text may differ
+after legal review. Do not rely on this draft as authoritative legal
+advice.
+
+----------------------------------------------------------------------
+1. DEFINITIONS
+----------------------------------------------------------------------
+
+"Work" means the BrowsAI software, including source code, object code,
+build scripts, configuration, and accompanying documentation distributed
+under this license.
+
+"You" means each individual or legal entity exercising permissions under
+this license.
+
+"Internal Use" means use of the Work by You, or by Your employees,
+contractors, and authorised agents, solely for Your own internal business
+or organisational operations, including internal research, internal
+automation, internal product evaluation, internal quality assurance, and
+similar activities that are not directed at providing the Work, or a
+function materially derived from the Work, to any third party as part
+of a paid or otherwise commercially-monetised offering.
+
+"External Commercial Use" means any use of the Work that is not Internal
+Use, including:
+
+  a. selling, reselling, sublicensing, or otherwise commercially
+     distributing the Work, or a derivative work of the Work, to a third
+     party;
+  b. embedding, bundling, or integrating the Work, or a derivative work
+     of the Work, into a commercial product or service offered to a
+     third party;
+  c. operating the Work, or a derivative work of the Work, as a hosted,
+     managed, software-as-a-service, platform-as-a-service, or
+     application-programming-interface offering for third-party
+     customers, whether or not a fee is charged;
+  d. using the Work, or a derivative work of the Work, as a material
+     functional component of a customer-facing paid offering; or
+  e. providing consulting, integration, or other services to a third
+     party where the Work itself, or a material function derived from
+     the Work, is delivered to the third party as part of that service.
+
+"Derivative Work" means any work that includes, depends on, or is
+derived from the Work, in any form.
+
+----------------------------------------------------------------------
+2. GRANT OF RIGHTS (Internal Use)
+----------------------------------------------------------------------
+
+Subject to Your compliance with the conditions in section 3 and the
+restrictions in section 4, the copyright holders grant You a worldwide,
+royalty-free, non-exclusive, non-transferable licence to:
+
+  a. use, run, and execute the Work for Internal Use;
+  b. modify, adapt, and create Derivative Works of the Work for
+     Internal Use;
+  c. distribute copies of the Work, and Derivative Works, to Your
+     employees, contractors, and authorised agents solely to enable
+     their Internal Use;
+  d. study, test, evaluate, and audit the Work for Internal Use; and
+  e. make, have made, and use the Work, and Derivative Works, in
+     connection with Your own internal products, services, and
+     workflows that are not External Commercial Use.
+
+The grant in this section 2 is intended to permit use of the Work by
+individuals, academic researchers, students, hobbyists, and commercial
+companies for their own internal operations. It is not intended to
+permit External Commercial Use.
+
+----------------------------------------------------------------------
+3. CONDITIONS
+----------------------------------------------------------------------
+
+Any exercise of rights granted under section 2 is conditional on:
+
+  a. preserving all copyright notices, licence texts, and required
+     attribution notices accompanying the Work or any copy You receive
+     or distribute;
+  b. providing a copy of this licence (and any accompanying
+     `LICENSE-COMMERCIAL.md`) with each copy of the Work or
+     Derivative Work You distribute; and
+  c. not removing, obscuring, or altering any notice regarding the
+     commercial-use boundary in any distributed copy.
+
+----------------------------------------------------------------------
+4. RESTRICTIONS
+----------------------------------------------------------------------
+
+You may not, without a separate written commercial licence from the
+copyright holders:
+
+  a. engage in any External Commercial Use of the Work or any
+     Derivative Work;
+  b. distribute the Work, or any Derivative Work, to any third party
+     other than as expressly permitted under section 2(c);
+  c. sublicense, sell, rent, lease, lend, or otherwise commercially
+     transfer the Work or any Derivative Work to any third party;
+  d. remove, alter, or obscure any proprietary notices or licence
+     markings in the Work;
+  e. use the trademarks, trade names, service marks, or product names
+     of the copyright holders to endorse or promote any product or
+     service derived from the Work without prior written permission; or
+  f. claim authorship of, or right to, the Work or any Derivative
+     Work.
+
+For the avoidance of doubt, the foregoing restrictions apply to any
+distribution of the Work in source or binary form, whether alone,
+bundled, embedded, containerised, virtualised, or distributed via
+network access.
+
+----------------------------------------------------------------------
+5. PATENTS
+----------------------------------------------------------------------
+
+Each copyright holder grants You a worldwide, royalty-free,
+non-exclusive licence under the patent claims it has the right to
+grant, to make, have made, use, sell, offer for sale, and import the
+Work, solely for the purposes of Internal Use. This patent grant does
+not extend to any External Commercial Use; for External Commercial Use
+You must obtain a separate commercial licence that may include a
+patent licence from the copyright holders.
+
+If You initiate patent litigation (including a cross-claim or
+counterclaim in a lawsuit) alleging that the Work constitutes direct
+or contributory patent infringement, the patent licences granted to
+You under this licence terminate as of the date such litigation is
+filed.
+
+----------------------------------------------------------------------
+6. TERMINATION
+----------------------------------------------------------------------
+
+This licence and the rights granted to You hereunder terminate
+automatically if You breach any of its conditions. Upon termination,
+You must cease all use, copying, modification, and distribution of the
+Work and any Derivative Works. Sections 7, 8, and 9 survive any
+termination.
+
+If You cure the breach within thirty (30) days of becoming aware of
+it, the licence is reinstated for the cured portion, provided You have
+not previously had this licence terminated for the same or a similar
+breach.
+
+----------------------------------------------------------------------
+7. DISCLAIMER OF WARRANTY
+----------------------------------------------------------------------
+
+THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+NON-INFRINGEMENT. THE COPYRIGHT HOLDERS MAKE NO REPRESENTATION THAT
+THE WORK IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR ANY PARTICULAR
+PURPOSE, OR NON-INFRINGING.
+
+----------------------------------------------------------------------
+8. LIMITATION OF LIABILITY
+----------------------------------------------------------------------
+
+IN NO EVENT WILL THE COPYRIGHT HOLDERS, CONTRIBUTORS, OR ANYONE
+DISTRIBUTING THE WORK BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE
+OF THE WORK, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+9. GENERAL
+----------------------------------------------------------------------
+
+  a. If any provision of this licence is held to be unenforceable, the
+     remaining provisions remain in full force and effect.
+  b. This licence constitutes the entire agreement between You and
+     the copyright holders with respect to the Work and supersedes
+     any prior or contemporaneous understandings.
+  c. Nothing in this licence is intended to limit any non-waivable
+     rights You may have under applicable consumer-protection or
+     similar law.
+  d. The rights and obligations under this licence are governed by the
+     laws of the jurisdiction in which the copyright holders are
+     established, without regard to conflict-of-laws principles.
+
+----------------------------------------------------------------------
+10. THIRD-PARTY COMPONENTS
+----------------------------------------------------------------------
+
+The Work depends on third-party components (including Servo and other
+Rust crates). This licence does not apply to those third-party
+components; each such component is governed by its own licence.
+Required third-party notices are maintained in `THIRD_PARTY_LICENSES.md`
+and must be preserved.
+
+----------------------------------------------------------------------
+END OF TERMS
+----------------------------------------------------------------------
+
+Copyright © 2026 [COPYRIGHT HOLDER TO BE INSERTED]
+
+For commercial licensing inquiries, see `LICENSE-COMMERCIAL.md`.
