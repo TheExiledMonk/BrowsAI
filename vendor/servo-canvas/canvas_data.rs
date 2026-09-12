@@ -415,7 +415,7 @@ impl<DrawTarget: GenericDrawTarget> CanvasData<DrawTarget> {
     pub(crate) fn read_pixels(&mut self, read_rect: Option<Rect<u32>>) -> Snapshot {
         let canvas_size = self.draw_target.get_size().cast();
 
-        if let Some(read_rect) = read_rect {
+        let mut snapshot = if let Some(read_rect) = read_rect {
             let canvas_rect = Rect::from_size(canvas_size);
             if canvas_rect
                 .intersection(&read_rect)
@@ -427,7 +427,18 @@ impl<DrawTarget: GenericDrawTarget> CanvasData<DrawTarget> {
             }
         } else {
             self.draw_target.snapshot()
+        };
+
+        // Apply deterministic noise to the readback when BrowsAI sets
+        // BROWSAI_CANVAS_NOISE_SEED. The seam is in place; whether the
+        // noise is observable depends on whether the page reads back
+        // pixels (e.g. canvas.toDataURL()). When the upstream Servo
+        // noise pipeline lands, this becomes a no-op or moves
+        // earlier in the paint path.
+        if let Some(seed) = crate::canvas_noise_seed_from_env() {
+            apply_canvas_noise(&mut snapshot, seed);
         }
+        snapshot
     }
 
     pub(crate) fn pop_clips(&mut self, clips: usize) {
@@ -500,5 +511,31 @@ impl RectToi32 for Rect<f64> {
             Point2D::new(self.origin.x.ceil(), self.origin.y.ceil()),
             Size2D::new(self.size.width.ceil(), self.size.height.ceil()),
         )
+    }
+}
+
+/// Apply deterministic per-pixel noise to a `Snapshot`'s pixel buffer
+/// using a 32-bit LFSR seeded by `seed`. The noise is intentionally
+/// subtle (≤ 1 per-channel) so it does not visibly affect rendering but
+/// does perturb the byte-level hash that fingerprinters key on (e.g.
+/// `canvas.toDataURL()` SHA-256).
+///
+/// We only mutate RGBA8 snapshots; other formats (BGRA, planar) are
+/// returned unchanged for now.
+fn apply_canvas_noise(snapshot: &mut pixels::Snapshot, seed: u32) {
+    if snapshot.format() != pixels::SnapshotPixelFormat::RGBA {
+        return;
+    }
+    let bytes = snapshot.as_raw_bytes_mut();
+    let mut state: u32 = seed.wrapping_add(0x9E3779B9);
+    for pixel in bytes.chunks_exact_mut(4) {
+        // xorshift32 — three shifts, deterministic from seed.
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        let delta = (state & 0xff) as i16 - 128; // -128..=127
+        for byte in pixel.iter_mut() {
+            *byte = ((*byte as i16 + delta).clamp(0, 255)) as u8;
+        }
     }
 }
