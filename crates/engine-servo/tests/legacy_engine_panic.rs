@@ -24,7 +24,6 @@
 
 use browsai_engine_api::{BrowserEngine, ContextOptions};
 use browsai_engine_servo::ServoEngine;
-use url::Url;
 
 fn cli_options() -> ContextOptions {
     ContextOptions {

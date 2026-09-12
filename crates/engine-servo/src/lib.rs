@@ -114,8 +114,11 @@ struct RuntimeWebViewDelegate {
 
 #[cfg(feature = "servo-runtime")]
 const MAIN_FRAME_REQUEST_LIMIT: usize = 256;
+#[cfg(feature = "servo-runtime")]
 const RESOURCE_REQUEST_LIMIT: usize = 2048;
+#[cfg(feature = "servo-runtime")]
 const RUNTIME_CONSOLE_LIMIT: usize = 512;
+#[cfg(feature = "servo-runtime")]
 const RUNTIME_CONSOLE_BYTES_LIMIT: usize = 256 * 1024;
 
 #[cfg(feature = "servo-runtime")]
