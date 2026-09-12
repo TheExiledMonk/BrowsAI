@@ -201,6 +201,21 @@ Third-party component licences are tracked in
 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) and
 [docs/licensing.md](docs/licensing.md).
 
+## Fingerprint hardening
+
+`Fingerprint` carries `hardwareConcurrency`, `deviceMemory`,
+`maxTouchPoints`, and `colorDepth` in addition to UA / locale /
+viewport / brand list. The default catalog ships 15 vetted identities
+(10 with non-default viewport sizes). The long-running `browsai
+serve` daemon keeps one engine per host, so cookies and storage are
+isolated across domains. See
+[docs/fingerprint-hardening.md](docs/fingerprint-hardening.md) for
+what landed, what was deferred to vendored-Servo patches (HTTP/2
+SETTINGS, canvas noise seed wiring, TLS impersonation via
+`rustls-impersonate`), and what the Helios plugin author needs to
+wire on the plugin side (`HTTPS_PROXY` env, optional per-call
+isolation via separate subprocess calls).
+
 ## JSON schema for host integrations
 
 Every CLI response shape and every NDJSON streaming event emitted by
