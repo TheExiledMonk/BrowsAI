@@ -76,7 +76,7 @@ fn auto_solve_challenges(
 }
 
 fn usage() -> &'static str {
-    "browsai commands:\n  version\n  capabilities\n  profile <name>\n  workspace <profile-name>\n  headless <url>\n  open <url>\n  navigate <url>\n  render <url>\n  query <url>\n  action <url> <target> <kind>\n  live-open <url> [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N] [--auto-solve]\n  live-search <query> [--open-links] [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N]\n  check site <url>\n  check corpus <sites.csv>\n  check report <run-id>\n  logs <log.json>\n  audit <journal.json>\n  replay <journal.json>\n  benchmark <result.json>\n  recovery <checkpoint.json>\n"
+    "browsai commands:\n  version\n  capabilities\n  profile <name>\n  workspace <profile-name>\n  headless <url>\n  open <url>\n  navigate <url>\n  render <url>\n  query <url>\n  action <url> <target> <kind>\n  live-open <url> [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N] [--auto-solve]\n  live-search <query> [--open-links] [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N]\n  serve [--port N] [--bind HOST] [--idle-shutdown-seconds N] [--fingerprint ID] [--http2-profile ID] [--no-live-browser] [--canvas-noise-seed N]\n  check site <url>\n  check corpus <sites.csv>\n  check report <run-id>\n  logs <log.json>\n  audit <journal.json>\n  replay <journal.json>\n  benchmark <result.json>\n  recovery <checkpoint.json>\n"
 }
 
 fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, String> {
@@ -410,15 +410,39 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                         .unwrap_or("firefox-130")
                         .to_string()
                 });
-            let live_browser = bool_flag(args, "--live-browser")
-                || std::env::var("BROWSAI_SERVER_LIVE_BROWSER")
-                    .map(|value| matches!(value.as_str(), "1" | "true" | "yes" | "on"))
-                    .unwrap_or(false);
-            if !live_browser && cfg!(feature = "live-browser") {
+            // `--live-browser` is now the production default; `--no-live-browser`
+            // is the opt-out for unit-test fixtures that want the
+            // deterministic stub. Without the flag and without the env
+            // var we use the live runtime because the deterministic
+            // backend returns a single Page root node and is useless for
+            // any real plugin scenario — `browsai serve` should "just
+            // work" out of the box.
+            let live_browser = if bool_flag(args, "--no-live-browser") {
+                false
+            } else if bool_flag(args, "--live-browser") {
+                true
+            } else {
+                std::env::var("BROWSAI_SERVER_LIVE_BROWSER")
+                    .ok()
+                    .and_then(|value| match value.as_str() {
+                        "0" | "false" | "no" | "off" => Some(false),
+                        "1" | "true" | "yes" | "on" => Some(true),
+                        _ => None,
+                    })
+                    .unwrap_or(true)
+            };
+            if live_browser && !cfg!(feature = "live-browser") {
+                // The runtime default now asks for the live embedder,
+                // but this binary was built without `live-browser` so
+                // every real navigation would fail with
+                // `EngineError::Unsupported`. Surface that loudly at
+                // startup instead of returning 1-node stub responses
+                // for the lifetime of the daemon.
                 eprintln!(
-                    "BROWSAI_SERVER: live-browser feature compiled in but daemon is running in \
-                     deterministic mode; pass --live-browser (or set BROWSAI_SERVER_LIVE_BROWSER=1) \
-                     for real Servo runtime"
+                    "BROWSAI_SERVER: live runtime is the default but this binary was built without \
+                     the `live-browser` feature (cargo build --features browsai-cli/live-browser). \
+                     Pass --no-live-browser to force the deterministic stub, or rebuild with the \
+                     feature enabled."
                 );
             }
             let config = crate::server::ServerConfig {
@@ -2237,6 +2261,7 @@ mod tests {
         let port = pick_unused_port();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .arg("--bind")
@@ -2287,6 +2312,7 @@ mod tests {
         let port = pick_unused_port();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .stdout(std::process::Stdio::piped())
@@ -2319,6 +2345,7 @@ mod tests {
         let start = std::time::Instant::now();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .arg("--idle-shutdown-seconds")
@@ -2344,6 +2371,7 @@ mod tests {
         let port = pick_unused_port();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .stdout(std::process::Stdio::piped())
@@ -2388,6 +2416,7 @@ mod tests {
         let port = pick_unused_port();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .arg("--bind")
@@ -2430,6 +2459,7 @@ mod tests {
         let port = pick_unused_port();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .arg("--bind")
@@ -2465,6 +2495,7 @@ mod tests {
         let port = pick_unused_port();
         let mut child = std::process::Command::new(&bin)
             .arg("serve")
+            .arg("--no-live-browser")
             .arg("--port")
             .arg(port.to_string())
             .arg("--bind")

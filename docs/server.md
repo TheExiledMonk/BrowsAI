@@ -201,23 +201,36 @@ WantedBy=multi-user.target
 
 ## Live-browser runtime
 
-By default the daemon runs the deterministic backend (1 node per page,
-no JS execution, no network). Pass `--live-browser` to spin up the real
-Servo embedder:
+The daemon runs the live Servo embedder by default. The deterministic
+backend (1 node per page, no JS execution, no network) is now opt-in via
+`--no-live-browser` and is only useful for unit-test fixtures that
+need the wire protocol without the heavy Servo dep:
 
 ```sh
+# Production: live runtime, real navigation, full agent tree.
 browsai serve --port 8765 --idle-shutdown-seconds 3600 \
-    --live-browser \
     --fingerprint=firefox-130-linux-x86_64 \
     --http2-profile=firefox-130
+
+# Test fixture: deterministic stub, returns 1 Page root node.
+browsai serve --port 8765 --no-live-browser
 ```
+
+The default flipped from `--live-browser` opt-in to live by default
+because shipping a daemon that silently serves a 1-node stub is a worse
+failure mode than asking the operator to opt out of the live embedder.
+If the binary was built without the `live-browser` Cargo feature, the
+daemon logs a loud warning at startup and every navigation returns
+`EngineError::Unsupported` until you either pass `--no-live-browser`
+or rebuild with `--features browsai-cli/live-browser`.
 
 Equivalent env-var form (useful for process supervisors that can't
 pass flags):
 
 | Env var | Effect |
 | --- | --- |
-| `BROWSAI_SERVER_LIVE_BROWSER=1` | Same as `--live-browser` |
+| `BROWSAI_SERVER_LIVE_BROWSER=0` / `=no` / `=off` | Same as `--no-live-browser` |
+| `BROWSAI_SERVER_LIVE_BROWSER=1` | Same as `--live-browser` (explicit; default is already live) |
 | `BROWSAI_DEFAULT_FINGERPRINT` | Default `--fingerprint` if no flag |
 | `BROWSAI_DEFAULT_HTTP2_PROFILE` | Default `--http2-profile` if no flag |
 | `BROWSAI_CANVAS_NOISE_SEED` | Forwarded to vendored canvas readback |
