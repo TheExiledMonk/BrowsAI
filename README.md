@@ -217,3 +217,21 @@ stream. The deterministic-backend `live-open` and `live-search`
 commands honour `--auto-solve`, `--fingerprint=<id>`, and the randomized
 initial cursor path; the real-Servo path requires the
 `live-browser` Cargo feature.
+
+## HTTP server for LLM control
+
+`browsai serve --port 8765` exposes the same shape over a localhost
+HTTP/1.1 socket — bind to `127.0.0.1` by default, `--bind 0.0.0.0`
+to expose externally. LLMs and other clients drive the browser with
+plain `curl` or any HTTP client:
+
+```sh
+curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"url":"https://example.test","query":"release notes"}' \
+    http://127.0.0.1:8765/browse | jq
+```
+
+Streaming is `?stream=true` (or `"stream": true` in the body) and uses
+chunked transfer encoding so the host reads events as they arrive. See
+[docs/server.md](docs/server.md) for the route table, systemd unit,
+and CLI command list.

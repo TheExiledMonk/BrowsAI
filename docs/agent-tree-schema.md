@@ -28,7 +28,8 @@ The CLI emits one of these top-level shapes depending on the command:
 | `FollowLinkResult`      | `browsai follow-link`                         |
 | `LiveResult`            | `browsai live-open / live-search` (deterministic & live) |
 | `CompatibilityRun`      | `browsai check corpus / report`               |
-| NDJSON event stream     | any command with `--stream`                   |
+| `HttpResponse`          | `browsai serve --port 8765`                  |
+| NDJSON event stream     | any command with `--stream`                   | HTTP server `?stream=true` |
 
 ## Top-level reference types
 

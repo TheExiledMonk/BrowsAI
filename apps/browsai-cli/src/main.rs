@@ -369,6 +369,12 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
         Some("live-search") => run_live_search(args),
         Some("live-open") => run_live_open(args, one_shot_live_runtime),
         Some("check") => run_check_command(args),
+        Some("serve") => {
+            let bind = string_option(args, "--bind").unwrap_or_else(|| "127.0.0.1".into());
+            let port = bounded_option(args, "--port", 1024, 65535)? as u16;
+            crate::server::run(&bind, port).map_err(|error| format!("server: {error}"))?;
+            Ok("server exited".into())
+        }
         Some("audit") => {
             let path = args
                 .get(2)
@@ -1684,6 +1690,8 @@ fn main() {
     }
 }
 
+mod server;
+
 #[cfg(test)]
 mod tests {
     use super::{
@@ -2142,6 +2150,116 @@ mod tests {
         assert_eq!(events.len(), 1);
         // The trajectory emits PointerMove events; assert at least one is dispatched.
         let _ = NativeInputEvent::PointerMove { x: 0.0, y: 0.0 };
+    }
+
+    #[test]
+    fn http_server_exposes_capabilities_over_http() {
+        let Some(bin) = browsai_binary() else {
+            eprintln!("browsai binary not found; skipping HTTP server test");
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        let start = std::time::Instant::now();
+        let client = loop {
+            match std::net::TcpStream::connect(("127.0.0.1", port)) {
+                Ok(stream) => break stream,
+                Err(_) if start.elapsed() < std::time::Duration::from_secs(5) => {
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                    continue;
+                }
+                Err(error) => panic!("connect failed: {error}"),
+            }
+        };
+        let (mut reader, mut writer) = (client.try_clone().unwrap(), client);
+        std::thread::spawn(move || {
+            use std::io::Write;
+            writer
+                .write_all(
+                    b"GET /capabilities HTTP/1.1\r\n\
+                  Host: 127.0.0.1\r\n\
+                  Connection: close\r\n\
+                  \r\n",
+                )
+                .unwrap();
+        });
+        let body = read_http_response(&mut reader);
+        assert!(
+            body.starts_with("HTTP/1.1 200"),
+            "expected 200 OK; got: {}",
+            &body[..body.len().min(80)]
+        );
+        assert!(body.contains("\"engine_name\""));
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn http_server_rejects_unknown_path_with_404() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        let start = std::time::Instant::now();
+        let client = loop {
+            match std::net::TcpStream::connect(("127.0.0.1", port)) {
+                Ok(stream) => break stream,
+                Err(_) if start.elapsed() < std::time::Duration::from_secs(5) => {
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                    continue;
+                }
+                Err(error) => panic!("connect failed: {error}"),
+            }
+        };
+        let (mut reader, mut writer) = (client.try_clone().unwrap(), client);
+        std::thread::spawn(move || {
+            use std::io::Write;
+            writer
+                .write_all(
+                    b"GET /does-not-exist HTTP/1.1\r\n\
+                  Host: 127.0.0.1\r\n\
+                  Connection: close\r\n\
+                  \r\n",
+                )
+                .unwrap();
+        });
+        let body = read_http_response(&mut reader);
+        assert!(body.starts_with("HTTP/1.1 404"), "got: {body}");
+        assert!(body.contains("\"error\""));
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    fn pick_unused_port() -> u16 {
+        std::net::TcpListener::bind("127.0.0.1:0")
+            .ok()
+            .and_then(|listener| listener.local_addr().ok())
+            .map(|addr| addr.port())
+            .expect("find free port")
+    }
+
+    fn read_http_response(stream: &mut std::net::TcpStream) -> String {
+        let mut reader = std::io::BufReader::new(stream);
+        let mut body = String::new();
+        std::io::Read::read_to_string(&mut reader, &mut body).expect("read response");
+        body
     }
 
     #[test]
