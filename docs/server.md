@@ -171,7 +171,7 @@ connection is closed with the last chunked write.
 browsai serve --port 8765
 
 # Background, log to file
-nohup browsai serve --port 8765 > /var/log/browsai.log 2>&1 &
+nohup browsai serve --port 8765 >/var/log/browsai.log 2>&1 &
 
 # Self-shut-down after 5 minutes of inactivity
 browsai serve --port 8765 --idle-shutdown-seconds 300
@@ -193,6 +193,42 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target
 ```
+
+## Live-browser runtime
+
+By default the daemon runs the deterministic backend (1 node per page,
+no JS execution, no network). Pass `--live-browser` to spin up the real
+Servo embedder:
+
+```sh
+browsai serve --port 8765 --idle-shutdown-seconds 3600 \
+    --live-browser \
+    --fingerprint=firefox-130-linux-x86_64 \
+    --http2-profile=firefox-130
+```
+
+Equivalent env-var form (useful for process supervisors that can't
+pass flags):
+
+| Env var | Effect |
+| --- | --- |
+| `BROWSAI_SERVER_LIVE_BROWSER=1` | Same as `--live-browser` |
+| `BROWSAI_DEFAULT_FINGERPRINT` | Default `--fingerprint` if no flag |
+| `BROWSAI_DEFAULT_HTTP2_PROFILE` | Default `--http2-profile` if no flag |
+| `BROWSAI_CANVAS_NOISE_SEED` | Forwarded to vendored canvas readback |
+| `BROWSAI_HTTP2_PROFILE` | Set automatically by `browsai serve`; vendored `servo-net` reads it for HTTP/2 SETTINGS |
+
+`--http2-profile` is auto-derived from `--fingerprint` when not
+explicitly set: `firefox-*` → `firefox-130`, `chrome-*` / `chromium-*`
+→ `chrome-140`, `edge-*` → `edge`. If neither fingerprint nor
+`--http2-profile` is set, the daemon defaults to `firefox-130`.
+
+**Caveat:** Servo 0.5.0's global config can only be initialised once
+per process. The first domain that hits the daemon gets the live
+runtime; any subsequent domain's `ServoRuntime::new()` panics with
+"Already initialized" and the engine returns a 500. For multi-domain
+live use, run one daemon per host (or fall back to the CLI for
+second-and-later domains).
 
 ## Per-domain clean sessions
 

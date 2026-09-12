@@ -37,6 +37,7 @@ pub struct ServerConfig {
     pub port: u16,
     pub idle_shutdown_seconds: Option<u64>,
     pub fingerprint: Option<ProfileIdentity>,
+    pub live_browser: bool,
 }
 
 struct DomainEngine {
@@ -106,8 +107,13 @@ impl ServerState {
         }
         let options = ContextOptions {
             headless: true,
+            use_real_browser_runtime: self.control.config.live_browser,
             viewport: Some(VirtualViewport::default()),
-            deterministic_clock_millis: Some(0),
+            deterministic_clock_millis: if self.control.config.live_browser {
+                None
+            } else {
+                Some(0)
+            },
             http2_profile: None,
             profile_identity: self.control.config.fingerprint.clone(),
             ..Default::default()
@@ -208,6 +214,24 @@ pub fn resolve_fingerprint_for_server(id: &str) -> Result<Option<ProfileIdentity
                 .collect::<Vec<_>>()
                 .join(", ")
         )),
+    }
+}
+
+/// Map a fingerprint id (e.g. `firefox-130-linux-x86_64`) to the
+/// matching HTTP/2 SETTINGS profile id (`firefox-130`). Returns `None`
+/// when the family isn't recognised so the caller can fall back to a
+/// generic default. Used so the daemon's `--http2-profile` tracks the
+/// chosen `--fingerprint` without an extra flag.
+pub fn http2_profile_for_fingerprint(id: &str) -> Option<&'static str> {
+    let lower = id.trim().to_ascii_lowercase();
+    if lower.starts_with("firefox") {
+        Some("firefox-130")
+    } else if lower.starts_with("chrome") || lower.starts_with("chromium") {
+        Some("chrome-140")
+    } else if lower.starts_with("edge") {
+        Some("edge")
+    } else {
+        None
     }
 }
 

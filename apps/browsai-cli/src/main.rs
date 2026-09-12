@@ -391,13 +391,36 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let bind = string_option(args, "--bind").unwrap_or_else(|| "127.0.0.1".into());
             let port = bounded_option(args, "--port", 1024, 65535)? as u16;
             let idle_shutdown_seconds = bounded_option(args, "--idle-shutdown-seconds", 0, 86_400)?;
-            let fingerprint_id = string_option(args, "--fingerprint");
+            let fingerprint_id = string_option(args, "--fingerprint")
+                .or_else(|| std::env::var("BROWSAI_DEFAULT_FINGERPRINT").ok())
+                .filter(|value| !value.trim().is_empty());
             let fingerprint = fingerprint_id
                 .as_deref()
                 .map(crate::server::resolve_fingerprint_for_server)
                 .transpose()
                 .map_err(|error| error.to_string())?
                 .flatten();
+            let http2_profile = string_option(args, "--http2-profile")
+                .or_else(|| std::env::var("BROWSAI_DEFAULT_HTTP2_PROFILE").ok())
+                .filter(|value| !value.trim().is_empty())
+                .unwrap_or_else(|| {
+                    fingerprint_id
+                        .as_deref()
+                        .and_then(crate::server::http2_profile_for_fingerprint)
+                        .unwrap_or("firefox-130")
+                        .to_string()
+                });
+            let live_browser = bool_flag(args, "--live-browser")
+                || std::env::var("BROWSAI_SERVER_LIVE_BROWSER")
+                    .map(|value| matches!(value.as_str(), "1" | "true" | "yes" | "on"))
+                    .unwrap_or(false);
+            if !live_browser && cfg!(feature = "live-browser") {
+                eprintln!(
+                    "BROWSAI_SERVER: live-browser feature compiled in but daemon is running in \
+                     deterministic mode; pass --live-browser (or set BROWSAI_SERVER_LIVE_BROWSER=1) \
+                     for real Servo runtime"
+                );
+            }
             let config = crate::server::ServerConfig {
                 bind,
                 port,
@@ -407,11 +430,14 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     Some(idle_shutdown_seconds as u64)
                 },
                 fingerprint,
+                live_browser,
             };
             let canvas_noise_seed = string_option(args, "--canvas-noise-seed");
             if let Some(seed_str) = canvas_noise_seed.as_deref() {
                 std::env::set_var("BROWSAI_CANVAS_NOISE_SEED", seed_str);
             }
+            std::env::set_var("BROWSAI_HTTP2_PROFILE", &http2_profile);
+            eprintln!("BROWSAI_SERVER: http2_profile={http2_profile} live_browser={live_browser}");
             crate::server::run(config).map_err(|error| format!("server: {error}"))?;
             Ok("server exited".into())
         }
