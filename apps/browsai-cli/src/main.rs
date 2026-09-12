@@ -382,7 +382,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                 .flatten();
             let config = crate::server::ServerConfig {
                 bind,
-                port: port as u16,
+                port,
                 idle_shutdown_seconds: if idle_shutdown_seconds == 0 {
                     None
                 } else {
@@ -2235,7 +2235,7 @@ mod tests {
             .stderr(std::process::Stdio::piped())
             .spawn()
             .expect("spawn browsai serve");
-        let _ = wait_for_server(port);
+        wait_for_server(port);
         let body_first = post_browse(port, "https://example.test/");
         assert!(
             body_first.starts_with("HTTP/1.1 200"),
@@ -2269,7 +2269,7 @@ mod tests {
             .stderr(std::process::Stdio::piped())
             .spawn()
             .expect("spawn browsai serve");
-        let _ = wait_for_server(port);
+        wait_for_server(port);
         let _ = post_browse(port, "https://example.test/");
         let exit_status = child.wait().expect("wait for child");
         assert!(
@@ -2360,7 +2360,7 @@ mod tests {
 
     fn wait_for_server(port: u16) {
         let start = std::time::Instant::now();
-        while let Err(_) = std::net::TcpStream::connect(("127.0.0.1", port)) {
+        while std::net::TcpStream::connect(("127.0.0.1", port)).is_err() {
             if start.elapsed() > std::time::Duration::from_secs(5) {
                 panic!("server did not start on port {port}");
             }

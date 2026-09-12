@@ -18,7 +18,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -46,25 +46,56 @@ struct DomainEngine {
     last_used: Instant,
 }
 
+/// Send-safe control surface. Held by the accept loop thread and the
+/// idle sweeper thread. The engines map itself is not Send (because
+/// `ServoEngine` contains `Rc<RefCell<...>>`); only the accept loop
+/// thread touches it.
+pub struct ServerControl {
+    pub config: ServerConfig,
+    pub last_activity: Mutex<Instant>,
+    pub should_exit: Arc<AtomicBool>,
+    pub active_domains: AtomicUsize,
+}
+
+impl Clone for ServerControl {
+    fn clone(&self) -> Self {
+        Self {
+            config: self.config.clone(),
+            last_activity: Mutex::new(*self.last_activity.lock().expect("lock")),
+            should_exit: Arc::clone(&self.should_exit),
+            active_domains: AtomicUsize::new(self.active_domains.load(Ordering::Relaxed)),
+        }
+    }
+}
+
+/// Per-domain engines. Held by the accept-loop thread only. The
+/// `!Send` bound on `ServoEngine` means we cannot share this across
+/// threads; the sweeper thread must talk to the engine map via a
+/// channel or through the accept loop, never directly.
 pub struct ServerState {
+    control: ServerControl,
     engines: Mutex<HashMap<String, DomainEngine>>,
-    config: ServerConfig,
-    last_activity: Mutex<Instant>,
-    should_exit: Arc<AtomicBool>,
 }
 
 impl ServerState {
     fn new(config: ServerConfig) -> Self {
         Self {
+            control: ServerControl {
+                config,
+                last_activity: Mutex::new(Instant::now()),
+                should_exit: Arc::new(AtomicBool::new(false)),
+                active_domains: AtomicUsize::new(0),
+            },
             engines: Mutex::new(HashMap::new()),
-            config,
-            last_activity: Mutex::new(Instant::now()),
-            should_exit: Arc::new(AtomicBool::new(false)),
         }
     }
 
     fn record_activity(&self) {
-        *self.last_activity.lock().expect("last_activity lock") = Instant::now();
+        *self
+            .control
+            .last_activity
+            .lock()
+            .expect("last_activity lock") = Instant::now();
     }
 
     fn get_or_create_domain(&self, host: &str) -> Result<(ContextId, PageId), String> {
@@ -77,7 +108,7 @@ impl ServerState {
             headless: true,
             viewport: Some(VirtualViewport::default()),
             deterministic_clock_millis: Some(0),
-            profile_identity: self.config.fingerprint.clone(),
+            profile_identity: self.control.config.fingerprint.clone(),
             ..Default::default()
         };
         drop(engines);
@@ -98,6 +129,7 @@ impl ServerState {
                 last_used: Instant::now(),
             },
         );
+        self.control.active_domains.fetch_add(1, Ordering::Relaxed);
         let entry = engines.get(host).expect("domain engine just inserted");
         Ok((entry.context_id, entry.page_id))
     }
@@ -106,15 +138,12 @@ impl ServerState {
         let mut engines = self.engines.lock().expect("engines lock");
         let now = Instant::now();
         let threshold = Duration::from_secs(MAX_IDLE_PER_DOMAIN_SECONDS);
+        let before = engines.len();
         engines.retain(|_, entry| now.duration_since(entry.last_used) <= threshold);
-    }
-
-    fn check_global_idle(&self) -> bool {
-        let Some(idle_secs) = self.config.idle_shutdown_seconds else {
-            return false;
-        };
-        let last = *self.last_activity.lock().expect("last_activity lock");
-        last.elapsed() >= Duration::from_secs(idle_secs)
+        self.control
+            .active_domains
+            .store(engines.len(), Ordering::Relaxed);
+        let _ = before;
     }
 }
 
@@ -125,41 +154,39 @@ pub fn run(config: ServerConfig) -> Result<(), Box<dyn std::error::Error>> {
         "BROWSAI_SERVER: listening on http://{}:{} (idle_shutdown_seconds={:?})",
         config.bind, config.port, config.idle_shutdown_seconds
     );
-    let state = Arc::new(ServerState::new(config));
-    let sweeper_state = state.clone();
-    thread::spawn(move || idle_loop(sweeper_state));
+    let state = ServerState::new(config);
+    let sweeper_control = state.control.clone();
+    thread::spawn(move || idle_loop(sweeper_control));
+    // The accept-loop thread is the only thread that touches
+    // `state.engines` (the `ServoEngine` it contains is !Send).
+    // Per-domain idle eviction happens lazily on each accept.
     for incoming in listener.incoming() {
-        if state.should_exit.load(Ordering::Acquire) {
+        if state.control.should_exit.load(Ordering::Acquire) {
             eprintln!("BROWSAI_SERVER: idle timeout reached; shutting down");
             break;
         }
+        state.idle_sweep();
         match incoming {
-            Ok(stream) => {
-                let state = state.clone();
-                thread::spawn(move || {
-                    if let Err(error) = handle_request(stream, state.clone()) {
-                        eprintln!("BROWSAI_SERVER: request error: {error}");
-                    }
-                });
-            }
-            Err(error) => {
-                eprintln!("BROWSAI_SERVER: accept error: {error}");
-            }
+            Ok(stream) => match handle_request(stream, &state) {
+                Ok(()) => {}
+                Err(error) => eprintln!("BROWSAI_SERVER: request error: {error}"),
+            },
+            Err(error) => eprintln!("BROWSAI_SERVER: accept error: {error}"),
         }
     }
     Ok(())
 }
 
-fn idle_loop(state: Arc<ServerState>) {
+fn idle_loop(control: ServerControl) {
     loop {
         std::thread::sleep(Duration::from_secs(1));
-        state.idle_sweep();
-        if state.check_global_idle() {
-            state.should_exit.store(true, Ordering::Release);
-            eprintln!(
-                "BROWSAI_SERVER: idle for {} seconds; exiting",
-                state.config.idle_shutdown_seconds.unwrap_or(0)
-            );
+        let Some(idle_secs) = control.config.idle_shutdown_seconds else {
+            continue;
+        };
+        let last = *control.last_activity.lock().expect("last_activity lock");
+        if last.elapsed() >= Duration::from_secs(idle_secs) {
+            control.should_exit.store(true, Ordering::Release);
+            eprintln!("BROWSAI_SERVER: idle for {idle_secs} seconds; exiting");
             std::process::exit(0);
         }
     }
@@ -191,7 +218,7 @@ struct HttpRequest {
     body: Vec<u8>,
 }
 
-fn handle_request(mut stream: TcpStream, state: Arc<ServerState>) -> std::io::Result<()> {
+fn handle_request(mut stream: TcpStream, state: &ServerState) -> std::io::Result<()> {
     state.record_activity();
     let mut reader = BufReader::new(stream.try_clone()?);
     let request_line = match read_request_line(&mut reader) {
@@ -348,7 +375,7 @@ fn hex_value(byte: u8) -> Option<u8> {
     }
 }
 
-fn route(request: HttpRequest, state: Arc<ServerState>) -> Response {
+fn route(request: HttpRequest, state: &ServerState) -> Response {
     let path = request.path.as_str();
     let query = parse_query(&request.query);
     let body: Value = if request.body.is_empty() {
@@ -358,10 +385,10 @@ fn route(request: HttpRequest, state: Arc<ServerState>) -> Response {
     };
 
     if request.method == "GET" && path == "/health" {
-        return Response::json(200, health_response(&state));
+        return Response::json(200, health_response(state));
     }
     if request.method == "GET" && path == "/capabilities" {
-        return Response::json(200, capabilities_response(&state));
+        return Response::json(200, capabilities_response(state));
     }
     if request.method == "GET" && path == "/version" {
         return Response::text(200, "text/plain; charset=utf-8", b"browsai".to_vec());
@@ -370,19 +397,19 @@ fn route(request: HttpRequest, state: Arc<ServerState>) -> Response {
         return Response::json(200, schema_response());
     }
     if path == "/browse" && request.method == "POST" {
-        return handle_browse(&body, &query, &state);
+        return handle_browse(&body, &query, state);
     }
     if path == "/query" && request.method == "POST" {
-        return handle_query_or_render(&body, "query", &state);
+        return handle_query_or_render(&body, "query", state);
     }
     if path == "/render" && request.method == "POST" {
-        return handle_query_or_render(&body, "render", &state);
+        return handle_query_or_render(&body, "render", state);
     }
     if path == "/follow-link" && request.method == "POST" {
-        return handle_follow_link(&body, &state);
+        return handle_follow_link(&body, state);
     }
     if path == "/auto-solve" && request.method == "POST" {
-        return handle_auto_solve(&body, &state);
+        return handle_auto_solve(&body, state);
     }
 
     let payload = serde_json::json!({
@@ -394,19 +421,21 @@ fn route(request: HttpRequest, state: Arc<ServerState>) -> Response {
 }
 
 fn health_response(state: &ServerState) -> Vec<u8> {
-    let engines = state.engines.lock().expect("engines lock");
-    let active = engines.len();
-    drop(engines);
-    let last = *state.last_activity.lock().expect("last_activity lock");
+    let last = *state
+        .control
+        .last_activity
+        .lock()
+        .expect("last_activity lock");
+    let active = state.control.active_domains.load(Ordering::Relaxed);
     let payload = serde_json::json!({
         "live_browser_compiled": cfg!(feature = "live-browser"),
         "servo_loaded": false,
         "egl_available": false,
         "uptime_seconds": last.elapsed().as_secs(),
         "active_domains": active,
-        "idle_shutdown_seconds": state.config.idle_shutdown_seconds,
+        "idle_shutdown_seconds": state.control.config.idle_shutdown_seconds,
         "max_idle_per_domain_seconds": MAX_IDLE_PER_DOMAIN_SECONDS,
-        "fingerprint": state.config.fingerprint.as_ref().map(|id| id.user_agent.clone()),
+        "fingerprint": state.control.config.fingerprint.as_ref().map(|id| id.user_agent.clone()),
     });
     serde_json::to_vec_pretty(&payload).unwrap_or_default()
 }
