@@ -7,7 +7,7 @@ rust-version.workspace = true
 
 [features]
 default = []
-servo-runtime = ["dep:servo"]
+servo-runtime = ["dep:servo", "dep:servo-net"]
 
 [dependencies]
 serde_json.workspace = true
@@ -21,6 +21,7 @@ browsai-engine-api = { path = "../engine-api" }
 browsai-input = { path = "../input" }
 browsai-state = { path = "../state" }
 servo = { version = "0.5", optional = true }
+servo-net = { version = "0.5", optional = true }
 
 [dev-dependencies]
 serde.workspace = true

@@ -864,6 +864,7 @@ dependencies = [
  "serde",
  "serde_json",
  "servo",
+ "servo-net",
  "sha1 0.10.7",
  "thiserror 1.0.69",
  "url",
@@ -6868,8 +6869,6 @@ dependencies = [
 [[package]]
 name = "servo-net"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64afa122aa4c8b0344eca816dc19dc93837e5a71af4c3087fa6e1a88aa651ae3"
 dependencies = [
  "async-compression",
  "async-recursion",
