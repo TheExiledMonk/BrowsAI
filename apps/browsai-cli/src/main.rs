@@ -2414,7 +2414,10 @@ mod tests {
         );
         assert!(body.contains("\"results\""), "missing results key: {body}");
         assert!(body.contains("\"filter\""), "missing filter echo: {body}");
-        assert!(body.contains("\"truncated\""), "missing truncated flag: {body}");
+        assert!(
+            body.contains("\"truncated\""),
+            "missing truncated flag: {body}"
+        );
         let _ = child.kill();
         let _ = child.wait();
     }
@@ -2436,7 +2439,11 @@ mod tests {
             .spawn()
             .expect("spawn browsai serve");
         wait_for_server(port);
-        let body = post_json(port, "/query", &serde_json::json!({"filter":"Link"}).to_string());
+        let body = post_json(
+            port,
+            "/query",
+            &serde_json::json!({"filter":"Link"}).to_string(),
+        );
         assert!(
             body.starts_with("HTTP/1.1 400"),
             "expected 400 for missing url, got: {}",

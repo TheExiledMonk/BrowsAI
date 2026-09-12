@@ -35,7 +35,10 @@ fn cli_options(profile_identity: Option<browsai_engine_api::ProfileIdentity>) ->
 /// After the refactor this matches the CLI on `no_raster`; the only
 /// remaining difference is `deterministic_clock_millis` when running
 /// without `--live-browser`.
-fn server_options(live_browser: bool, profile_identity: Option<browsai_engine_api::ProfileIdentity>) -> ContextOptions {
+fn server_options(
+    live_browser: bool,
+    profile_identity: Option<browsai_engine_api::ProfileIdentity>,
+) -> ContextOptions {
     ContextOptions {
         profile: None,
         profile_identity,
@@ -53,12 +56,36 @@ fn diff_options(label_a: &str, a: &ContextOptions, label_b: &str, b: &ContextOpt
     println!("\n--- ContextOptions diff ({label_a} vs {label_b}) ---");
     let pairs: [(&str, String, String); 7] = [
         ("headless", a.headless.to_string(), b.headless.to_string()),
-        ("use_real_browser_runtime", a.use_real_browser_runtime.to_string(), b.use_real_browser_runtime.to_string()),
-        ("no_raster", a.no_raster.to_string(), b.no_raster.to_string()),
-        ("deterministic_clock_millis", format!("{:?}", a.deterministic_clock_millis), format!("{:?}", b.deterministic_clock_millis)),
-        ("viewport", format!("{:?}", a.viewport), format!("{:?}", b.viewport)),
-        ("profile_identity_present", a.profile_identity.is_some().to_string(), b.profile_identity.is_some().to_string()),
-        ("http2_profile", format!("{:?}", a.http2_profile), format!("{:?}", b.http2_profile)),
+        (
+            "use_real_browser_runtime",
+            a.use_real_browser_runtime.to_string(),
+            b.use_real_browser_runtime.to_string(),
+        ),
+        (
+            "no_raster",
+            a.no_raster.to_string(),
+            b.no_raster.to_string(),
+        ),
+        (
+            "deterministic_clock_millis",
+            format!("{:?}", a.deterministic_clock_millis),
+            format!("{:?}", b.deterministic_clock_millis),
+        ),
+        (
+            "viewport",
+            format!("{:?}", a.viewport),
+            format!("{:?}", b.viewport),
+        ),
+        (
+            "profile_identity_present",
+            a.profile_identity.is_some().to_string(),
+            b.profile_identity.is_some().to_string(),
+        ),
+        (
+            "http2_profile",
+            format!("{:?}", a.http2_profile),
+            format!("{:?}", b.http2_profile),
+        ),
     ];
     let mut diverged = 0;
     for (name, av, bv) in pairs {
@@ -75,13 +102,21 @@ fn diff_options(label_a: &str, a: &ContextOptions, label_b: &str, b: &ContextOpt
 fn options_are_now_aligned_when_live() {
     let cli = cli_options(None);
     let server = server_options(true, None);
-    diff_options("CLI live-open", &cli, "server /browse --live-browser", &server);
+    diff_options(
+        "CLI live-open",
+        &cli,
+        "server /browse --live-browser",
+        &server,
+    );
     // After the refactor, both paths set no_raster=true and both run
     // the live runtime when --live-browser is passed. The only
     // remaining field-level difference (deterministic_clock_millis)
     // only matters in the non-live path.
     assert_eq!(cli.no_raster, server.no_raster);
-    assert_eq!(cli.use_real_browser_runtime, server.use_real_browser_runtime);
+    assert_eq!(
+        cli.use_real_browser_runtime,
+        server.use_real_browser_runtime
+    );
 }
 
 #[test]
@@ -93,14 +128,18 @@ fn deterministic_construction_uses_independent_state() {
     let mut cli_engine = ServoEngine::new();
     let mut cli_opts = cli_options(None);
     cli_opts.use_real_browser_runtime = false;
-    let cli_ctx = cli_engine.create_context(cli_opts).expect("cli create_context");
+    let cli_ctx = cli_engine
+        .create_context(cli_opts)
+        .expect("cli create_context");
     let cli_page = cli_engine.create_page(cli_ctx).expect("cli create_page");
 
     let mut server_engine = ServoEngine::new();
     let server_ctx = server_engine
         .create_context(server_options(false, None))
         .expect("server create_context");
-    let server_page = server_engine.create_page(server_ctx).expect("server create_page");
+    let server_page = server_engine
+        .create_page(server_ctx)
+        .expect("server create_page");
 
     let stored_cli = cli_engine.context_options(cli_ctx).unwrap().clone();
     let stored_server = server_engine.context_options(server_ctx).unwrap().clone();
@@ -127,11 +166,13 @@ fn deterministic_construction_uses_independent_state() {
     let server_snap = server_engine.snapshot(server_page).unwrap();
     println!(
         "\n=== CLI snapshot ===\n  url={}\n  nodes={}",
-        cli_snap.url, cli_snap.tree.nodes.len()
+        cli_snap.url,
+        cli_snap.tree.nodes.len()
     );
     println!(
         "\n=== server snapshot ===\n  url={}\n  nodes={}",
-        server_snap.url, server_snap.tree.nodes.len()
+        server_snap.url,
+        server_snap.tree.nodes.len()
     );
 
     assert_eq!(cli_snap.tree.nodes.len(), server_snap.tree.nodes.len());
@@ -176,7 +217,10 @@ fn shared_engine_hosts_multiple_independent_pages() {
     // The contexts are independently readable from the same engine.
     let opts_a = engine.context_options(ctx_a).unwrap().clone();
     let opts_b = engine.context_options(ctx_b).unwrap().clone();
-    assert_eq!(opts_a.use_real_browser_runtime, opts_b.use_real_browser_runtime);
+    assert_eq!(
+        opts_a.use_real_browser_runtime,
+        opts_b.use_real_browser_runtime
+    );
 }
 
 #[cfg(feature = "servo-runtime")]
