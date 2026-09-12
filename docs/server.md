@@ -126,10 +126,15 @@ curl -s -X POST -H 'Content-Type: application/json' \
     http://127.0.0.1:8765/browse | jq '.node_count'
 ```
 
-`wait_ms` defaults to `0` (current behaviour). Recommended values:
-`1000` for SPA shells, `3000-5000` for sites that fire an XHR after
-load, `0` for server-rendered pages where the snapshot is already
-correct.
+`wait_ms` defaults to `1000` so SPA shells (DuckDuckGo, X, login
+walls) settle their JS-driven DOM on the first call without the
+caller having to opt in. Pass `0` for server-rendered pages where the
+snapshot is already complete (skips the post-navigation pump), or
+`3000-5000` for sites that fire an XHR after `LoadStatus::Complete`.
+The CLI's `live-open` unconditionally pumps for `2000` ms
+(`apps/browsai-cli/src/main.rs:574-576`); the server default of `1000`
+covers the common case without doubling the response latency on
+plain HTML.
 
 ### Follow a search result
 
@@ -223,24 +228,30 @@ explicitly set: `firefox-*` → `firefox-130`, `chrome-*` / `chromium-*`
 → `chrome-140`, `edge-*` → `edge`. If neither fingerprint nor
 `--http2-profile` is set, the daemon defaults to `firefox-130`.
 
-**Caveat:** Servo 0.5.0's global config can only be initialised once
-per process. The first domain that hits the daemon gets the live
-runtime; any subsequent domain's `ServoRuntime::new()` panics with
-"Already initialized" and the engine returns a 500. For multi-domain
-live use, run one daemon per host (or fall back to the CLI for
-second-and-later domains).
-
 ## Per-domain clean sessions
 
-The long-running server keeps **one `ServoEngine` per host** for the
-lifetime of the process. The first request to `example.com`
-provisions a fresh engine; subsequent requests to the same host reuse
-it. Requests to `other.com` get a separate fresh engine. Within an
-engine, cookies, localStorage, IndexedDB, and ServiceWorker
-registrations are isolated from other engines — `example.com` and
-`other.com` cannot read each other's state.
+The long-running server keeps **one `ServoEngine`** (one
+`ServoRuntime`) for the lifetime of the process and gives each host
+its own `(ContextId, PageId)`. The first request to `example.com`
+provisions a fresh context + page; subsequent requests to the same
+host reuse the same page; requests to `other.com` get a separate
+fresh context + page in the same engine.
 
-Idle engines are evicted after
+Because Servo's `HttpState.cookie_jar` is keyed by host
+(`vendor/servo-net/cookie_storage.rs:54`) and IndexedDB /
+ServiceWorker scope are keyed by origin URL, cookies, localStorage,
+IndexedDB, and ServiceWorker registrations are isolated between
+domains even though they share a single Servo instance:
+`example.com` cannot read `other.com`'s state.
+
+A previous design instantiated a fresh `ServoEngine` per host. That
+tripped Servo 0.5's process-wide `Opts` singleton at
+`servo-config/opts.rs:279` ("Already initialized") on every
+second-and-later domain and was replaced by the shared-engine model.
+The CLI never hit that panic because each `browsai live-open`
+invocation is a fresh process.
+
+Idle host sessions are evicted after
 `--max-idle-per-domain-seconds` (default 60) of no activity, so the
 process does not grow without bound across many distinct hosts.
 

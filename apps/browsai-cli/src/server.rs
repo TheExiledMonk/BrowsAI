@@ -3,16 +3,24 @@
 //! `browsai serve [--bind <host>] [--port <port>] [--idle-shutdown-seconds <N>] [--fingerprint <id>]`
 //! opens a localhost HTTP endpoint that drives the BrowsAI engine directly.
 //! Unlike the subprocess-per-request mode that the early prototype used,
-//! this server keeps one `ServoEngine` per host so cookies, localStorage,
-//! IndexedDB, and ServiceWorker registrations are isolated between
-//! domains. The first request to `example.com` allocates a fresh
-//! engine; subsequent requests to the same host reuse it; requests to
-//! `other.com` get a separate fresh engine.
+//! this server keeps one shared `ServoEngine` for the lifetime of the
+//! process and gives each host its own `ContextId` + `PageId`. Cookies,
+//! localStorage, IndexedDB, and ServiceWorker registrations are still
+//! isolated between domains because Servo's `HttpState.cookie_jar`
+//! partitions by host (`vendor/servo-net/cookie_storage.rs:54`) and
+//! IndexedDB / ServiceWorker scope are keyed by origin URL.
 //!
 //! `--idle-shutdown-seconds <N>` (default: off) makes the server
 //! exit cleanly after no request has been served for `N` seconds.
-//! Idle domains are evicted at the same interval so the process does
-//! not grow without bound.
+//! Idle host sessions are evicted at the same interval so the process
+//! does not grow without bound.
+//!
+//! Why one engine (and not one per host): Servo 0.5 keeps its
+//! `servo::Opts` in a process-wide global. A second `ServoRuntime::new()`
+//! after the first one panics with "Already initialized" at
+//! `servo-config/opts.rs:279`. The CLI hides this by being a fresh
+//! process per invocation; a long-running daemon cannot. Sharing one
+//! engine keeps `ServoRuntime::new()` to one call.
 
 use serde_json::Value;
 use std::collections::HashMap;
@@ -40,17 +48,20 @@ pub struct ServerConfig {
     pub live_browser: bool,
 }
 
-struct DomainEngine {
-    engine: ServoEngine,
+/// Per-host `(ContextId, PageId)` pair plus an idle-eviction marker.
+/// The host's webview state lives inside the shared `ServoEngine`'s
+/// `real_pages: HashMap<PageId, ServoRuntimePage>` map; this struct
+/// just remembers which PageId is ours and when we last used it.
+struct DomainSession {
     context_id: ContextId,
     page_id: PageId,
     last_used: Instant,
 }
 
 /// Send-safe control surface. Held by the accept loop thread and the
-/// idle sweeper thread. The engines map itself is not Send (because
+/// idle sweeper thread. The engine + sessions map are not Send (because
 /// `ServoEngine` contains `Rc<RefCell<...>>`); only the accept loop
-/// thread touches it.
+/// thread touches them.
 pub struct ServerControl {
     pub config: ServerConfig,
     pub last_activity: Mutex<Instant>,
@@ -69,13 +80,12 @@ impl Clone for ServerControl {
     }
 }
 
-/// Per-domain engines. Held by the accept-loop thread only. The
-/// `!Send` bound on `ServoEngine` means we cannot share this across
-/// threads; the sweeper thread must talk to the engine map via a
-/// channel or through the accept loop, never directly.
+/// Single shared engine + per-host page table. Held by the accept-loop
+/// thread only; the sweeper thread only touches `ServerControl`.
 pub struct ServerState {
     control: ServerControl,
-    engines: Mutex<HashMap<String, DomainEngine>>,
+    engine: Mutex<ServoEngine>,
+    sessions: Mutex<HashMap<String, DomainSession>>,
 }
 
 impl ServerState {
@@ -87,7 +97,8 @@ impl ServerState {
                 should_exit: Arc::new(AtomicBool::new(false)),
                 active_domains: AtomicUsize::new(0),
             },
-            engines: Mutex::new(HashMap::new()),
+            engine: Mutex::new(ServoEngine::new()),
+            sessions: Mutex::new(HashMap::new()),
         }
     }
 
@@ -100,12 +111,14 @@ impl ServerState {
     }
 
     fn get_or_create_domain(&self, host: &str) -> Result<(ContextId, PageId), String> {
-        let mut engines = self.engines.lock().expect("engines lock");
-        if let Some(entry) = engines.get_mut(host) {
-            entry.last_used = Instant::now();
-            return Ok((entry.context_id, entry.page_id));
+        let mut sessions = self.sessions.lock().expect("sessions lock");
+        if let Some(session) = sessions.get_mut(host) {
+            session.last_used = Instant::now();
+            return Ok((session.context_id, session.page_id));
         }
         let options = ContextOptions {
+            profile: None,
+            profile_identity: self.control.config.fingerprint.clone(),
             headless: true,
             use_real_browser_runtime: self.control.config.live_browser,
             viewport: Some(VirtualViewport::default()),
@@ -114,42 +127,42 @@ impl ServerState {
             } else {
                 Some(0)
             },
+            no_raster: true,
             http2_profile: None,
-            profile_identity: self.control.config.fingerprint.clone(),
-            ..Default::default()
+            canvas_noise_seed: None,
         };
-        drop(engines);
-        let mut engine = ServoEngine::new();
+        // Release the sessions lock before taking the engine lock so the
+        // accept loop is never blocked while we construct contexts.
+        drop(sessions);
+        let mut engine = self.engine.lock().expect("engine lock");
         let context = engine
             .create_context(options)
             .map_err(|error| format!("create_context failed for {host}: {error:?}"))?;
         let page = engine
             .create_page(context)
             .map_err(|error| format!("create_page failed for {host}: {error:?}"))?;
-        let mut engines = self.engines.lock().expect("engines lock");
-        engines.insert(
+        let mut sessions = self.sessions.lock().expect("sessions lock");
+        sessions.insert(
             host.to_string(),
-            DomainEngine {
-                engine,
+            DomainSession {
                 context_id: context,
                 page_id: page,
                 last_used: Instant::now(),
             },
         );
         self.control.active_domains.fetch_add(1, Ordering::Relaxed);
-        let entry = engines.get(host).expect("domain engine just inserted");
-        Ok((entry.context_id, entry.page_id))
+        Ok((context, page))
     }
 
     fn idle_sweep(&self) {
-        let mut engines = self.engines.lock().expect("engines lock");
+        let mut sessions = self.sessions.lock().expect("sessions lock");
         let now = Instant::now();
         let threshold = Duration::from_secs(MAX_IDLE_PER_DOMAIN_SECONDS);
-        let before = engines.len();
-        engines.retain(|_, entry| now.duration_since(entry.last_used) <= threshold);
+        let before = sessions.len();
+        sessions.retain(|_, session| now.duration_since(session.last_used) <= threshold);
         self.control
             .active_domains
-            .store(engines.len(), Ordering::Relaxed);
+            .store(sessions.len(), Ordering::Relaxed);
         let _ = before;
     }
 }
@@ -165,7 +178,7 @@ pub fn run(config: ServerConfig) -> Result<(), Box<dyn std::error::Error>> {
     let sweeper_control = state.control.clone();
     thread::spawn(move || idle_loop(sweeper_control));
     // The accept-loop thread is the only thread that touches
-    // `state.engines` (the `ServoEngine` it contains is !Send).
+    // `state.engine` (the `ServoEngine` it contains is !Send).
     // Per-domain idle eviction happens lazily on each accept.
     for incoming in listener.incoming() {
         if state.control.should_exit.load(Ordering::Acquire) {
@@ -545,7 +558,13 @@ fn handle_browse(
                 .collect()
         })
         .unwrap_or_default();
-    let wait_ms = body.get("wait_ms").and_then(Value::as_u64).unwrap_or(0);
+    // Default to a 1s settle after navigation. The CLI's `live-open`
+    // unconditionally pumps the runtime for 2s after navigate() returns;
+    // `load_status::Complete` alone doesn't guarantee that JS-driven DOM
+    // (DuckDuckGo's React bundle, X, login walls) has settled. The
+    // server caller can still override with `wait_ms: 0` for
+    // server-rendered pages where the snapshot is already complete.
+    let wait_ms = body.get("wait_ms").and_then(Value::as_u64).unwrap_or(1000);
     let _ = query; // streaming is a future extension; for v1 always single-blob
 
     let (_context_id, page_id) = match state.get_or_create_domain(&host) {
@@ -553,20 +572,15 @@ fn handle_browse(
         Err(error) => return error_response(error),
     };
     let navigation = {
-        let mut engines = state.engines.lock().expect("engines lock");
-        let entry = engines.get_mut(&host).expect("domain engine present");
-        match entry
-            .engine
-            .navigate(entry.page_id, url::Url::parse(&url).expect("checked url"))
-        {
+        let mut engine = state.engine.lock().expect("engine lock");
+        match engine.navigate(page_id, url::Url::parse(&url).expect("checked url")) {
             Ok(nav) => nav,
             Err(error) => return error_response(format!("navigate failed: {error:?}")),
         }
     };
     if wait_ms > 0 {
-        let engines = state.engines.lock().expect("engines lock");
-        let entry = engines.get(&host).expect("domain engine present");
-        if let Err(error) = entry.engine.pump_runtime(entry.page_id, wait_ms) {
+        let engine = state.engine.lock().expect("engine lock");
+        if let Err(error) = engine.pump_runtime(page_id, wait_ms) {
             return error_response(format!("wait_ms pump failed: {error:?}"));
         }
     }
@@ -581,9 +595,8 @@ fn handle_browse(
         );
     }
     let snapshot = {
-        let mut engines = state.engines.lock().expect("engines lock");
-        let entry = engines.get_mut(&host).expect("domain engine present");
-        match entry.engine.snapshot(entry.page_id) {
+        let engine = state.engine.lock().expect("engine lock");
+        match engine.snapshot(page_id) {
             Ok(snap) => snap,
             Err(error) => return error_response(format!("snapshot failed: {error:?}")),
         }

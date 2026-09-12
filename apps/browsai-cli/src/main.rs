@@ -540,6 +540,15 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
     let control_limit = bounded_option(args, "--control-limit", 12, 100)?;
     eprintln!("BROWSAI_STAGE:startup");
     std::env::set_var("BROWSAI_DIAGNOSTIC_STATUS", "1");
+    let http2_profile_id = string_option(args, "--http2-profile");
+    if let Some(profile_id) = http2_profile_id.as_deref() {
+        // Mirrors the `headless | navigate | open` dispatch (main.rs:158).
+        // The vendored Servo reads `BROWSAI_HTTP2_PROFILE` to pick the
+        // HTTP/2 SETTINGS knobs (FIREFOX_130 / CHROME_140 / EDGE). Set
+        // it before `ServoEngine::new()` so the live runtime sees it on
+        // first HTTP client construction.
+        std::env::set_var("BROWSAI_HTTP2_PROFILE", profile_id);
+    }
     let fingerprint_id = string_option(args, "--fingerprint");
     let profile_identity = fingerprint_id
         .as_deref()

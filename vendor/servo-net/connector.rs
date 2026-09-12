@@ -20,7 +20,7 @@ use hyper_util::client::legacy::connect::proxy::Tunnel;
 use hyper_util::client::legacy::connect::{
     Connected, Connection, HttpConnector as HyperHttpConnector,
 };
-use hyper_util::rt::TokioIo;
+use hyper_util::rt::{TokioIo, TokioTimer};
 use log::warn;
 use parking_lot::Mutex;
 use rustls::client::danger::ServerCertVerifier;
@@ -710,6 +710,15 @@ impl Default for H2Settings {
 }
 
 /// Firefox-130 SETTINGS pulled from a fresh Firefox session.
+///
+/// `keep_alive_interval` is enabled so the live Servo embedder fires
+/// HTTP/2 PINGs every 45s, matching what a real Firefox would do.
+/// `create_http_client_with_settings` wires `hyper_util::rt::TokioTimer`
+/// into both `.timer(...)` and `.pool_timer(...)`; without that, the
+/// h2 keepalive constructor would call `Time::Empty.sleep(...)` and
+/// panic ("You must supply a timer") the moment an HTTP/2 connection
+/// was established, which is what aborted every navigation in the
+/// long-running `browsai serve` daemon before this was fixed.
 pub const FIREFOX_130: H2Settings = H2Settings {
     initial_stream_window_size: Some(131_072),
     initial_connection_window_size: Some(131_072),
@@ -719,7 +728,8 @@ pub const FIREFOX_130: H2Settings = H2Settings {
     max_header_list_size: Some(8_192),
 };
 
-/// Chrome-140 SETTINGS pulled from a fresh Chrome session.
+/// Chrome-140 SETTINGS pulled from a fresh Chrome session. See
+/// `FIREFOX_130` for the timer requirement.
 pub const CHROME_140: H2Settings = H2Settings {
     initial_stream_window_size: Some(6_291_456),
     initial_connection_window_size: Some(15_663_105),
@@ -749,7 +759,19 @@ pub fn create_http_client_with_settings(
     // before calling .build(), because the knobs are methods on Builder
     // (not on the resulting Client). Bind each step to its own let
     // so the temporary Builder is not dropped mid-chain.
+    //
+    // The timer is wired in here (not via the default Builder) so that
+    // `h2`'s `KeepAlive` struct — which calls `timer.sleep(interval)` at
+    // construction time when `keep_alive_interval` is set — has a real
+    // timer to sleep on. Without this, hyper-util 0.1's Client panics
+    // with "You must supply a timer" the moment an HTTP/2 connection is
+    // established. `TokioTimer` from `hyper_util::rt` implements
+    // `hyper::rt::Timer` on top of `tokio::time::sleep`, which uses the
+    // Servo-managed tokio runtime created in `crate::async_runtime`.
+    let timer = TokioTimer::new();
     let mut builder = Client::builder(TokioExecutor {});
+    let mut builder = builder.timer(timer.clone());
+    let mut builder = builder.pool_timer(timer);
     let mut builder = builder.http1_title_case_headers(true);
     if let Some(sz) = h2.initial_stream_window_size {
         let mut b = builder;
