@@ -108,6 +108,7 @@ impl ServerState {
             headless: true,
             viewport: Some(VirtualViewport::default()),
             deterministic_clock_millis: Some(0),
+            http2_profile: None,
             profile_identity: self.control.config.fingerprint.clone(),
             ..Default::default()
         };

@@ -51,7 +51,8 @@ use tokio::sync::Mutex as TokioMutex;
 
 use crate::async_runtime::{init_async_runtime, spawn_task};
 use crate::connector::{
-    CACertificates, CertificateErrorOverrideManager, create_http_client, create_tls_config,
+    CACertificates, CertificateErrorOverrideManager, create_http_client,
+    create_http_client_with_settings, create_tls_config, H2Settings,
 };
 use crate::cookie::ServoCookie;
 use crate::cookie_storage::CookieStorage;
@@ -214,17 +215,21 @@ fn create_http_states(
     }
 
     let override_manager = CertificateErrorOverrideManager::new();
+    let h2_settings = h2_settings_from_env();
     let http_state = HttpState {
         hsts_list: RwLock::new(hsts_list),
         cookie_jar: RwLock::new(cookie_jar),
         auth_cache: RwLock::new(auth_cache),
         history_states: RwLock::new(FxHashMap::default()),
         http_cache: HttpCache::default(),
-        client: create_http_client(create_tls_config(
-            ca_certificates.clone(),
-            ignore_certificate_errors,
-            override_manager.clone(),
-        )),
+        client: create_http_client_with_settings(
+            create_tls_config(
+                ca_certificates.clone(),
+                ignore_certificate_errors,
+                override_manager.clone(),
+            ),
+            h2_settings,
+        ),
         override_manager,
         embedder_proxy: embedder_proxy.clone(),
     };
@@ -236,16 +241,41 @@ fn create_http_states(
         auth_cache: RwLock::new(AuthCache::default()),
         history_states: RwLock::new(FxHashMap::default()),
         http_cache: HttpCache::default(),
-        client: create_http_client(create_tls_config(
-            ca_certificates,
-            ignore_certificate_errors,
-            override_manager.clone(),
-        )),
+        client: create_http_client_with_settings(
+            create_tls_config(
+                ca_certificates,
+                ignore_certificate_errors,
+                override_manager.clone(),
+            ),
+            h2_settings,
+        ),
         override_manager,
         embedder_proxy,
     };
 
     (Arc::new(http_state), Arc::new(private_http_state))
+}
+
+/// Reads `BROWSAI_HTTP2_PROFILE` from the process environment and
+/// returns the matching `H2Settings`. Recognised values:
+/// `firefox-130`, `chrome-140`, `edge`. Anything else (including
+/// unset) returns `H2Settings::default()` so existing embeds are
+/// unaffected.
+fn h2_settings_from_env() -> H2Settings {
+    let value = match std::env::var_os("BROWSAI_HTTP2_PROFILE") {
+        Some(value) => value,
+        None => return H2Settings::default(),
+    };
+    let s = match value.to_str() {
+        Some(s) => s,
+        None => return H2Settings::default(),
+    };
+    match s {
+        "firefox-130" => crate::connector::FIREFOX_130,
+        "chrome-140" => crate::connector::CHROME_140,
+        "edge" => crate::connector::EDGE,
+        _ => H2Settings::default(),
+    }
 }
 
 impl ResourceChannelManager {

@@ -125,6 +125,33 @@ pub struct ContextOptions {
     pub viewport: Option<VirtualViewport>,
     pub deterministic_clock_millis: Option<u64>,
     pub no_raster: bool,
+    /// HTTP/2 SETTINGS profile for the live Servo runtime's HTTP client.
+    /// `None` keeps hyper-util's defaults. The vendored `servo-net`
+    /// connector applies real-browser values for Firefox-130, Chrome-140,
+    /// and Edge when one of these is selected. See `docs/fingerprint-hardening.md`
+    /// for the per-profile knob tables.
+    pub http2_profile: Option<Http2Profile>,
+}
+
+/// HTTP/2 SETTINGS profile presets. Each maps to the knobs measured from
+/// fresh sessions of the named browser. `Default` (None in ContextOptions)
+/// keeps hyper-util's stock defaults; this enum is opt-in.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Http2Profile {
+    Firefox130,
+    Chrome140,
+    Edge,
+}
+
+impl Http2Profile {
+    /// Render as a stable string for CLI / capabilities output.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Http2Profile::Firefox130 => "firefox-130",
+            Http2Profile::Chrome140 => "chrome-140",
+            Http2Profile::Edge => "edge",
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -266,5 +293,31 @@ pub trait BrowserEngine {
             return Err(EngineError::EvaluationTimeout);
         }
         self.evaluate_page_script(page, request.source)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn http2_profile_as_str_round_trips() {
+        assert_eq!(Http2Profile::Firefox130.as_str(), "firefox-130");
+        assert_eq!(Http2Profile::Chrome140.as_str(), "chrome-140");
+        assert_eq!(Http2Profile::Edge.as_str(), "edge");
+    }
+
+    #[test]
+    fn http2_profile_distinct_variants() {
+        // Each profile must be a distinct variant so the CLI flag round-trips.
+        assert_ne!(Http2Profile::Firefox130, Http2Profile::Chrome140);
+        assert_ne!(Http2Profile::Firefox130, Http2Profile::Edge);
+        assert_ne!(Http2Profile::Chrome140, Http2Profile::Edge);
+    }
+
+    #[test]
+    fn context_options_default_http2_profile_is_none() {
+        let opts = ContextOptions::default();
+        assert_eq!(opts.http2_profile, None);
     }
 }

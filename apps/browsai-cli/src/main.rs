@@ -155,6 +155,12 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let query_context = string_option(args, "--query");
             let snapshot_only = bool_flag(args, "--snapshot-only");
             let stream = bool_flag(args, "--stream");
+            let http2_profile_id = string_option(args, "--http2-profile");
+            if let Some(profile_id) = http2_profile_id.as_deref() {
+                // Set the env var that vendored servo-net reads to pick
+                // HTTP/2 SETTINGS knobs matching a real browser.
+                std::env::set_var("BROWSAI_HTTP2_PROFILE", profile_id);
+            }
             let profile_identity = fingerprint_id
                 .as_deref()
                 .map(resolve_fingerprint)
@@ -168,6 +174,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     headless,
                     viewport: Some(VirtualViewport::default()),
                     deterministic_clock_millis: Some(0),
+                    http2_profile: None,
                     no_raster: headless,
                     profile_identity,
                     ..Default::default()
@@ -236,6 +243,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     headless: true,
                     viewport: Some(VirtualViewport::default()),
                     deterministic_clock_millis: Some(0),
+                    http2_profile: None,
                     no_raster: true,
                     ..Default::default()
                 })
@@ -342,6 +350,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     headless: true,
                     no_raster: true,
                     deterministic_clock_millis: Some(0),
+                    http2_profile: None,
                     ..Default::default()
                 })
                 .map_err(|error| error.to_string())?;
@@ -1346,6 +1355,7 @@ impl SiteExecutor for BrowserSiteExecutor {
             headless: true,
             viewport: Some(VirtualViewport::default()),
             deterministic_clock_millis: Some(0),
+            http2_profile: None,
             no_raster: true,
             ..Default::default()
         }) {

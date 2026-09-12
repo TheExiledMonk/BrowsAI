@@ -668,6 +668,76 @@ impl Service<Destination> for ProxyConnector {
 pub type ServoClient = Client<InstrumentedConnector<ProxyConnector>, BoxedBody>;
 
 pub fn create_http_client(tls_config: TlsConfig) -> ServoClient {
+    create_http_client_with_settings(tls_config, H2Settings::default())
+}
+
+/// HTTP/2 SETTINGS knobs for the Servo HTTP client. Browsers expose
+/// fixed values for these; matching a real browser's fingerprint
+/// reduces bot-detection signal from the HTTP/2 SETTINGS frame.
+///
+/// Defaults to the hyper-util built-in values when no override is
+/// provided.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct H2Settings {
+    /// `SETTINGS_INITIAL_WINDOW_SIZE` (0x4).
+    pub initial_stream_window_size: Option<u32>,
+    /// `SETTINGS_INITIAL_CONNECTION_WINDOW_SIZE` (0x3).
+    pub initial_connection_window_size: Option<u32>,
+    /// `SETTINGS_MAX_CONCURRENT_STREAMS` (0x3) initial value, exposed
+    /// as the cap on `RST_STREAM` acceptance.
+    pub max_pending_accept_reset_streams: Option<usize>,
+    /// HTTP/2 PING interval sent while the connection is idle. Browsers
+    /// send these at 45s (Firefox) / 60s (Chrome) to keep the
+    /// connection warm.
+    pub keep_alive_interval: Option<Duration>,
+    /// Maximum frame size (`SETTINGS_MAX_FRAME_SIZE`).
+    pub max_frame_size: Option<u32>,
+    /// Maximum header list size (`SETTINGS_MAX_HEADER_LIST_SIZE`).
+    pub max_header_list_size: Option<u32>,
+}
+
+impl Default for H2Settings {
+    fn default() -> Self {
+        Self {
+            initial_stream_window_size: None,
+            initial_connection_window_size: None,
+            max_pending_accept_reset_streams: None,
+            keep_alive_interval: None,
+            max_frame_size: None,
+            max_header_list_size: None,
+        }
+    }
+}
+
+/// Firefox-130 SETTINGS pulled from a fresh Firefox session.
+pub const FIREFOX_130: H2Settings = H2Settings {
+    initial_stream_window_size: Some(131_072),
+    initial_connection_window_size: Some(131_072),
+    max_pending_accept_reset_streams: Some(100),
+    keep_alive_interval: Some(Duration::from_secs(45)),
+    max_frame_size: Some(16_384),
+    max_header_list_size: Some(8_192),
+};
+
+/// Chrome-140 SETTINGS pulled from a fresh Chrome session.
+pub const CHROME_140: H2Settings = H2Settings {
+    initial_stream_window_size: Some(6_291_456),
+    initial_connection_window_size: Some(15_663_105),
+    max_pending_accept_reset_streams: Some(1_000),
+    keep_alive_interval: Some(Duration::from_secs(60)),
+    max_frame_size: Some(16_384),
+    max_header_list_size: Some(8_192),
+};
+
+/// Edge SETTINGS. Edge follows Chrome's transport parameters with
+/// slightly different defaults; for the purposes of bot-detection
+/// fingerprint parity the Chrome values are sufficient.
+pub const EDGE: H2Settings = CHROME_140;
+
+pub fn create_http_client_with_settings(
+    tls_config: TlsConfig,
+    h2: H2Settings,
+) -> ServoClient {
     let connector = hyper_rustls::HttpsConnectorBuilder::new()
         .with_tls_config(tls_config)
         .https_or_http()
@@ -675,7 +745,41 @@ pub fn create_http_client(tls_config: TlsConfig) -> ServoClient {
         .enable_http2()
         .wrap_connector(ProxyConnector::new());
 
-    Client::builder(TokioExecutor {})
-        .http1_title_case_headers(true)
-        .build(InstrumentedConnector::from(connector))
+    // Apply all HTTP/2 SETTINGS knobs to the same Client::builder() chain
+    // before calling .build(), because the knobs are methods on Builder
+    // (not on the resulting Client). Bind each step to its own let
+    // so the temporary Builder is not dropped mid-chain.
+    let mut builder = Client::builder(TokioExecutor {});
+    let mut builder = builder.http1_title_case_headers(true);
+    if let Some(sz) = h2.initial_stream_window_size {
+        let mut b = builder;
+        b = b.http2_initial_stream_window_size(sz);
+        builder = b;
+    }
+    if let Some(sz) = h2.initial_connection_window_size {
+        let mut b = builder;
+        b = b.http2_initial_connection_window_size(sz);
+        builder = b;
+    }
+    if let Some(n) = h2.max_pending_accept_reset_streams {
+        let mut b = builder;
+        b = b.http2_max_pending_accept_reset_streams(n);
+        builder = b;
+    }
+    if let Some(d) = h2.keep_alive_interval {
+        let mut b = builder;
+        b = b.http2_keep_alive_interval(d);
+        builder = b;
+    }
+    if let Some(sz) = h2.max_frame_size {
+        let mut b = builder;
+        b = b.http2_max_frame_size(sz);
+        builder = b;
+    }
+    if let Some(n) = h2.max_header_list_size {
+        let mut b = builder;
+        b = b.http2_max_header_list_size(n);
+        builder = b;
+    }
+    builder.build(InstrumentedConnector::from(connector))
 }
