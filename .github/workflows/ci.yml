@@ -7,6 +7,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Servo build dependencies
+        # The `--all-features` builds below activate the `servo-runtime` feature
+        # in `browsai-engine-servo`, which pulls in vendored Servo source. Servo's
+        # build script invokes `pkg-config` for fontconfig; without
+        # `libfontconfig1-dev` the build fails before clippy ever runs.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libfontconfig1-dev \
+            libegl1-mesa-dev \
+            libglib2.0-dev \
+            pkg-config \
+            build-essential
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
