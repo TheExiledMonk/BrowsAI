@@ -18,9 +18,9 @@ encoding for streaming responses.
 | GET    | `/capabilities`    | (none)                                                               | yes     | no        |
 | GET    | `/version`         | (none)                                                               | yes     | no        |
 | GET    | `/schema`          | (none)                                                               | yes     | no        |
-| POST   | `/browse`          | `{url, fingerprint?, query?, snapshot_only?, auto_solve?, stream?}`  | no      | yes       |
-| POST   | `/query`           | `{url, query?, filter?, cursor?, limit?, fingerprint?, stream?}`     | no      | yes       |
-| POST   | `/render`          | `{url, query?, filter?, cursor?, limit?, fingerprint?, stream?}`     | no      | yes       |
+| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, snapshot_only?, auto_solve?, stream?}` | no      | yes       |
+| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, stream?}`                            | no      | yes       |
+| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, stream?}`                            | no      | yes       |
 | POST   | `/follow-link`     | `{page, node_id, stream?, fingerprint?}`                           | no      | yes       |
 | POST   | `/auto-solve`      | `{url, fingerprint?, stream?}`                                     | no      | yes       |
 
@@ -104,6 +104,32 @@ curl -s -X POST -H 'Content-Type: application/json' \
     -d '{"url":"https://example.test","filter":"Link,Heading","cursor":0,"limit":50}' \
     http://127.0.0.1:8765/query | jq '.results | length'
 ```
+
+`/query` and `/render` navigate to the supplied `url` first and then
+return the same shapes as `/browse` would (with the role `filter`,
+`cursor`, `limit`, and confidence-biasing `query` applied). They share
+the daemon's per-domain `ServoEngine`, so a follow-up `/browse` or
+`/query` to the same host reuses the same engine instance.
+
+### Waiting for JS-rendered content
+
+Sites whose initial HTML is a shell populated by client-side JS (e.g.
+DuckDuckGo search results) can return a snapshot that only contains
+the loading skeleton. Pass `wait_ms` on `/browse`, `/query`, or `/render`
+to give the embedder extra event-loop time after `LoadStatus::Complete`
+fires before the snapshot is projected:
+
+```sh
+# DuckDuckGo: results render after the React bundle runs
+curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"url":"https://duckduckgo.com/?q=rust+async","wait_ms":3000}' \
+    http://127.0.0.1:8765/browse | jq '.node_count'
+```
+
+`wait_ms` defaults to `0` (current behaviour). Recommended values:
+`1000` for SPA shells, `3000-5000` for sites that fire an XHR after
+load, `0` for server-rendered pages where the snapshot is already
+correct.
 
 ### Follow a search result
 

@@ -401,10 +401,10 @@ fn route(request: HttpRequest, state: &ServerState) -> Response {
         return handle_browse(&body, &query, state);
     }
     if path == "/query" && request.method == "POST" {
-        return handle_query_or_render(&body, "query", state);
+        return handle_query_or_render(&body, &query, "query", state);
     }
     if path == "/render" && request.method == "POST" {
-        return handle_query_or_render(&body, "render", state);
+        return handle_query_or_render(&body, &query, "render", state);
     }
     if path == "/follow-link" && request.method == "POST" {
         return handle_follow_link(&body, state);
@@ -521,6 +521,7 @@ fn handle_browse(
                 .collect()
         })
         .unwrap_or_default();
+    let wait_ms = body.get("wait_ms").and_then(Value::as_u64).unwrap_or(0);
     let _ = query; // streaming is a future extension; for v1 always single-blob
 
     let (_context_id, page_id) = match state.get_or_create_domain(&host) {
@@ -538,6 +539,13 @@ fn handle_browse(
             Err(error) => return error_response(format!("navigate failed: {error:?}")),
         }
     };
+    if wait_ms > 0 {
+        let engines = state.engines.lock().expect("engines lock");
+        let entry = engines.get(&host).expect("domain engine present");
+        if let Err(error) = entry.engine.pump_runtime(entry.page_id, wait_ms) {
+            return error_response(format!("wait_ms pump failed: {error:?}"));
+        }
+    }
     if snapshot_only {
         return Response::json(
             200,
@@ -596,14 +604,20 @@ fn handle_browse(
     Response::json(200, serde_json::to_vec_pretty(&payload).unwrap_or_default())
 }
 
-fn handle_query_or_render(_body: &Value, command: &str, _state: &ServerState) -> Response {
-    let payload = serde_json::json!({
-        "error": format!(
-            "{command} requires a snapshot, but the long-running server \
-             always navigates first; use POST /browse instead"
-        ),
-    });
-    Response::json(400, serde_json::to_vec(&payload).unwrap_or_default())
+fn handle_query_or_render(
+    body: &Value,
+    query: &std::collections::HashMap<String, String>,
+    command: &str,
+    state: &ServerState,
+) -> Response {
+    if body.get("url").and_then(Value::as_str).is_none() {
+        let payload = serde_json::json!({
+            "error": format!("{command} requires a `url` field; it navigates and filters in one call"),
+        });
+        return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+    }
+    let _ = command;
+    handle_browse(body, query, state)
 }
 
 fn handle_follow_link(_body: &Value, _state: &ServerState) -> Response {

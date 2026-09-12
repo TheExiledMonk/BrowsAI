@@ -2345,6 +2345,111 @@ mod tests {
         let _ = child.wait();
     }
 
+    #[test]
+    fn http_server_query_navigates_and_returns_results() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        wait_for_server(port);
+        let body = post_json(
+            port,
+            "/query",
+            &serde_json::json!({
+                "url": "https://example.test/",
+                "filter": "Page",
+                "limit": 10,
+            })
+            .to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 200"),
+            "query returned: {}",
+            &body[..body.len().min(160)]
+        );
+        assert!(body.contains("\"results\""), "missing results key: {body}");
+        assert!(body.contains("\"filter\""), "missing filter echo: {body}");
+        assert!(body.contains("\"truncated\""), "missing truncated flag: {body}");
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn http_server_query_rejects_missing_url() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        wait_for_server(port);
+        let body = post_json(port, "/query", &serde_json::json!({"filter":"Link"}).to_string());
+        assert!(
+            body.starts_with("HTTP/1.1 400"),
+            "expected 400 for missing url, got: {}",
+            &body[..body.len().min(160)]
+        );
+        assert!(
+            body.contains("requires a `url` field"),
+            "missing helpful error: {body}"
+        );
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn http_server_browse_accepts_wait_ms() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        wait_for_server(port);
+        let body = post_json(
+            port,
+            "/browse",
+            &serde_json::json!({
+                "url": "https://example.test/",
+                "wait_ms": 250,
+            })
+            .to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 200"),
+            "browse with wait_ms failed: {}",
+            &body[..body.len().min(160)]
+        );
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
     static TEST_PORT_COUNTER: std::sync::atomic::AtomicU32 =
         std::sync::atomic::AtomicU32::new(35_000);
 
@@ -2392,12 +2497,30 @@ mod tests {
     }
 
     fn post_browse(port: u16, url: &str) -> String {
+        post_json(
+            port,
+            "/browse",
+            &serde_json::json!({"url": url}).to_string(),
+        )
+    }
+
+    fn post_json(port: u16, path: &str, body: &str) -> String {
         use std::io::Write;
-        let mut stream = std::net::TcpStream::connect(("127.0.0.1", port)).expect("connect");
-        let body = serde_json::json!({"url": url}).to_string();
+        let mut stream = None;
+        let start = std::time::Instant::now();
+        while start.elapsed() < std::time::Duration::from_secs(5) {
+            match std::net::TcpStream::connect(("127.0.0.1", port)) {
+                Ok(s) => {
+                    stream = Some(s);
+                    break;
+                }
+                Err(_) => std::thread::sleep(std::time::Duration::from_millis(20)),
+            }
+        }
+        let mut stream = stream.expect("connect after retries");
         write!(
             stream,
-            "POST /browse HTTP/1.1\r\n\
+            "POST {path} HTTP/1.1\r\n\
              Host: 127.0.0.1\r\n\
              Content-Type: application/json\r\n\
              Content-Length: {}\r\n\
