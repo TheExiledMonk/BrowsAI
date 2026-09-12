@@ -146,6 +146,9 @@ browsai serve --port 8765
 
 # Background, log to file
 nohup browsai serve --port 8765 > /var/log/browsai.log 2>&1 &
+
+# Self-shut-down after 5 minutes of inactivity
+browsai serve --port 8765 --idle-shutdown-seconds 300
 ```
 
 There is no built-in `browsai stop`; send `SIGTERM` to the process.
@@ -157,10 +160,42 @@ Description=BrowsAI HTTP server
 After=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/browsai serve --port 8765
+ExecStart=/usr/local/bin/browsai serve --port 8765 --idle-shutdown-seconds 3600
 Restart=always
 RestartSec=2
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+## Per-domain clean sessions
+
+The long-running server keeps **one `ServoEngine` per host** for the
+lifetime of the process. The first request to `example.com`
+provisions a fresh engine; subsequent requests to the same host reuse
+it. Requests to `other.com` get a separate fresh engine. Within an
+engine, cookies, localStorage, IndexedDB, and ServiceWorker
+registrations are isolated from other engines — `example.com` and
+`other.com` cannot read each other's state.
+
+Idle engines are evicted after
+`--max-idle-per-domain-seconds` (default 60) of no activity, so the
+process does not grow without bound across many distinct hosts.
+
+The current `GET /health` response carries `active_domains` so you can
+monitor how many hosts are alive:
+
+```sh
+$ curl -s http://127.0.0.1:8765/health | jq
+{
+  "live_browser_compiled": false,
+  "servo_loaded": false,
+  "egl_available": false,
+  "uptime_seconds": 42,
+  "active_domains": 2,
+  "idle_shutdown_seconds": 3600,
+  "max_idle_per_domain_seconds": 60,
+  "fingerprint": "Mozilla/5.0 ..."
+}
+```
+

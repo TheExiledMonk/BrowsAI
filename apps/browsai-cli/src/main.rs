@@ -372,7 +372,25 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
         Some("serve") => {
             let bind = string_option(args, "--bind").unwrap_or_else(|| "127.0.0.1".into());
             let port = bounded_option(args, "--port", 1024, 65535)? as u16;
-            crate::server::run(&bind, port).map_err(|error| format!("server: {error}"))?;
+            let idle_shutdown_seconds = bounded_option(args, "--idle-shutdown-seconds", 0, 86_400)?;
+            let fingerprint_id = string_option(args, "--fingerprint");
+            let fingerprint = fingerprint_id
+                .as_deref()
+                .map(crate::server::resolve_fingerprint_for_server)
+                .transpose()
+                .map_err(|error| error.to_string())?
+                .flatten();
+            let config = crate::server::ServerConfig {
+                bind,
+                port: port as u16,
+                idle_shutdown_seconds: if idle_shutdown_seconds == 0 {
+                    None
+                } else {
+                    Some(idle_shutdown_seconds as u64)
+                },
+                fingerprint,
+            };
+            crate::server::run(config).map_err(|error| format!("server: {error}"))?;
             Ok("server exited".into())
         }
         Some("audit") => {
@@ -2204,6 +2222,63 @@ mod tests {
     }
 
     #[test]
+    fn http_server_allocates_separate_engines_per_host() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        let _ = wait_for_server(port);
+        let body_first = post_browse(port, "https://example.test/");
+        assert!(
+            body_first.starts_with("HTTP/1.1 200"),
+            "first browse failed: {}",
+            &body_first[..body_first.len().min(80)]
+        );
+        let body_second = post_browse(port, "https://example.test/foo");
+        assert!(body_second.starts_with("HTTP/1.1 200"));
+        let body_other = post_browse(port, "https://other.test/");
+        assert!(body_other.starts_with("HTTP/1.1 200"));
+        let health = http_get_json(port, "/health");
+        assert_eq!(health["active_domains"], serde_json::json!(2));
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn http_server_idle_shutdown_exits_when_idle_seconds_elapse() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let start = std::time::Instant::now();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--idle-shutdown-seconds")
+            .arg("2")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        let _ = wait_for_server(port);
+        let _ = post_browse(port, "https://example.test/");
+        let exit_status = child.wait().expect("wait for child");
+        assert!(
+            exit_status.success() || start.elapsed() < std::time::Duration::from_secs(15),
+            "server did not self-shut down"
+        );
+    }
+
+    #[test]
     fn http_server_rejects_unknown_path_with_404() {
         let Some(bin) = browsai_binary() else {
             return;
@@ -2247,12 +2322,33 @@ mod tests {
         let _ = child.wait();
     }
 
+    static TEST_PORT_COUNTER: std::sync::atomic::AtomicU32 =
+        std::sync::atomic::AtomicU32::new(35_000);
+
     fn pick_unused_port() -> u16 {
-        std::net::TcpListener::bind("127.0.0.1:0")
-            .ok()
-            .and_then(|listener| listener.local_addr().ok())
-            .map(|addr| addr.port())
-            .expect("find free port")
+        // Reserve a deterministic port range above the kernel's ephemeral
+        // range so two parallel tests never collide. u16 wraps at 65535 so
+        // use u32 internally and cast at the end.
+        let port = TEST_PORT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        assert!(port <= u16::MAX as u32, "test port counter wrapped");
+        let port = port as u16;
+        if let Ok(listener) = std::net::TcpListener::bind(("127.0.0.1", port)) {
+            drop(listener);
+            return port;
+        }
+        // Fallback: ask the kernel. The bind-then-drop pattern may race
+        // with another test on slow CI runners, so retry up to a few times.
+        for _ in 0..32 {
+            if let Ok(listener) = std::net::TcpListener::bind("127.0.0.1:0") {
+                let port = listener.local_addr().expect("local_addr").port();
+                drop(listener);
+                std::thread::sleep(std::time::Duration::from_millis(5));
+                if std::net::TcpListener::bind(("127.0.0.1", port)).is_ok() {
+                    return port;
+                }
+            }
+        }
+        panic!("could not reserve a free port");
     }
 
     fn read_http_response(stream: &mut std::net::TcpStream) -> String {
@@ -2260,6 +2356,51 @@ mod tests {
         let mut body = String::new();
         std::io::Read::read_to_string(&mut reader, &mut body).expect("read response");
         body
+    }
+
+    fn wait_for_server(port: u16) {
+        let start = std::time::Instant::now();
+        while let Err(_) = std::net::TcpStream::connect(("127.0.0.1", port)) {
+            if start.elapsed() > std::time::Duration::from_secs(5) {
+                panic!("server did not start on port {port}");
+            }
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+    }
+
+    fn post_browse(port: u16, url: &str) -> String {
+        use std::io::Write;
+        let mut stream = std::net::TcpStream::connect(("127.0.0.1", port)).expect("connect");
+        let body = serde_json::json!({"url": url}).to_string();
+        write!(
+            stream,
+            "POST /browse HTTP/1.1\r\n\
+             Host: 127.0.0.1\r\n\
+             Content-Type: application/json\r\n\
+             Content-Length: {}\r\n\
+             Connection: close\r\n\
+             \r\n{}",
+            body.len(),
+            body
+        )
+        .expect("write request");
+        read_http_response(&mut stream)
+    }
+
+    fn http_get_json(port: u16, path: &str) -> serde_json::Value {
+        use std::io::Write;
+        let mut stream = std::net::TcpStream::connect(("127.0.0.1", port)).expect("connect");
+        write!(
+            stream,
+            "GET {path} HTTP/1.1\r\n\
+             Host: 127.0.0.1\r\n\
+             Connection: close\r\n\
+             \r\n"
+        )
+        .expect("write request");
+        let raw = read_http_response(&mut stream);
+        let body_start = raw.find("\r\n\r\n").map(|i| i + 4).expect("body separator");
+        serde_json::from_str(&raw[body_start..]).expect("json body")
     }
 
     #[test]

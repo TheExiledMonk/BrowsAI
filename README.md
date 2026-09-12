@@ -235,3 +235,11 @@ Streaming is `?stream=true` (or `"stream": true` in the body) and uses
 chunked transfer encoding so the host reads events as they arrive. See
 [docs/server.md](docs/server.md) for the route table, systemd unit,
 and CLI command list.
+
+The long-running server keeps **one engine per host** so cookies,
+localStorage, IndexedDB, and ServiceWorker registrations are isolated
+between domains — the first request to `example.com` provisions a fresh
+engine, and requests to `other.com` get a separate fresh engine.
+`--idle-shutdown-seconds <N>` makes the server exit cleanly after
+`N` seconds of no activity, so the daemon does not leak when the LLM
+forgets to clean up.
