@@ -161,6 +161,15 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                 // HTTP/2 SETTINGS knobs matching a real browser.
                 std::env::set_var("BROWSAI_HTTP2_PROFILE", profile_id);
             }
+            let canvas_noise_seed = string_option(args, "--canvas-noise-seed");
+            if let Some(seed_str) = canvas_noise_seed.as_deref() {
+                // Servo's vendored canvas reads BROWSAI_CANVAS_NOISE_SEED
+                // for the 2D-noise seed. The actual noise injection
+                // currently lives in the CSS / render pipeline (stylo)
+                // which is not vendored here; the seed plumbing is in
+                // place for when it lands.
+                std::env::set_var("BROWSAI_CANVAS_NOISE_SEED", seed_str);
+            }
             let profile_identity = fingerprint_id
                 .as_deref()
                 .map(resolve_fingerprint)
@@ -399,6 +408,10 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                 },
                 fingerprint,
             };
+            let canvas_noise_seed = string_option(args, "--canvas-noise-seed");
+            if let Some(seed_str) = canvas_noise_seed.as_deref() {
+                std::env::set_var("BROWSAI_CANVAS_NOISE_SEED", seed_str);
+            }
             crate::server::run(config).map_err(|error| format!("server: {error}"))?;
             Ok("server exited".into())
         }

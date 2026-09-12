@@ -85,3 +85,4 @@ servo-script-bindings = { path = "vendor/servo-script-bindings" }
 servo-script = { path = "vendor/servo-script" }
 servo-storage = { path = "vendor/servo-storage" }
 servo-net = { path = "vendor/servo-net" }
+servo-canvas = { path = "vendor/servo-canvas" }

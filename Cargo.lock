@@ -6161,8 +6161,6 @@ dependencies = [
 [[package]]
 name = "servo-canvas"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "094bfc67439cd13a1ddb8cf3cf9d5a8a1bccaf1fe54ae39167f1218e40933180"
 dependencies = [
  "bytemuck",
  "crossbeam-channel",

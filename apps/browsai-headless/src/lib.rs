@@ -29,6 +29,7 @@ impl HeadlessHost {
             viewport: Some(options.viewport),
             deterministic_clock_millis: Some(options.clock_millis),
             http2_profile: None,
+            canvas_noise_seed: None,
             no_raster: true,
         })?;
         Ok(Self {

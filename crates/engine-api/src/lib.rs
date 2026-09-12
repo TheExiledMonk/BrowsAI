@@ -131,6 +131,13 @@ pub struct ContextOptions {
     /// and Edge when one of these is selected. See `docs/fingerprint-hardening.md`
     /// for the per-profile knob tables.
     pub http2_profile: Option<Http2Profile>,
+    /// Canvas / 2D rendering noise seed. The vendored `servo-canvas`
+    /// reads `BROWSAI_CANVAS_NOISE_SEED` from the process env and uses
+    /// it as the seed for its 2D-noise injection. `None` (default) means
+    /// stock canvas rendering. See `docs/fingerprint-hardening.md` for
+    /// the full T2.2 picture (the noise injection itself lives in the
+    /// vendored Servo's CSS / render pipeline and is a future work item).
+    pub canvas_noise_seed: Option<u32>,
 }
 
 /// HTTP/2 SETTINGS profile presets. Each maps to the knobs measured from
@@ -319,5 +326,11 @@ mod tests {
     fn context_options_default_http2_profile_is_none() {
         let opts = ContextOptions::default();
         assert_eq!(opts.http2_profile, None);
+    }
+
+    #[test]
+    fn context_options_default_canvas_noise_seed_is_none() {
+        let opts = ContextOptions::default();
+        assert_eq!(opts.canvas_noise_seed, None);
     }
 }
