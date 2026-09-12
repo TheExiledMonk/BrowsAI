@@ -262,15 +262,26 @@ between them. The sequence:
 * CLI: `browsai navigate --http2-profile=firefox <url>`.
 * Health response surfaces the active profile.
 
-### Commit 4 — TLS impersonation (T3.1)
+### Commit 4 — TLS impersonation (T3.1) — DEFERRED to sidecar
 
-* Replace `rustls` with `rustls-impersonate` in the vendored
-  `connector.rs`. Use `rustls-impersonate` at a version that tracks
-  rustls-0.23 (the version `servo = "0.5"` uses).
-* Cipher suite / extension reorder matches Firefox-130 / Chrome-140
-  JA3 templates.
-* Verified with Wireshark TLS capture: client JA3 hash falls within
-  the impersonated browser's published JA3.
+* **Status: deferred.** The upstream `rustls-impersonate` GitHub repo
+  (`github.com/0x67646e/rustls-impersonate`) is no longer available;
+  the functionality now lives inside `z0uki/impit`, a much larger
+  browser-impersonation framework. Vendoring `z0uki/impit` is not
+  practical for BrowsAI's scope.
+* **Recommended workaround for T3.1**: route the plugin through a
+  `curl-impersonate-httpd` sidecar. The plugin sets
+  `HTTPS_PROXY=http://127.0.0.1:8888?ja3=firefox-130` on the daemon
+  spawn, and the sidecar handles the TLS-level impersonation. BrowsAI's
+  vendored Servo continues to use stock `rustls`; the cipher-suite
+  signal comes from the sidecar.
+* The `connector.rs` patch we have (commit 2) exposes the HTTP/2
+  SETTINGS knobs. Combined with a sidecar, BrowsAI covers Tier 1 +
+  T2.1 without any TLS-stack change. T3.1 / JA3 impersonation is
+  external to BrowsAI.
+* **Reopen commit 4** if and when a clean standalone
+  `rustls-impersonate` becomes available again, or if BrowsAI takes on
+  a `z0uki/impit`-style dependency.
 
 ### Commit 5 — canvas noise seed wiring (T2.2)
 
