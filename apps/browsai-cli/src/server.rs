@@ -31,11 +31,16 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use browsai_agent_runtime::{AgentRuntime, AgentSessionId, SolveAuditEvent, TakeoverManager};
+use browsai_agent_tree::StructuralRole;
 use browsai_engine_api::{
     BrowserEngine, ContextId, ContextOptions, PageId, ProfileIdentity, VirtualViewport,
 };
 use browsai_engine_servo::ServoEngine;
 use browsai_fingerprint::{FingerprintCatalog, FingerprintId};
+use browsai_sandbox::{Capability, SandboxPolicy};
+use browsai_state::PageSnapshot;
+use url::Url;
 
 const MAX_IDLE_PER_DOMAIN_SECONDS: u64 = 60;
 
@@ -48,14 +53,18 @@ pub struct ServerConfig {
     pub live_browser: bool,
 }
 
-/// Per-host `(ContextId, PageId)` pair plus an idle-eviction marker.
-/// The host's webview state lives inside the shared `ServoEngine`'s
+/// Per-host `(ContextId, PageId)` pair plus an idle-eviction marker
+/// and the `ProfileIdentity` the session was constructed under. The
+/// host's webview state lives inside the shared `ServoEngine`'s
 /// `real_pages: HashMap<PageId, ServoRuntimePage>` map; this struct
-/// just remembers which PageId is ours and when we last used it.
+/// just remembers which PageId is ours, when we last used it, and
+/// which fingerprint pinned the WebView so a per-request override
+/// can evict and rebuild on mismatch.
 struct DomainSession {
     context_id: ContextId,
     page_id: PageId,
     last_used: Instant,
+    fingerprint: Option<ProfileIdentity>,
 }
 
 /// Send-safe control surface. Held by the accept loop thread and the
@@ -110,15 +119,35 @@ impl ServerState {
             .expect("last_activity lock") = Instant::now();
     }
 
-    fn get_or_create_domain(&self, host: &str) -> Result<(ContextId, PageId), String> {
+    fn get_or_create_domain(
+        &self,
+        host: &str,
+        fingerprint_override: Option<ProfileIdentity>,
+    ) -> Result<(ContextId, PageId), String> {
+        // Per-request fingerprint overrides the daemon default. The
+        // override is intentionally an `Option<Option<…>>` semantically:
+        // `None` means "no body field supplied, fall back to daemon
+        // default", `Some(daemon_default)` is the same intent, and
+        // `Some(other)` means "evict any stale session pinned to a
+        // different fingerprint and create a new one".
+        let effective_fingerprint =
+            fingerprint_override.or_else(|| self.control.config.fingerprint.clone());
         let mut sessions = self.sessions.lock().expect("sessions lock");
         if let Some(session) = sessions.get_mut(host) {
-            session.last_used = Instant::now();
-            return Ok((session.context_id, session.page_id));
+            if session.fingerprint == effective_fingerprint {
+                session.last_used = Instant::now();
+                return Ok((session.context_id, session.page_id));
+            }
+            // Fingerprint mismatch — drop the stale session. The
+            // ServoEngine will drop its WebView when the corresponding
+            // PageRecord is dropped; we don't tear down the context by
+            // hand because the engine owns the WebView lifetime.
+            sessions.remove(host);
+            self.control.active_domains.fetch_sub(1, Ordering::Relaxed);
         }
         let options = ContextOptions {
             profile: None,
-            profile_identity: self.control.config.fingerprint.clone(),
+            profile_identity: effective_fingerprint.clone(),
             headless: true,
             use_real_browser_runtime: self.control.config.live_browser,
             viewport: Some(VirtualViewport::default()),
@@ -148,6 +177,7 @@ impl ServerState {
                 context_id: context,
                 page_id: page,
                 last_used: Instant::now(),
+                fingerprint: effective_fingerprint,
             },
         );
         self.control.active_domains.fetch_add(1, Ordering::Relaxed);
@@ -516,6 +546,482 @@ fn url_host(url: &str) -> Option<String> {
     parsed.host_str().map(|host| host.to_ascii_lowercase())
 }
 
+/// Resolve an optional `fingerprint` JSON field into a `ProfileIdentity`.
+/// Empty / missing fields fall through to `Ok(None)` so the caller can
+/// keep using the daemon default. Unknown ids surface a 400 instead of
+/// silently degrading to the default — silent fallback was the easiest
+/// way to misroute traffic to the wrong fingerprint during testing.
+fn resolve_body_fingerprint(body: &Value) -> Result<Option<ProfileIdentity>, String> {
+    let raw = match body.get("fingerprint").and_then(Value::as_str) {
+        Some(s) if !s.trim().is_empty() => s.trim(),
+        _ => return Ok(None),
+    };
+    let catalog = FingerprintCatalog::default_catalog();
+    match catalog.get(&FingerprintId::new(raw.to_string())) {
+        Some(entry) => Ok(Some(entry.clone().into_profile_identity())),
+        None => Err(format!(
+            "unknown fingerprint id {raw:?}; available: {}",
+            catalog
+                .ids()
+                .map(|id| id.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
+    }
+}
+
+/// Pick a starting mouse position inside the viewport. Deterministic per
+/// (url, invocation_seed) so replays of the same challenge look the
+/// same; distinct per request so concurrent calls don't bias toward
+/// the same corner. Mirrors `apps/browsai-cli/src/main.rs:36`.
+fn auto_solve_cursor_origin(
+    viewport: VirtualViewport,
+    url: &Url,
+    invocation_seed: u64,
+) -> (f64, f64) {
+    use browsai_input::SplitMix64;
+    let url_seed = url.as_str().bytes().fold(0u64, |acc, byte| {
+        acc.wrapping_mul(0x100000001B3).wrapping_add(byte as u64)
+    });
+    let mut rng = SplitMix64::new(url_seed.wrapping_add(invocation_seed));
+    let margin = 32.0_f64;
+    let max_x = (viewport.width as f64 - margin).max(margin + 1.0);
+    let max_y = (viewport.height as f64 - margin).max(margin + 1.0);
+    let x = margin + rng.next_unit() * (max_x - margin);
+    let y = margin + rng.next_unit() * (max_y - margin);
+    (x, y)
+}
+
+/// Window over `values` starting at `cursor`, capped by `limit`,
+/// `max_bytes`, and `max_duration_ms`. Mirrors
+/// `apps/browsai-cli/src/main.rs:1685`.
+struct BoundedStringPage {
+    items: Vec<String>,
+    truncated: bool,
+    next_cursor: Option<String>,
+    bytes_used: usize,
+    duration_ms: u128,
+}
+
+fn bounded_string_page(
+    values: &[String],
+    cursor: usize,
+    limit: usize,
+    max_bytes: usize,
+    max_duration_ms: usize,
+) -> BoundedStringPage {
+    let started = Instant::now();
+    let start = cursor.min(values.len());
+    let mut items = Vec::new();
+    let mut bytes_used = 0usize;
+    let mut next_index = start;
+    for (index, value) in values.iter().enumerate().skip(start).take(limit.max(1)) {
+        let elapsed = started.elapsed().as_millis();
+        if elapsed >= max_duration_ms as u128 && !items.is_empty() {
+            break;
+        }
+        let item_bytes = value.len().saturating_add(3);
+        if bytes_used.saturating_add(item_bytes) > max_bytes && !items.is_empty() {
+            break;
+        }
+        if item_bytes > max_bytes && items.is_empty() {
+            next_index = index.saturating_add(1);
+            break;
+        }
+        bytes_used = bytes_used.saturating_add(item_bytes);
+        items.push(value.clone());
+        next_index = index.saturating_add(1);
+    }
+    let truncated = next_index < values.len();
+    BoundedStringPage {
+        items,
+        truncated,
+        next_cursor: truncated.then_some(next_index.to_string()),
+        bytes_used,
+        duration_ms: started.elapsed().as_millis(),
+    }
+}
+
+/// Run the challenge-observer loop using a freshly-created AgentRuntime
+/// + session. Returns the audit trail. Mirrors
+///   `apps/browsai-cli/src/main.rs::auto_solve_challenges`.
+#[allow(clippy::too_many_arguments)]
+fn run_auto_solve(
+    engine: &mut ServoEngine,
+    page: PageId,
+    snapshot: &PageSnapshot,
+    runtime: &mut AgentRuntime,
+    session: AgentSessionId,
+    takeovers: &TakeoverManager,
+    now: u64,
+    cursor_origin: (f64, f64),
+) -> Result<Vec<SolveAuditEvent>, String> {
+    browsai_agent_runtime::solve_observed_challenges(
+        page,
+        snapshot,
+        runtime,
+        session,
+        takeovers,
+        now,
+        cursor_origin,
+        |event| {
+            engine
+                .dispatch_input(page, event.clone())
+                .map_err(|error| format!("auto-solve dispatch failed: {error:?}"))
+        },
+        |error| eprintln!("BROWSAI_AUTO_SOLVE_ERROR: {error}"),
+    )
+}
+
+fn handle_live_auto_solve(body: &Value, state: &ServerState) -> Response {
+    // Auto-solve only makes sense against the live runtime — the
+    // deterministic backend returns a single Page root node with no
+    // challenge observers. Refuse early so the operator knows to add
+    // --live-browser rather than getting back a confusing 200 with no
+    // candidate_links.
+    if !state.control.config.live_browser {
+        let payload = serde_json::json!({
+            "error": "auto-solve requires the daemon to be started with --live-browser (or BROWSAI_SERVER_LIVE_BROWSER=1); the deterministic backend has no JS-driven challenges to solve"
+        });
+        return Response::json(503, serde_json::to_vec(&payload).unwrap_or_default());
+    }
+    let url = match body.get("url").and_then(Value::as_str) {
+        Some(s) => s.to_string(),
+        None => {
+            let payload = serde_json::json!({"error": "missing url"});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let parsed_url = match Url::parse(&url) {
+        Ok(u) => u,
+        Err(error) => {
+            let payload = serde_json::json!({"error": format!("invalid url: {error}")});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let host = match parsed_url.host_str() {
+        Some(host) => host.to_ascii_lowercase(),
+        None => {
+            let payload = serde_json::json!({"error": "url has no host"});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let fingerprint_override = match resolve_body_fingerprint(body) {
+        Ok(f) => f,
+        Err(error) => {
+            let payload = serde_json::json!({"error": error});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let wait_ms = body.get("wait_ms").and_then(Value::as_u64).unwrap_or(1000);
+    // HTTP defaults are larger than the CLI's because the only HTTP
+    // callers (Helios plugin + curl) want to see the full candidate
+    // set on the first call, not page through with cursor=2/limit=2.
+    let link_cursor = body.get("link_cursor").and_then(Value::as_u64).unwrap_or(0) as usize;
+    let link_limit = body
+        .get("link_limit")
+        .and_then(Value::as_u64)
+        .unwrap_or(50)
+        .max(1) as usize;
+    let link_max_bytes = body
+        .get("link_max_bytes")
+        .and_then(Value::as_u64)
+        .unwrap_or(64 * 1024) as usize;
+    let link_max_duration_ms = body
+        .get("link_max_duration_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(2_000) as usize;
+    let textbox_limit = body
+        .get("textbox_limit")
+        .and_then(Value::as_u64)
+        .unwrap_or(100)
+        .max(1) as usize;
+    let control_limit = body
+        .get("control_limit")
+        .and_then(Value::as_u64)
+        .unwrap_or(100)
+        .max(1) as usize;
+
+    eprintln!("BROWSAI_STAGE:auto_solve startup host={host}");
+    let (_ctx, page_id) = match state.get_or_create_domain(&host, fingerprint_override) {
+        Ok(ids) => ids,
+        Err(error) => return error_response(error),
+    };
+    let _navigation = {
+        let mut engine = state.engine.lock().expect("engine lock");
+        match engine.navigate(page_id, parsed_url.clone()) {
+            Ok(nav) => nav,
+            Err(error) => return error_response(format!("navigate failed: {error:?}")),
+        }
+    };
+    if wait_ms > 0 {
+        let engine = state.engine.lock().expect("engine lock");
+        if let Err(error) = engine.pump_runtime(page_id, wait_ms) {
+            return error_response(format!("post-navigation pump failed: {error:?}"));
+        }
+    }
+    eprintln!("BROWSAI_STAGE:auto_solve dom_projection");
+    let initial_snapshot = {
+        let engine = state.engine.lock().expect("engine lock");
+        match engine.snapshot(page_id) {
+            Ok(snap) => snap,
+            Err(error) => return error_response(format!("snapshot failed: {error:?}")),
+        }
+    };
+    // Auto-solve challenge loop. The AgentRuntime + TakeoverManager are
+    // short-lived for this single request — they carry no state that
+    // needs to survive across requests (cookies/storage live inside
+    // Servo).
+    eprintln!("BROWSAI_STAGE:auto_solve challenge_loop");
+    let mut runtime = AgentRuntime::new(SandboxPolicy::autonomous_agent());
+    let session = runtime.open([Capability::SolveChallenge], Default::default());
+    if let Err(error) = runtime.start(session) {
+        return error_response(format!("agent runtime start failed: {error}"));
+    }
+    let takeovers = TakeoverManager::default();
+    let now = runtime.now_millis();
+    let cursor_origin = auto_solve_cursor_origin(VirtualViewport::default(), &parsed_url, 1);
+    eprintln!(
+        "BROWSAI_AUTO_SOLVE: initial cursor = ({:.1}, {:.1})",
+        cursor_origin.0, cursor_origin.1
+    );
+    let auto_solve_audit = {
+        let mut engine = state.engine.lock().expect("engine lock");
+        match run_auto_solve(
+            &mut engine,
+            page_id,
+            &initial_snapshot,
+            &mut runtime,
+            session,
+            &takeovers,
+            now,
+            cursor_origin,
+        ) {
+            Ok(events) => {
+                for event in &events {
+                    eprintln!(
+                        "BROWSAI_AUTO_SOLVE: provider={} capability={} target={:?}",
+                        event.provider, event.capability_used, event.target_node_id
+                    );
+                }
+                events
+            }
+            Err(error) => {
+                eprintln!("BROWSAI_AUTO_SOLVE_ERROR: {error}");
+                Vec::new()
+            }
+        }
+    };
+    let snapshot = if auto_solve_audit.is_empty() {
+        initial_snapshot
+    } else {
+        let engine = state.engine.lock().expect("engine lock");
+        match engine.snapshot(page_id) {
+            Ok(snap) => snap,
+            Err(error) => {
+                return error_response(format!("post-auto-solve snapshot failed: {error:?}"))
+            }
+        }
+    };
+    let visible_link_ids = snapshot
+        .tree
+        .nodes
+        .iter()
+        .filter(|node| node.structural_role == StructuralRole::Link && node.state.visible)
+        .map(|node| node.id.clone())
+        .collect::<Vec<_>>();
+    let link_page = bounded_string_page(
+        &visible_link_ids,
+        link_cursor,
+        link_limit,
+        link_max_bytes,
+        link_max_duration_ms,
+    );
+    let candidate_links = link_page.items.clone();
+    let textbox_count = snapshot
+        .tree
+        .nodes
+        .iter()
+        .filter(|node| node.structural_role == StructuralRole::Textbox)
+        .count();
+    let candidate_textboxes: Vec<serde_json::Value> = snapshot
+        .tree
+        .nodes
+        .iter()
+        .filter(|node| node.structural_role == StructuralRole::Textbox)
+        .map(|node| {
+            serde_json::json!({
+                "id": node.id,
+                "name": node.name,
+                "visible": node.state.visible,
+                "geometry": node.geometry,
+            })
+        })
+        .take(textbox_limit)
+        .collect();
+    let candidate_control_count = snapshot
+        .tree
+        .nodes
+        .iter()
+        .filter(|node| {
+            node.state.visible
+                && matches!(
+                    node.structural_role,
+                    StructuralRole::Button
+                        | StructuralRole::Checkbox
+                        | StructuralRole::Radio
+                        | StructuralRole::Link
+                )
+        })
+        .count();
+    let candidate_controls: Vec<serde_json::Value> = snapshot
+        .tree
+        .nodes
+        .iter()
+        .filter(|node| {
+            node.state.visible
+                && matches!(
+                    node.structural_role,
+                    StructuralRole::Button
+                        | StructuralRole::Checkbox
+                        | StructuralRole::Radio
+                        | StructuralRole::Link
+                )
+        })
+        .take(control_limit)
+        .map(|node| {
+            serde_json::json!({
+                "id": node.id,
+                "role": format!("{:?}", node.structural_role),
+                "name": node.name,
+                "geometry": node.geometry,
+            })
+        })
+        .collect();
+
+    let diagnostics_url = match state
+        .engine
+        .lock()
+        .expect("engine lock")
+        .runtime_current_url(page_id)
+    {
+        Ok(u) => u,
+        Err(error) => return error_response(format!("runtime_current_url failed: {error:?}")),
+    };
+    let (navigation_history, navigation_request_history, navigation_request_history_truncated) = {
+        let engine = state.engine.lock().expect("engine lock");
+        let h = match engine.runtime_navigation_history(page_id) {
+            Ok(h) => h,
+            Err(error) => return error_response(format!("navigation history failed: {error:?}")),
+        };
+        let r = match engine.runtime_navigation_request_history(page_id) {
+            Ok(r) => r,
+            Err(error) => {
+                return error_response(format!("navigation request history failed: {error:?}"))
+            }
+        };
+        let t = match engine.runtime_navigation_request_history_truncated(page_id) {
+            Ok(t) => t,
+            Err(error) => {
+                return error_response(format!(
+                    "navigation request history truncated failed: {error:?}"
+                ))
+            }
+        };
+        (h, r, t)
+    };
+    let mut redirect_chain: Vec<String> = navigation_request_history
+        .iter()
+        .map(|url| url.as_str().to_owned())
+        .collect();
+    for url in navigation_history.iter().map(|url| url.as_str()) {
+        if redirect_chain.last().map(String::as_str) != Some(url) {
+            redirect_chain.push(url.to_owned());
+        }
+    }
+    let (
+        load_status,
+        resource_request_history,
+        resource_request_history_truncated,
+        runtime_messages,
+    ) = {
+        let engine = state.engine.lock().expect("engine lock");
+        let ls = match engine.runtime_load_status(page_id) {
+            Ok(s) => s,
+            Err(error) => return error_response(format!("runtime_load_status failed: {error:?}")),
+        };
+        let rrh = match engine.runtime_resource_request_history(page_id) {
+            Ok(r) => r,
+            Err(error) => {
+                return error_response(format!("resource_request_history failed: {error:?}"))
+            }
+        };
+        let rrt = match engine.runtime_resource_request_history_truncated(page_id) {
+            Ok(t) => t,
+            Err(error) => {
+                return error_response(format!(
+                    "resource_request_history_truncated failed: {error:?}"
+                ))
+            }
+        };
+        let rm = match engine.runtime_messages(page_id) {
+            Ok(m) => m,
+            Err(error) => return error_response(format!("runtime_messages failed: {error:?}")),
+        };
+        (ls, rrh, rrt, rm)
+    };
+    eprintln!("BROWSAI_STAGE:auto_solve evaluation");
+    let payload = serde_json::json!({
+        "page": page_id,
+        "url": snapshot.url,
+        "navigation": {
+            "requested_url": url,
+            "final_url": diagnostics_url,
+            "history": redirect_chain,
+            "history_truncated": navigation_request_history_truncated,
+            "redirect_observed": redirect_chain.len() > 1,
+            "http_status": Value::Null,
+            "mime_type": Value::Null,
+            "origin": diagnostics_url.origin().ascii_serialization(),
+            "initiator": Value::Null,
+            "resource_type": "main_frame",
+        },
+        "load_status": load_status,
+        "resource_diagnostics": Value::Null,
+        "resource_requests": resource_request_history
+            .into_iter()
+            .map(|u| u.to_string())
+            .collect::<Vec<_>>(),
+        "resource_requests_truncated": resource_request_history_truncated,
+        "runtime_messages": runtime_messages,
+        "node_count": snapshot.tree.nodes.len(),
+        "agent_tree_truncated": snapshot.tree.truncated,
+        "candidate_links": candidate_links,
+        "candidate_links_cursor": link_cursor,
+        "candidate_links_limit": link_limit,
+        "candidate_links_truncated": link_page.truncated,
+        "candidate_links_next_cursor": link_page.next_cursor,
+        "candidate_links_bytes": link_page.bytes_used,
+        "candidate_links_max_bytes": link_max_bytes,
+        "candidate_links_duration_ms": link_page.duration_ms,
+        "candidate_links_max_duration_ms": link_max_duration_ms,
+        "candidate_textboxes": candidate_textboxes,
+        "candidate_textboxes_truncated": textbox_count > candidate_textboxes.len(),
+        "candidate_controls": candidate_controls,
+        "candidate_controls_truncated": candidate_control_count > candidate_controls.len(),
+        "clicked_links": Vec::<String>::new(),
+        "probed_controls": Vec::<String>::new(),
+        "skipped_controls": Vec::<String>::new(),
+        "auto_solve_audit": auto_solve_audit,
+        "diagnostics": serde_json::json!({
+            "document_available": diagnostics_url.as_str() != "about:blank",
+            "diagnostics_mode": "snapshot-only",
+        }),
+    });
+    let body_bytes = serde_json::to_vec_pretty(&payload).unwrap_or_default();
+    Response::json(200, body_bytes)
+}
+
 fn handle_browse(
     body: &Value,
     query: &std::collections::HashMap<String, String>,
@@ -567,7 +1073,7 @@ fn handle_browse(
     let wait_ms = body.get("wait_ms").and_then(Value::as_u64).unwrap_or(1000);
     let _ = query; // streaming is a future extension; for v1 always single-blob
 
-    let (_context_id, page_id) = match state.get_or_create_domain(&host) {
+    let (_context_id, page_id) = match state.get_or_create_domain(&host, None) {
         Ok(ids) => ids,
         Err(error) => return error_response(error),
     };
@@ -664,11 +1170,8 @@ fn handle_follow_link(_body: &Value, _state: &ServerState) -> Response {
     Response::json(501, serde_json::to_vec(&payload).unwrap_or_default())
 }
 
-fn handle_auto_solve(_body: &Value, _state: &ServerState) -> Response {
-    let payload = serde_json::json!({
-        "error": "auto-solve requires runtime + takeover plumbing; not yet wired through the long-running server"
-    });
-    Response::json(501, serde_json::to_vec(&payload).unwrap_or_default())
+fn handle_auto_solve(body: &Value, state: &ServerState) -> Response {
+    handle_live_auto_solve(body, state)
 }
 
 fn error_response(message: String) -> Response {
