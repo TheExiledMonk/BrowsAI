@@ -42,6 +42,9 @@ fn build_navigator_identity_script(identity: &browsai_engine_api::ProfileIdentit
             .replace('\r', "\\r");
         format!("\"{}\"", escaped)
     }
+    fn js_number(value: u8) -> String {
+        value.to_string()
+    }
     let ua = js_string(&identity.user_agent);
     let platform = js_string(&identity.platform);
     let vendor = js_string("Google Inc.");
@@ -58,13 +61,19 @@ fn build_navigator_identity_script(identity: &browsai_engine_api::ProfileIdentit
         .collect::<Vec<_>>()
         .join(",");
     let mobile = identity.sec_ch_ua_mobile();
+    let hardware_concurrency = identity.hardware_concurrency;
+    let device_memory = identity.device_memory;
+    let max_touch_points = identity.max_touch_points;
     format!(
-        r#"(function(){{try{{if(typeof navigator==='undefined')return;function setProp(name,value){{try{{Object.defineProperty(navigator,name,{{configurable:true,get:function(){{return value;}}}});}}catch(_){{try{{navigator[name]=value;}}catch(__){{}}}}}}setProp('userAgent',{ua});setProp('platform',{platform});setProp('vendor',{vendor});var ua=String({ua});if(ua&&(!navigator.appVersion||navigator.appVersion.indexOf('Chrome/')<0)){{setProp('appVersion',ua.replace(/^Mozilla\/5\.0\s*/,''));}}if(!navigator.userAgentData){{var brands=[{brands_json}];var platform={platform};var mobile={mobile};var data={{brands:brands,mobile:mobile==='?1',platform:platform,getHighEntropyValues:function(hints){{var result={{brands:brands,mobile:mobile==='?1',platform:platform}};if(Array.isArray(hints)){{if(hints.indexOf('architecture')>=0)result.architecture='x86';if(hints.indexOf('bitness')>=0)result.bitness='64';if(hints.indexOf('model')>=0)result.model='';if(hints.indexOf('platformVersion')>=0)result.platformVersion='0.0.0';if(hints.indexOf('uaFullVersion')>=0){{var match=/Chrome\/(\d+)/.exec(ua);result.uaFullVersion=(match?match[1]:'140')+'.0.0.0';}}}}return Promise.resolve(result);}},toJSON:function(){{return {{brands:brands,mobile:mobile==='?1',platform:platform}};}}}};try{{Object.defineProperty(navigator,'userAgentData',{{configurable:true,value:data}});}}catch(_){{}}}}if(typeof window!=='undefined'&&!window.chrome)window.chrome={{runtime:{{}}}};}}catch(_){{}}}}());"#,
+        r#"(function(){{try{{if(typeof navigator==='undefined')return;function setProp(name,value){{try{{Object.defineProperty(navigator,name,{{configurable:true,get:function(){{return value;}}}});}}catch(_){{try{{navigator[name]=value;}}catch(__){{}}}}}}setProp('userAgent',{ua});setProp('platform',{platform});setProp('vendor',{vendor});setProp('hardwareConcurrency',{hardware_concurrency});setProp('deviceMemory',{device_memory});setProp('maxTouchPoints',{max_touch_points});var ua=String({ua});if(ua&&(!navigator.appVersion||navigator.appVersion.indexOf('Chrome/')<0)){{setProp('appVersion',ua.replace(/^Mozilla\/5\.0\s*/,''));}}if(!navigator.userAgentData){{var brands=[{brands_json}];var platform={platform};var mobile={mobile};var data={{brands:brands,mobile:mobile==='?1',platform:platform,getHighEntropyValues:function(hints){{var result={{brands:brands,mobile:mobile==='?1',platform:platform}};if(Array.isArray(hints)){{if(hints.indexOf('architecture')>=0)result.architecture='x86';if(hints.indexOf('bitness')>=0)result.bitness='64';if(hints.indexOf('model')>=0)result.model='';if(hints.indexOf('platformVersion')>=0)result.platformVersion='0.0.0';if(hints.indexOf('uaFullVersion')>=0){{var match=/Chrome\/(\d+)/.exec(ua);result.uaFullVersion=(match?match[1]:'140')+'.0.0.0';}}}}return Promise.resolve(result);}},toJSON:function(){{return {{brands:brands,mobile:mobile==='?1',platform:platform}};}}}};try{{Object.defineProperty(navigator,'userAgentData',{{configurable:true,value:data}});}}catch(_){{}}}}if(typeof window!=='undefined'&&!window.chrome)window.chrome={{runtime:{{}}}};}}catch(_){{}}}}());"#,
         ua = ua,
         platform = platform,
         vendor = vendor,
         brands_json = brands_json,
         mobile = mobile,
+        hardware_concurrency = js_number(hardware_concurrency),
+        device_memory = js_number(device_memory),
+        max_touch_points = js_number(max_touch_points),
     )
 }
 

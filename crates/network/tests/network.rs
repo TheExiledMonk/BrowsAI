@@ -633,6 +633,10 @@ fn profile_identity_supplies_default_headers_and_survives_worker_path() {
             },
         ],
         accept_language: "en-US,en;q=0.9".into(),
+        hardware_concurrency: 8,
+        device_memory: 8,
+        max_touch_points: 0,
+        color_depth: 24,
     };
     let mut stack = NetworkStack::default();
     stack.set_profile_identity(identity.clone());

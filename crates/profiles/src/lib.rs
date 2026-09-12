@@ -68,6 +68,14 @@ pub struct ProfileConfig {
     pub brands: Vec<SecChUaBrand>,
     #[serde(default)]
     pub accept_language: String,
+    #[serde(default)]
+    pub hardware_concurrency: u8,
+    #[serde(default)]
+    pub device_memory: u8,
+    #[serde(default)]
+    pub max_touch_points: u8,
+    #[serde(default)]
+    pub color_depth: u8,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -130,6 +138,10 @@ impl Default for ProfileConfig {
                 },
             ],
             accept_language: "en-US,en;q=0.9".into(),
+            hardware_concurrency: 8,
+            device_memory: 8,
+            max_touch_points: 0,
+            color_depth: 24,
         }
     }
 }
@@ -382,6 +394,10 @@ impl ProfileVariant {
                     },
                 ],
                 accept_language: "en-US,en;q=0.9".into(),
+                hardware_concurrency: 8,
+                device_memory: 8,
+                max_touch_points: 0,
+                color_depth: 24,
             },
             ProfileVariant::FirefoxDesktop => ProfileConfig {
                 user_agent: Some(
@@ -401,6 +417,10 @@ impl ProfileVariant {
                 platform: "Linux x86_64".into(),
                 brands: vec![],
                 accept_language: "en-US,en;q=0.5".into(),
+                hardware_concurrency: 8,
+                device_memory: 8,
+                max_touch_points: 0,
+                color_depth: 24,
             },
             ProfileVariant::SafariDesktop => ProfileConfig {
                 user_agent: Some(
@@ -420,6 +440,10 @@ impl ProfileVariant {
                 platform: "MacIntel".into(),
                 brands: vec![],
                 accept_language: "en-US,en;q=0.9".into(),
+                hardware_concurrency: 10,
+                device_memory: 16,
+                max_touch_points: 0,
+                color_depth: 30,
             },
             ProfileVariant::ChromeAndroid => ProfileConfig {
                 user_agent: Some(
@@ -452,6 +476,10 @@ impl ProfileVariant {
                     },
                 ],
                 accept_language: "en-US,en;q=0.9".into(),
+                hardware_concurrency: 8,
+                device_memory: 8,
+                max_touch_points: 5,
+                color_depth: 24,
             },
             ProfileVariant::SafariIos => ProfileConfig {
                 user_agent: Some(
@@ -471,6 +499,10 @@ impl ProfileVariant {
                 platform: "iPhone".into(),
                 brands: vec![],
                 accept_language: "en-US,en;q=0.9".into(),
+                hardware_concurrency: 6,
+                device_memory: 4,
+                max_touch_points: 5,
+                color_depth: 24,
             },
         }
     }
@@ -700,6 +732,10 @@ impl ProfileManager {
                 })
                 .collect(),
             accept_language: identity.accept_language,
+            hardware_concurrency: identity.hardware_concurrency,
+            device_memory: identity.device_memory,
+            max_touch_points: identity.max_touch_points,
+            color_depth: identity.color_depth,
         };
         self.try_update_config(id, config).map_err(|_| {
             FingerprintInconsistency::UserAgentClaimsBrowser {
@@ -763,6 +799,10 @@ impl From<&ProfileConfig> for ProfileIdentity {
             platform,
             brands,
             accept_language,
+            hardware_concurrency: config.hardware_concurrency,
+            device_memory: config.device_memory,
+            max_touch_points: config.max_touch_points,
+            color_depth: config.color_depth,
         }
     }
 }

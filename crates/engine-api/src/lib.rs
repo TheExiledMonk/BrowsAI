@@ -39,6 +39,14 @@ pub struct ProfileIdentity {
     pub platform: String,
     pub brands: Vec<SecChUaBrand>,
     pub accept_language: String,
+    /// `navigator.hardwareConcurrency`. Typical: 2, 4, 8, 16.
+    pub hardware_concurrency: u8,
+    /// `navigator.deviceMemory` in GB. Typical: 2, 4, 8, 16.
+    pub device_memory: u8,
+    /// `navigator.maxTouchPoints`. 0 on desktop, 5+ on touch devices.
+    pub max_touch_points: u8,
+    /// `screen.colorDepth`. 24 standard, 30 for HDR.
+    pub color_depth: u8,
 }
 
 impl ProfileIdentity {
@@ -66,6 +74,10 @@ impl ProfileIdentity {
                 },
             ],
             accept_language: "en-US,en;q=0.9".into(),
+            hardware_concurrency: 8,
+            device_memory: 8,
+            max_touch_points: 0,
+            color_depth: 24,
         }
     }
 
@@ -89,6 +101,14 @@ impl ProfileIdentity {
         } else {
             "?0"
         }
+    }
+
+    /// `true` when the platform string carries an Android/iOS/iPadOS marker,
+    /// which is the most reliable UA-side signal even though Android Chrome
+    /// reports `navigator.platform` as `Linux armv8l`.
+    pub fn ua_claims_touch(&self) -> bool {
+        let platform = self.platform.to_ascii_lowercase();
+        platform.contains("android") || platform.contains("iphone") || platform.contains("ipad")
     }
 
     pub fn sec_ch_ua_platform(&self) -> String {
