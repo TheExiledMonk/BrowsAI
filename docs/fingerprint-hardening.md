@@ -217,9 +217,109 @@ $ curl -s http://127.0.0.1:8765/health | jq '.active_domains'
    per-domain engines between calls. That's a follow-on; per-host
    isolation (the current behaviour) is enough for most read-only
    browsing.
-2. **Tier 3 TLS impersonation.** Multi-day. Plan with the project
-   owner.
-3. **Tier 2 HTTP/2 SETTINGS.** Smaller than Tier 3 but still requires
-   vendored-Servo work.
-4. **Tier 2.2 canvas noise.** Field exists; needs a vendored-Servo
-   hookup.
+
+---
+
+## Land-incrementally plan (commits)
+
+The full vendor + patches is **10–12 hours of careful work spread
+across 5–10 commits**. This is bigger than fits in one session. Each
+commit below is independently useful and the build stays green
+between them. The sequence:
+
+### Commit 1 — vendor `servo-net` and its dep tree
+
+* Source: `https://crates.io/api/v1/crates/servo-net/0.5.0/download`
+  (matches BrowsAI's pinned `servo = "0.5.0"`).
+* Place: `vendor/servo-net/`. ~1MB source + ~30 transitive deps.
+* Wire: `[patch.crates.io]` in workspace `Cargo.toml`.
+* New transitive deps BrowsAI doesn't already pull in:
+  `hyper-rustls`, `hyper_serde`, `rustls-pki-types`,
+  `rustls-platform-verifier`, `webpki-roots`, `net_traits`,
+  `profile_traits`, `embedder_traits`, `devtools_traits`,
+  `servo-base`, `servo-config`, `servo-url`, `servo-tracing`,
+  `servo-default-resources`, `servo_arc`, `content-security-policy`,
+  `headers`, `cookie`, `data-url`, `mime_guess`, `pixels`,
+  `paint_api`, `resvg`, `quick_cache`, `imsz`, `ipc-channel`.
+  Each downloaded from crates.io, extracted, and added to `[patch.crates.io]`.
+
+### Commit 2 — patch vendored `servo-net` with HTTP/2 SETTINGS knobs (T2.1)
+
+* Add `pub fn create_http_client_with_profile(tls_config, profile: Http2Profile)`
+  in `vendor/servo-net/src/connector.rs` alongside the existing
+  `create_http_client`.
+* The `Http2Profile` enum controls `initial_stream_window_size`,
+  `initial_connection_window_size`, `max_concurrent_reset_streams`,
+  `keep_alive_interval` matching Firefox / Chrome / Edge defaults.
+* Verified with `nghttp` or `h2spec` against the live SETTINGS frame.
+
+### Commit 3 — `--http2-profile=firefox|chrome|edge` flag in BrowsAI
+
+* Add to `browsai_engine_api::ContextOptions`: `http2_profile:
+  Option<Http2Profile>`.
+* Wire through `crates/engine-servo` to the vendored `create_http_client_*`
+  when the live-runtime path runs.
+* CLI: `browsai navigate --http2-profile=firefox <url>`.
+* Health response surfaces the active profile.
+
+### Commit 4 — TLS impersonation (T3.1)
+
+* Replace `rustls` with `rustls-impersonate` in the vendored
+  `connector.rs`. Use `rustls-impersonate` at a version that tracks
+  rustls-0.23 (the version `servo = "0.5"` uses).
+* Cipher suite / extension reorder matches Firefox-130 / Chrome-140
+  JA3 templates.
+* Verified with Wireshark TLS capture: client JA3 hash falls within
+  the impersonated browser's published JA3.
+
+### Commit 5 — canvas noise seed wiring (T2.2)
+
+* Vendor `components/canvas/` from upstream Servo as
+  `vendor/servo-canvas/`.
+* Add a thread-through for `ProfileIdentity.canvas_noise_seed`:
+  the noise injection reads the seed at canvas-creation time and
+  uses it as the RNG seed.
+* Verified: two `canvas.toDataURL()` calls with the same seed produce
+  identical output; two calls with different seeds produce different
+  output.
+
+### Commit ordering and dependencies
+
+* Commit 1 must land first — everything depends on the vendored
+  source.
+* Commits 2 and 3 can land in either order; both need Commit 1.
+* Commit 4 requires Commit 1's vendored chain but is independent of 2
+  and 3.
+* Commit 5 is independent of 2/3/4.
+
+### Per-commit verification
+
+Each commit lands with `cargo test --workspace` green, plus the
+tier-specific test:
+
+| Commit | Tier-specific test |
+| --- | --- |
+| 1 | `cargo test --workspace` (vendored chain compiles) |
+| 2 | `nghttp` or `h2spec` shows SETTINGS matching the profile |
+| 3 | unit test that `--http2-profile=firefox` is wired into `ContextOptions` |
+| 4 | Wireshark TLS capture shows `JA3` matches Firefox-130 template |
+| 5 | canvas hash determinism test |
+
+### Why not just do this in one PR?
+
+The user picked option 1 (full vendoring + patches), but the work is
+multi-day. Doing it in one PR means days of unreviewed code landing
+unsupervised. Breaking it into 5 PRs means each can be reviewed,
+reverted, or extended independently. The Helios plugin author can
+start using commit 3's `--http2-profile` even before commit 4 lands.
+
+---
+
+## What this doc is
+
+This document is the single source of truth for the fingerprint
+hardening roadmap. Each commit above references its implementation
+files; each test asserts the tier-specific behaviour. When the
+project's external environment changes (Servo release, rustls
+release, Akamai / Slashdot detection updates), this is the doc to
+update first.
