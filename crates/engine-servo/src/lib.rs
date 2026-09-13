@@ -1451,8 +1451,8 @@ impl ServoRuntimePage {
             tree.truncated = true;
             return Ok(tree);
         }
-        let script = "(function(){var count=0,MAX_NODES=1000;function walk(element){if(!element||count>=MAX_NODES)return null;count++;var tag=(element.tagName||'unknown').toLowerCase(),role=element.getAttribute('role')||'',nameAttr=element.getAttribute('aria-label')||element.getAttribute('title')||'',text=element.textContent||'',name=nameAttr||(text.trim()||''),n=(element.getAttribute('name')||'').toLowerCase(),a=(element.getAttribute('autocomplete')||'').toLowerCase(),t=(element.getAttribute('type')||'').toLowerCase(),interactive=tag==='a'||tag==='button'||tag==='input'||tag==='textarea'||tag==='select'||!!role||!!nameAttr,w=Math.max(0,Number(element.offsetWidth)||0),h=Math.max(0,Number(element.offsetHeight)||0),children=[];for(var i=0;i<element.children.length&&count<MAX_NODES;i++){var child=walk(element.children[i]);if(child!==null)children.push(child)}return {tag:tag,role:role,name:name,fieldName:n,autocomplete:a,text:interactive?(element.textContent||'').slice(0,500):'',value:interactive&&typeof element.value==='string'?element.value:'',type:t,id:element.id||'',disabled:element.hasAttribute('disabled'),focused:document.activeElement===element,visible:w>0&&h>0,rect:{x:Number(element.offsetLeft)||0,y:Number(element.offsetTop)||0,width:w,height:h},children:children}}var root=walk(document.documentElement||document.body);return {root:root,truncated:count>=MAX_NODES,nodeCount:count}})()";
-        let fallback_script = "(function(){function item(e){var s=getComputedStyle(e),w=Math.max(0,Number(e.offsetWidth)||0),h=Math.max(0,Number(e.offsetHeight)||0);return {tag:e.tagName.toLowerCase(),role:e.getAttribute('role')||'',name:e.getAttribute('aria-label')||e.getAttribute('title')||e.textContent.trim().slice(0,200),fieldName:(e.getAttribute('name')||'').toLowerCase(),autocomplete:'',text:e.textContent.trim().slice(0,500),value:typeof e.value==='string'?e.value:'',type:e.type||'',id:e.id||'',disabled:e.hasAttribute('disabled'),focused:document.activeElement===e,visible:s.display!=='none'&&s.visibility!=='hidden'&&w>0&&h>0,rect:{x:Number(e.offsetLeft)||0,y:Number(e.offsetTop)||0,width:w,height:h},children:[]};}return {root:{tag:'html',role:'',name:'',fieldName:'',autocomplete:'',text:'',value:'',type:'',id:'',disabled:false,focused:false,visible:true,rect:{x:0,y:0,width:0,height:0},children:Array.from(document.querySelectorAll('a,button,input,textarea,select,[role]')).slice(0,500).map(item)},truncated:false,nodeCount:0};})()";
+        let script = "(function(){var count=0,MAX_NODES=1000;function walk(element){if(!element||count>=MAX_NODES)return null;count++;var tag=(element.tagName||'unknown').toLowerCase(),role=element.getAttribute('role')||'',nameAttr=element.getAttribute('aria-label')||element.getAttribute('title')||'',text=element.textContent||'',name=nameAttr||(text.trim()||''),n=(element.getAttribute('name')||'').toLowerCase(),a=(element.getAttribute('autocomplete')||'').toLowerCase(),t=(element.getAttribute('type')||'').toLowerCase(),interactive=tag==='a'||tag==='button'||tag==='input'||tag==='textarea'||tag==='select'||!!role||!!nameAttr,url=(tag==='a'||tag==='area'||tag==='link')?(element.getAttribute('href')||element.getAttribute('xlink:href')||''):(tag==='img'||tag==='iframe'||tag==='source'||tag==='script')?(element.getAttribute('src')||''):(tag==='form')?(element.getAttribute('action')||''):(tag==='input'&&t==='image')?(element.getAttribute('src')||''):'',w=Math.max(0,Number(element.offsetWidth)||0),h=Math.max(0,Number(element.offsetHeight)||0),children=[];for(var i=0;i<element.children.length&&count<MAX_NODES;i++){var child=walk(element.children[i]);if(child!==null)children.push(child)}return {tag:tag,role:role,name:name,fieldName:n,autocomplete:a,text:interactive?(element.textContent||'').slice(0,500):'',value:interactive&&typeof element.value==='string'?element.value:'',type:t,url:url,id:element.id||'',disabled:element.hasAttribute('disabled'),focused:document.activeElement===element,visible:w>0&&h>0,rect:{x:Number(element.offsetLeft)||0,y:Number(element.offsetTop)||0,width:w,height:h},children:children}}var root=walk(document.documentElement||document.body);return {root:root,truncated:count>=MAX_NODES,nodeCount:count}})()";
+        let fallback_script = "(function(){function item(e){var s=getComputedStyle(e),w=Math.max(0,Number(e.offsetWidth)||0),h=Math.max(0,Number(e.offsetHeight)||0),tag=e.tagName.toLowerCase(),url=(tag==='a'||tag==='area'||tag==='link')?(e.getAttribute('href')||e.getAttribute('xlink:href')||''):(tag==='img'||tag==='iframe'||tag==='source'||tag==='script')?(e.getAttribute('src')||''):(tag==='form')?(e.getAttribute('action')||''):(tag==='input'&&e.type==='image')?(e.getAttribute('src')||''):'';return {tag:tag,role:e.getAttribute('role')||'',name:e.getAttribute('aria-label')||e.getAttribute('title')||e.textContent.trim().slice(0,200),fieldName:(e.getAttribute('name')||'').toLowerCase(),autocomplete:'',text:e.textContent.trim().slice(0,500),value:typeof e.value==='string'?e.value:'',type:e.type||'',url:url,id:e.id||'',disabled:e.hasAttribute('disabled'),focused:document.activeElement===e,visible:s.display!=='none'&&s.visibility!=='hidden'&&w>0&&h>0,rect:{x:Number(e.offsetLeft)||0,y:Number(e.offsetTop)||0,width:w,height:h},children:[]};}return {root:{tag:'html',role:'',name:'',fieldName:'',autocomplete:'',text:'',value:'',type:'',url:'',id:'',disabled:false,focused:false,visible:true,rect:{x:0,y:0,width:0,height:0},children:Array.from(document.querySelectorAll('a,button,input,textarea,select,[role]')).slice(0,500).map(item)},truncated:false,nodeCount:0};})()";
         let cisco_host = url
             .host_str()
             .is_some_and(|host| host == "cisco.com" || host == "www.cisco.com");
@@ -1463,7 +1463,7 @@ impl ServoRuntimePage {
         };
         let empty_projection = || {
             serde_json::json!({
-                "root": {"tag":"html","role":"","name":"","fieldName":"","autocomplete":"","text":"","value":"","type":"","id":"","disabled":false,"focused":false,"visible":true,"rect":{"x":0,"y":0,"width":0,"height":0},"children":[]},
+                "root": {"tag":"html","role":"","name":"","fieldName":"","autocomplete":"","text":"","value":"","type":"","url":"","id":"","disabled":false,"focused":false,"visible":true,"rect":{"x":0,"y":0,"width":0,"height":0},"children":[]},
                 "truncated": true,
                 "nodeCount": 0
             })
@@ -1481,7 +1481,7 @@ impl ServoRuntimePage {
             match self.evaluate_javascript_bounded(script.to_owned(), projection_timeout) {
             Ok(value) => value,
             Err(EngineError::EvaluationTimeout) => match self.evaluate_javascript_bounded(
-                "(function(){function item(e){var s=getComputedStyle(e),w=Math.max(0,Number(e.offsetWidth)||0),h=Math.max(0,Number(e.offsetHeight)||0);return {tag:e.tagName.toLowerCase(),role:e.getAttribute('role')||'',name:e.getAttribute('aria-label')||e.getAttribute('title')||e.textContent.trim().slice(0,200),fieldName:(e.getAttribute('name')||'').toLowerCase(),autocomplete:'',text:e.textContent.trim().slice(0,500),value:typeof e.value==='string'?e.value:'',type:e.type||'',id:e.id||'',disabled:e.hasAttribute('disabled'),focused:document.activeElement===e,visible:s.display!=='none'&&s.visibility!=='hidden'&&w>0&&h>0,rect:{x:Number(e.offsetLeft)||0,y:Number(e.offsetTop)||0,width:w,height:h},children:[]};}return {tag:'html',role:'',name:'',fieldName:'',autocomplete:'',text:'',value:'',type:'',id:'',disabled:false,focused:false,visible:true,rect:{x:0,y:0,width:0,height:0},children:Array.from(document.querySelectorAll('a,button,input,textarea,select,[role]')).slice(0,500).map(item)};})()",
+                "(function(){function item(e){var s=getComputedStyle(e),w=Math.max(0,Number(e.offsetWidth)||0),h=Math.max(0,Number(e.offsetHeight)||0),tag=e.tagName.toLowerCase(),url=(tag==='a'||tag==='area'||tag==='link')?(e.getAttribute('href')||e.getAttribute('xlink:href')||''):(tag==='img'||tag==='iframe'||tag==='source'||tag==='script')?(e.getAttribute('src')||''):(tag==='form')?(e.getAttribute('action')||''):(tag==='input'&&e.type==='image')?(e.getAttribute('src')||''):'';return {tag:tag,role:e.getAttribute('role')||'',name:e.getAttribute('aria-label')||e.getAttribute('title')||e.textContent.trim().slice(0,200),fieldName:(e.getAttribute('name')||'').toLowerCase(),autocomplete:'',text:e.textContent.trim().slice(0,500),value:typeof e.value==='string'?e.value:'',type:e.type||'',url:url,id:e.id||'',disabled:e.hasAttribute('disabled'),focused:document.activeElement===e,visible:s.display!=='none'&&s.visibility!=='hidden'&&w>0&&h>0,rect:{x:Number(e.offsetLeft)||0,y:Number(e.offsetTop)||0,width:w,height:h},children:[]};}return {tag:'html',role:'',name:'',fieldName:'',autocomplete:'',text:'',value:'',type:'',url:'',id:'',disabled:false,focused:false,visible:true,rect:{x:0,y:0,width:0,height:0},children:Array.from(document.querySelectorAll('a,button,input,textarea,select,[role]')).slice(0,500).map(item)};})()",
                 projection_timeout,
             ) {
                 Ok(value) => value,
@@ -1636,9 +1636,24 @@ fn build_agent_node(
         .get("value")
         .and_then(serde_json::Value::as_str)
         .unwrap_or("");
+    let raw_url = object
+        .get("url")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("");
     let structural_role = role_for_tag(tag, explicit_role);
     let node_value = if sensitive {
         None
+    } else if !raw_url.is_empty()
+        && matches!(
+            structural_role,
+            StructuralRole::Link | StructuralRole::Image
+        )
+    {
+        // Anchor/img/etc. with a resolved href/src — store as URL so the
+        // markdown emitter can render standard `[text](url)` syntax.
+        Some(AgentValue::Url(
+            browsai_provenance::ExplainabilityReport::redact_text(raw_url),
+        ))
     } else if raw_value.is_empty() {
         (!text.is_empty()).then_some(AgentValue::Text(text.clone()))
     } else {

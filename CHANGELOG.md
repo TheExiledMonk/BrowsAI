@@ -2,19 +2,16 @@
 
 ## Unreleased
 
-- `browsai-page-text`: new crate that renders an `AgentRenderTree` as
-  markdown for LLM consumption. Actionable widgets get BB-code-style
-  tags (`[link id="…"]`, `[button id="…"]`, `[textbox id="…"]`, etc.)
-  so the LLM can both read the page as prose and resolve the same
-  `AgentNodeId` back through the existing `/follow-link` and `/action`
-  endpoints. `--format=text` strips the tags for cheaper read-only
-  prompts. Body wrapped in a `<page-content trust="untrusted">`
-  envelope by default to mark page data vs. instructions.
-- Wire surface:
-  - CLI: `browsai query <url> --format=markdown|text` and
-    `browsai render <url> --format=markdown|text`. With `--stream`,
-    emits a `text-frame` NDJSON event before `snapshot-complete`.
-  - HTTP: `format` body field on `/browse`, `/query`, `/render`.
+- `browsai-page-text`: emit standard Markdown `[text](url)` for links
+  and `![alt](src)` for images when the projection script resolves
+  the URL. Anchors/images without a resolved URL still fall back to
+  BB-code-style `[link id="…"]` so the action-side `AgentNodeId`
+  remains resolvable. Format version bumps to `2` for this
+  behaviour change.
+- Servo projection script (`crates/engine-servo/src/lib.rs`) now
+  captures `href` / `xlink:href` / `src` / `action` from anchors,
+  links, forms, images, iframes, sources, and scripts so the
+  AgentNode for those elements carries a `value: AgentValue::Url`.
 - Initial public source: profile-driven browser identity, challenge
   observer, humanized mouse trajectory generator, unattended solve
   pathway, randomized initial cursor, dual-licensing structure

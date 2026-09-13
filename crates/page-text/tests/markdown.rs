@@ -60,7 +60,7 @@ fn page_title_becomes_level_one_heading() {
 }
 
 #[test]
-fn link_emits_bb_code_with_id_and_href() {
+fn link_with_href_emits_standard_markdown() {
     let mut tree = AgentRenderTree::new_page("Example");
     let link = node(
         "link-1",
@@ -73,9 +73,13 @@ fn link_emits_bb_code_with_id_and_href() {
     append(&mut tree, link);
     tree.nodes[0].children.push("link-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
-    let expected =
-        "[link id=\"link-1\" name=\"More information\" href=\"https://example.test/about\"]More information[/link]";
+    let expected = "[More information](https://example.test/about)";
     assert!(view.content.contains(expected), "got: {}", view.content);
+    assert!(
+        !view.content.contains("[link"),
+        "no BB-code fallback when href present: {}",
+        view.content
+    );
     let span = view
         .node_index
         .iter()
@@ -83,6 +87,46 @@ fn link_emits_bb_code_with_id_and_href() {
         .expect("link span indexed");
     assert_eq!(span.tag, MarkdownTag::Link);
     assert_eq!(span.href.as_deref(), Some("https://example.test/about"));
+}
+
+#[test]
+fn link_without_href_falls_back_to_bb_code() {
+    let mut tree = AgentRenderTree::new_page("Example");
+    let link = node(
+        "link-1",
+        StructuralRole::Link,
+        Some("Anchor"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    append(&mut tree, link);
+    tree.nodes[0].children.push("link-1".into());
+    let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
+    assert!(
+        view.content.contains("[link id=\"link-1\""),
+        "got: {}",
+        view.content
+    );
+    assert!(view.content.contains("Anchor"));
+}
+
+#[test]
+fn image_with_src_emits_standard_markdown() {
+    let mut tree = AgentRenderTree::new_page("Page");
+    let img = node(
+        "img-1",
+        StructuralRole::Image,
+        Some("A logo"),
+        Some(AgentValue::Url("https://example.test/logo.png".into())),
+        NodeState::default(),
+        vec![],
+    );
+    append(&mut tree, img);
+    tree.nodes[0].children.push("img-1".into());
+    let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
+    let expected = "![A logo](https://example.test/logo.png)";
+    assert!(view.content.contains(expected), "got: {}", view.content);
 }
 
 #[test]
@@ -277,12 +321,12 @@ fn list_items_are_indented_and_collapsed() {
     tree.nodes[0].children.push("list-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
     assert!(
-        view.content.contains("- [link id=\"link-1\""),
+        view.content.contains("- [First](/first)"),
         "got: {}",
         view.content
     );
     assert!(
-        view.content.contains("- [link id=\"link-2\""),
+        view.content.contains("- [Second](/second)"),
         "got: {}",
         view.content
     );
@@ -455,8 +499,8 @@ fn spans_track_byte_offsets_into_envelope() {
         .find(|s| s.id == "link-1")
         .expect("span");
     let slice = &view.content[span.start..span.end];
-    assert!(slice.starts_with("[link "), "slice was: {slice}");
-    assert!(slice.ends_with("[/link]"), "slice was: {slice}");
+    assert!(slice.starts_with("[A](/a)"), "slice was: {slice}");
+    assert!(slice.ends_with("](/a)"), "slice was: {slice}");
 }
 
 #[test]

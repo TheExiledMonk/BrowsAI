@@ -20,7 +20,7 @@ use browsai_agent_tree::{
 };
 use serde::{Deserialize, Serialize};
 
-pub const PAGE_TEXT_FORMAT_VERSION: u16 = 1;
+pub const PAGE_TEXT_FORMAT_VERSION: u16 = 2;
 
 /// Output style. Both modes share the same node walk and the same
 /// `<page-content trust="untrusted">` envelope.
@@ -336,6 +336,49 @@ impl<'a> MarkdownEmitter<'a> {
             self.emit_actionable_plain(node, tag, opts);
             return;
         }
+        // Links with a resolved href and images with a resolved src emit
+        // standard Markdown syntax (`[text](url)` / `![alt](src)`) so
+        // plugin consumers can parse them with a vanilla regex. The
+        // action-side id is still recorded in `node_index` so hosts can
+        // resolve back to /follow-link / /action by node id.
+        let resolved_url = match tag {
+            MarkdownTag::Link => link_href(node),
+            MarkdownTag::Image => image_src(node),
+            _ => None,
+        };
+        if let Some(url) = resolved_url {
+            let start = self.out.len();
+            let body_text = actionable_body_text(node, tag, opts);
+            if tag == MarkdownTag::Image {
+                self.out.push_str("![");
+                self.out.push_str(if body_text.is_empty() {
+                    "image"
+                } else {
+                    &body_text
+                });
+                self.out.push_str("](");
+                self.out.push_str(&url);
+                self.out.push(')');
+            } else {
+                self.out.push('[');
+                self.out.push_str(&body_text);
+                self.out.push_str("](");
+                self.out.push_str(&url);
+                self.out.push(')');
+            }
+            let end = self.out.len();
+            self.out.push('\n');
+            self.index.push(NodeSpan {
+                id: node.id.clone(),
+                tag,
+                start,
+                end,
+                href: Some(url),
+                name: node.name.clone(),
+            });
+            return;
+        }
+
         let start = self.out.len();
         self.out.push('[');
         self.out.push_str(tag.as_str());
