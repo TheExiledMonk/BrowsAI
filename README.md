@@ -32,6 +32,22 @@ browsai live-open https://example.com
 
 Boots a Servo-backed context, navigates, projects the Agent Render Tree, and emits a JSON snapshot. The `--click-links`, `--probe-controls`, and `--auto-solve` flags add interaction. See `docs/challenge-handling.md` for the full auto-solve model.
 
+### Reading a page as prose for LLMs
+
+```sh
+browsai query https://example.test --format=markdown
+browsai query https://example.test --format=text
+```
+
+`browsai-page-text` renders the Agent Render Tree as markdown for LLM
+consumption. Actionable widgets get BB-code-style `[tag id="…"]`
+wrappers so the model can both read the page and resolve the same
+`AgentNodeId` back through `/follow-link` and `/action`. `--format=text`
+strips the tags for cheaper read-only prompts. Output is wrapped in a
+`<page-content trust="untrusted">` envelope to mark page data vs.
+instructions. Full reference, tag set, and a worked navigate → read →
+follow example in [`docs/page-text.md`](docs/page-text.md).
+
 ### Live-search
 
 ```sh
