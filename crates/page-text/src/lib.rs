@@ -819,18 +819,6 @@ fn emit_extra_attrs(out: &mut String, node: &AgentNode, tag: MarkdownTag) {
     }
 }
 
-fn link_href(node: &AgentNode) -> Option<String> {
-    if let Some(AgentValue::Url(u)) = &node.value {
-        return Some(u.clone());
-    }
-    if let Some(description) = node.description.as_deref() {
-        if description.starts_with("http://") || description.starts_with("https://") {
-            return Some(description.to_string());
-        }
-    }
-    None
-}
-
 fn placeholder(node: &AgentNode) -> Option<String> {
     node.description
         .as_deref()
@@ -838,9 +826,108 @@ fn placeholder(node: &AgentNode) -> Option<String> {
         .map(|s| s.to_string())
 }
 
+fn link_href(node: &AgentNode) -> Option<String> {
+    // Primary: AgentValue::Url set by the projection pipeline.
+    if let Some(AgentValue::Url(u)) = &node.value {
+        let trimmed = u.trim();
+        if !trimmed.is_empty() {
+            return Some(trimmed.to_string());
+        }
+    }
+    // Fallback: description carrying a URL. Some IR passes stash the
+    // resolved href here when the projection script returns the URL in a
+    // non-standard field.
+    if let Some(description) = node.description.as_deref() {
+        if let Some(url) = extract_url(description) {
+            return Some(url);
+        }
+    }
+    // Fallback: text value carrying a URL (some legacy builds stored
+    // the href as the visible text for icon links or as the link's
+    // AgentValue::Text when the URL also surfaced as the link text).
+    if let Some(AgentValue::Text(text)) = &node.value {
+        if let Some(url) = extract_url(text) {
+            return Some(url);
+        }
+    }
+    // Fallback: accessible name containing a URL (icon-only links).
+    if let Some(name) = node.name.as_deref() {
+        if let Some(url) = extract_url(name) {
+            return Some(url);
+        }
+    }
+    None
+}
+
 fn image_src(node: &AgentNode) -> Option<String> {
     if let Some(AgentValue::Url(u)) = &node.value {
-        return Some(u.clone());
+        let trimmed = u.trim();
+        if !trimmed.is_empty() {
+            return Some(trimmed.to_string());
+        }
+    }
+    if let Some(description) = node.description.as_deref() {
+        if let Some(url) = extract_url(description) {
+            return Some(url);
+        }
+    }
+    None
+}
+
+/// Pull the first http/https URL out of `text`, or any path-shaped URL.
+fn extract_url(text: &str) -> Option<String> {
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let bytes = trimmed.as_bytes();
+    for (index, _) in trimmed.match_indices("http") {
+        // Require a scheme boundary so we don't pick up the middle of
+        // an unrelated word.
+        if index > 0 {
+            let prev = bytes[index - 1];
+            if prev.is_ascii_alphanumeric() || prev == b'_' || prev == b'-' {
+                continue;
+            }
+        }
+        let rest = &trimmed[index..];
+        if let Some(after_scheme) = rest
+            .strip_prefix("https://")
+            .or_else(|| rest.strip_prefix("http://"))
+        {
+            let end = after_scheme
+                .find(|c: char| c.is_whitespace() || c == '"' || c == '\'' || c == '<' || c == '>')
+                .unwrap_or(after_scheme.len());
+            let candidate = &after_scheme[..end];
+            if !candidate.is_empty() {
+                let scheme_len = rest.len() - after_scheme.len();
+                return Some(trimmed[index..index + scheme_len + end].to_string());
+            }
+        }
+    }
+    for (index, _) in trimmed.match_indices("//") {
+        if index == 0 {
+            continue;
+        }
+        if index > 0 {
+            let prev = bytes[index - 1];
+            if !prev.is_ascii_whitespace() {
+                continue;
+            }
+        }
+        let rest = &trimmed[index + 2..];
+        let end = rest
+            .find(|c: char| c.is_whitespace() || c == '"' || c == '\'' || c == '<' || c == '>')
+            .unwrap_or(rest.len());
+        let candidate = &rest[..end];
+        if !candidate.is_empty() {
+            return Some(format!("//{}", candidate));
+        }
+    }
+    // Fallback: relative path-shaped URLs (start with "/" and contain no
+    // whitespace).
+    if trimmed.starts_with('/') && !trimmed.contains(char::is_whitespace) && trimmed.len() > 1 {
+        return Some(trimmed.to_string());
     }
     None
 }

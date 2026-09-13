@@ -2,16 +2,20 @@
 
 ## Unreleased
 
-- `browsai-page-text`: emit standard Markdown `[text](url)` for links
-  and `![alt](src)` for images when the projection script resolves
-  the URL. Anchors/images without a resolved URL still fall back to
-  BB-code-style `[link id="…"]` so the action-side `AgentNodeId`
-  remains resolvable. Format version bumps to `2` for this
-  behaviour change.
+- `browsai-page-text`: `link_href` and `image_src` now also fall back
+  to `description`, `value` as text, and `name` when the projection
+  pipeline hasn't promoted the resolved URL to `AgentValue::Url`. This
+  catches builds where the URL surfaces in a non-standard field, and
+  lets the standard `[text](url)` / `![alt](src)` emission fire
+  instead of dropping back to BB-code without a URL.
 - Servo projection script (`crates/engine-servo/src/lib.rs`) now
   captures `href` / `xlink:href` / `src` / `action` from anchors,
   links, forms, images, iframes, sources, and scripts so the
   AgentNode for those elements carries a `value: AgentValue::Url`.
+- Known limitation: pages that load content via XHR after the initial
+  snapshot (turbo-frame, fetch-on-mount) may not have the XHR-loaded
+  nodes in the projection. Pass `wait_ms: 5000` for now; a
+  selector-poll primitive is a follow-up.
 - Initial public source: profile-driven browser identity, challenge
   observer, humanized mouse trajectory generator, unattended solve
   pathway, randomized initial cursor, dual-licensing structure

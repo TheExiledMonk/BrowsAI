@@ -311,6 +311,18 @@ underlying `AgentRenderTree`, but the markdown output is monolithic
 - **Tables lose some structure in plain mode** — rendered as
   pipe-separated rows without column widths. Markdown mode keeps the
   full `| a | b |` separator.
+- **URL detection is best-effort.** `link_href` looks at `value`
+  (primary), `description`, `value` as text, and `name`. Sites that
+  stash the resolved href in a non-standard field will fall through
+  to the BB-code fallback without a URL.
+- **XHR-loaded content (turbo-frame, fetch-on-mount, infinite scroll)
+  may not be in the snapshot.** The projection runs once after
+  `LoadStatus::Complete` plus the configured `wait_ms`. Pages that
+  keep loading content asynchronously — GitHub topic pages with
+  turbo-frame cards, X timelines, SPAs that hydrate after first paint
+  — need either a longer `wait_ms` or a polling primitive for a
+  specific selector (not yet implemented). The current workaround is
+  to pass `"wait_ms": 5000` and accept the latency.
 
 ## Schema
 

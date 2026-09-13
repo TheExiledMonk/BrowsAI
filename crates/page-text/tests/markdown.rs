@@ -130,6 +130,74 @@ fn image_with_src_emits_standard_markdown() {
 }
 
 #[test]
+fn link_recovers_url_from_description() {
+    // Some IR builds stash the resolved href in `description` instead
+    // of promoting it to AgentValue::Url. The emitter must surface it
+    // either way so the plugin's `[text](url)` regex keeps matching.
+    let mut tree = AgentRenderTree::new_page("Example");
+    let mut link = node(
+        "link-1",
+        StructuralRole::Link,
+        Some("Profile"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    link.description = Some("https://github.com/example".into());
+    append(&mut tree, link);
+    tree.nodes[0].children.push("link-1".into());
+    let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
+    assert!(
+        view.content
+            .contains("[Profile](https://github.com/example)"),
+        "got: {}",
+        view.content
+    );
+}
+
+#[test]
+fn link_recovers_url_from_name() {
+    let mut tree = AgentRenderTree::new_page("Example");
+    let link = node(
+        "link-1",
+        StructuralRole::Link,
+        Some("https://example.test/path"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    append(&mut tree, link);
+    tree.nodes[0].children.push("link-1".into());
+    let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
+    assert!(
+        view.content.contains("](https://example.test/path)"),
+        "got: {}",
+        view.content
+    );
+}
+
+#[test]
+fn link_recovers_relative_path_url() {
+    let mut tree = AgentRenderTree::new_page("Example");
+    let link = node(
+        "link-1",
+        StructuralRole::Link,
+        Some("Edit"),
+        Some(AgentValue::Text("/orgs/example/repo/edit".into())),
+        NodeState::default(),
+        vec![],
+    );
+    append(&mut tree, link);
+    tree.nodes[0].children.push("link-1".into());
+    let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
+    assert!(
+        view.content.contains("[Edit](/orgs/example/repo/edit)"),
+        "got: {}",
+        view.content
+    );
+}
+
+#[test]
 fn textbox_with_empty_value_is_self_closing() {
     let mut tree = AgentRenderTree::new_page("Search");
     let textbox = node(
