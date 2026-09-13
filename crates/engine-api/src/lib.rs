@@ -304,8 +304,11 @@ pub trait BrowserEngine {
 
     /// Wait until the page's network is idle: no in-flight XHR or fetch
     /// requests for `idle_ms` continuously, or `max_ms` total elapsed.
-    /// Returns `Ok(())` either way — the caller treats timeout as "best
-    /// effort, take the snapshot anyway".
+    /// `grace_ms` is the additional quiet window required *after*
+    /// `idle_ms` of stability, on top of any scroll-trigger / lazy-load
+    /// priming the engine performs. Callers treat timeout as "best
+    /// effort, take the snapshot anyway" — both Ok and timeout return
+    /// `Ok(())`.
     ///
     /// Engines that don't track in-flight network state return
     /// `EngineError::Unsupported`. The default impl does this so the
@@ -315,6 +318,7 @@ pub trait BrowserEngine {
         &mut self,
         _page: PageId,
         _idle_ms: u64,
+        _grace_ms: u64,
         _max_ms: u64,
     ) -> Result<(), EngineError> {
         Err(EngineError::Unsupported(

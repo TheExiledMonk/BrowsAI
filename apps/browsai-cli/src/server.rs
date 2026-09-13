@@ -1062,6 +1062,10 @@ fn handle_browse(
         .get("network_idle_ms")
         .and_then(Value::as_u64)
         .unwrap_or(500);
+    let network_idle_grace_ms = body
+        .get("network_idle_grace_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(1_000);
     let network_idle_max_ms = body
         .get("network_idle_max_ms")
         .and_then(Value::as_u64)
@@ -1105,9 +1109,12 @@ fn handle_browse(
     }
     if wait_for_network_idle {
         let mut engine = state.engine.lock().expect("engine lock");
-        if let Err(error) =
-            engine.wait_for_network_idle(page_id, network_idle_ms, network_idle_max_ms)
-        {
+        if let Err(error) = engine.wait_for_network_idle(
+            page_id,
+            network_idle_ms,
+            network_idle_grace_ms,
+            network_idle_max_ms,
+        ) {
             // Network-idle wait is best-effort. The deterministic
             // backend returns Unsupported by design; log the other
             // failures and continue with the snapshot rather than
@@ -1115,7 +1122,7 @@ fn handle_browse(
             let unsupported = matches!(&error, EngineError::Unsupported(_));
             if !unsupported {
                 eprintln!(
-                    "BROWSAI_NETWORK_IDLE_ERROR: {error:?} (idle_ms={network_idle_ms}, max_ms={network_idle_max_ms})"
+                    "BROWSAI_NETWORK_IDLE_ERROR: {error:?} (idle_ms={network_idle_ms}, grace_ms={network_idle_grace_ms}, max_ms={network_idle_max_ms})"
                 );
             }
         }

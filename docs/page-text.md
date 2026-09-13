@@ -316,23 +316,32 @@ underlying `AgentRenderTree`, but the markdown output is monolithic
   stash the resolved href in a non-standard field will fall through
   to the BB-code fallback without a URL.
 - **XHR-loaded and lazy-loaded content (turbo-frame, fetch-on-mount,
-  intersection-observer, infinite scroll, SPA hydration) is now in
-  the snapshot by default.** The daemon installs a JS interceptor on
-  `/browse` that tracks four signals and only proceeds once all four
-  have been quiet for 500ms continuously: `window.fetch` and
+  intersection-observer, infinite scroll, SPA hydration) is now
+  in the snapshot by default.** The daemon installs a JS interceptor on
+  `/browse` that tracks five signals and only proceeds once all five
+  have held for `network_idle_ms + network_idle_grace_ms` continuously
+  (defaults 500 + 1000 = 1500ms): `window.fetch` and
   `XMLHttpRequest` in-flight counts, `<img>` elements still loading,
-  `document.readyState` (`complete`), and a `MutationObserver`-
+  `document.readyState` (`complete`), a `MutationObserver`-
   driven `__browsaiLastMutation` timestamp that catches every DOM
-  mutation. The fourth signal is what covers lazy loading — JS that
-  schedules work via `setTimeout(0)`, `requestAnimationFrame`,
-  `IntersectionObserver`, or promise microtasks. Without it, the
-  three counter-based signals can all hit zero while the page is
-  still in the middle of mutating itself. Pass
-  `wait_for_network_idle: false` on the body to opt out for cached
-  / fully server-rendered pages. `pump_runtime` (driven by
-  `wait_ms`) still runs first to spin the event loop for
-  synchronous JS; the network-idle wait handles the async
-  XHR / image / readyState / mutation-driven work that pump misses.
+  mutation, and `__browsaiScrollComplete` from a programmatic
+  top→bottom→top scroll that fires any `IntersectionObserver`-
+  gated content below the fold before the stability check starts
+  ticking. The fourth signal covers JS that schedules work via
+  `setTimeout(0)`, `requestAnimationFrame`, `IntersectionObserver`,
+  or promise microtasks. The fifth signal covers scroll-triggered
+  lazy loads specifically — sites like GitHub topic pages gate the
+  repo-card region behind an `IntersectionObserver` that never
+  observes anything below the viewport until the user scrolls, so
+  without the scroll nudge the DOM reaches a stable "no mutations"
+  state almost immediately and the snapshot returns the empty
+  shell. Pass `wait_for_network_idle: false` on the body to opt
+  out for cached / fully server-rendered pages. `pump_runtime`
+  (driven by `wait_ms`) still runs first to spin the event loop
+  for synchronous JS; the network-idle wait handles the async
+  XHR / image / readyState / mutation / scroll-trigger-driven
+  work that pump misses. Set `network_idle_grace_ms: 0` to recover
+  the original four-signal behaviour.
 
 ## Schema
 

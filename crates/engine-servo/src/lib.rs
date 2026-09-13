@@ -1744,7 +1744,7 @@ fn build_agent_node(
 }
 
 #[cfg(feature = "servo-runtime")]
-const INSTALL_NETWORK_IDLE_SCRIPT: &str = "(function(){if(window.__browsaiNetworkIdleInstalled)return true;window.__browsaiNetworkIdleInstalled=true;window.__browsaiInFlight=0;window.__browsaiImagesLoading=0;window.__browsaiReadyState=document.readyState;window.__browsaiLastMutation=Date.now();function dec(){if(window.__browsaiInFlight>0)window.__browsaiInFlight--;}function imgDec(){if(window.__browsaiImagesLoading>0)window.__browsaiImagesLoading--;}document.addEventListener('readystatechange',function(){window.__browsaiReadyState=document.readyState;});if(typeof window.fetch==='function'){var origFetch=window.fetch;window.fetch=function(){window.__browsaiInFlight++;var p;try{p=origFetch.apply(this,arguments);}catch(e){dec();throw e;}if(p&&typeof p.then==='function'){p.then(dec,dec);}else{dec();}return p;};}var XHR=window.XMLHttpRequest;if(XHR&&XHR.prototype){var origOpen=XHR.prototype.open;var origSend=XHR.prototype.send;XHR.prototype.open=function(){this.__browsaiTracked=true;return origOpen.apply(this,arguments);};XHR.prototype.send=function(){if(this.__browsaiTracked){window.__browsaiInFlight++;var done=false;function onDone(){if(done)return;done=true;dec();}this.addEventListener('loadend',onDone);this.addEventListener('error',onDone);this.addEventListener('abort',onDone);}return origSend.apply(this,arguments);};}function trackImg(img){if(!img||img.__browsaiTracked)return;img.__browsaiTracked=true;if(img.complete)return;window.__browsaiImagesLoading++;img.addEventListener('load',imgDec,{once:true});img.addEventListener('error',imgDec,{once:true});}try{var existing=document.querySelectorAll('img');for(var i=0;i<existing.length;i++)trackImg(existing[i]);}catch(_){}if(typeof MutationObserver==='function'){try{var domObserver=new MutationObserver(function(){window.__browsaiLastMutation=Date.now();});domObserver.observe(document.documentElement||document,{childList:true,subtree:true,attributes:true,characterData:true,attributeOldValue:false,characterDataOldValue:false});var imgObserver=new MutationObserver(function(muts){for(var m=0;m<muts.length;m++){var added=muts[m].addedNodes;for(var n=0;n<added.length;n++){var node=added[n];if(!node)continue;if(node.tagName==='IMG'){trackImg(node);}else if(node.querySelectorAll){var nested=node.querySelectorAll('img');for(var k=0;k<nested.length;k++)trackImg(nested[k]);}}}});imgObserver.observe(document.documentElement||document,{childList:true,subtree:true});}catch(_){}}return true;})()";
+const INSTALL_NETWORK_IDLE_SCRIPT: &str = "(function(){if(window.__browsaiNetworkIdleInstalled)return true;window.__browsaiNetworkIdleInstalled=true;window.__browsaiInFlight=0;window.__browsaiImagesLoading=0;window.__browsaiReadyState=document.readyState;window.__browsaiLastMutation=Date.now();function dec(){if(window.__browsaiInFlight>0)window.__browsaiInFlight--;}function imgDec(){if(window.__browsaiImagesLoading>0)window.__browsaiImagesLoading--;}document.addEventListener('readystatechange',function(){window.__browsaiReadyState=document.readyState;});if(typeof window.fetch==='function'){var origFetch=window.fetch;window.fetch=function(){window.__browsaiInFlight++;var p;try{p=origFetch.apply(this,arguments);}catch(e){dec();throw e;}if(p&&typeof p.then==='function'){p.then(dec,dec);}else{dec();}return p;};}var XHR=window.XMLHttpRequest;if(XHR&&XHR.prototype){var origOpen=XHR.prototype.open;var origSend=XHR.prototype.send;XHR.prototype.open=function(){this.__browsaiTracked=true;return origOpen.apply(this,arguments);};XHR.prototype.send=function(){if(this.__browsaiTracked){window.__browsaiInFlight++;var done=false;function onDone(){if(done)return;done=true;dec();}this.addEventListener('loadend',onDone);this.addEventListener('error',onDone);this.addEventListener('abort',onDone);}return origSend.apply(this,arguments);};}function trackImg(img){if(!img||img.__browsaiTracked)return;img.__browsaiTracked=true;if(img.complete)return;window.__browsaiImagesLoading++;img.addEventListener('load',imgDec,{once:true});img.addEventListener('error',imgDec,{once:true});}try{var existing=document.querySelectorAll('img');for(var i=0;i<existing.length;i++)trackImg(existing[i]);}catch(_){}if(typeof MutationObserver==='function'){try{var domObserver=new MutationObserver(function(){window.__browsaiLastMutation=Date.now();});domObserver.observe(document.documentElement||document,{childList:true,subtree:true,attributes:true,characterData:true,attributeOldValue:false,characterDataOldValue:false});var imgObserver=new MutationObserver(function(muts){for(var m=0;m<muts.length;m++){var added=muts[m].addedNodes;for(var n=0;n<added.length;n++){var node=added[n];if(!node)continue;if(node.tagName==='IMG'){trackImg(node);}else if(node.querySelectorAll){var nested=node.querySelectorAll('img');for(var k=0;k<nested.length;k++)trackImg(nested[k]);}}}});imgObserver.observe(document.documentElement||document,{childList:true,subtree:true});}catch(_){}}window.__browsaiScrollComplete=false;window.__browsaiScrollStarted=Date.now();window.__browsaiScrollStep=0;(function stepScroll(){try{var doc=document;var win=window;var h=Math.max(doc.documentElement?doc.documentElement.scrollHeight:0,doc.body?doc.body.scrollHeight:0);var vh=win.innerHeight||(doc.documentElement?doc.documentElement.clientHeight:0)||0;var scrollable=Math.max(0,h-vh);if(scrollable<=0){win.__browsaiScrollComplete=true;win.__browsaiLastMutation=Date.now();return;}var steps=6;var step=win.__browsaiScrollStep||0;if(step>=steps){try{win.scrollTo(0,0);}catch(_){}win.__browsaiScrollComplete=true;win.__browsaiLastMutation=Date.now();return;}var frac=(step+1)/steps;var y=Math.max(0,Math.floor(scrollable*frac));try{win.scrollTo(0,y);}catch(_){}win.__browsaiScrollStep=step+1;win.__browsaiLastMutation=Date.now();setTimeout(function(){requestAnimationFrame(stepScroll);},120);}catch(_){window.__browsaiScrollComplete=true;}})();return true;})()";
 
 /// Returns the JS source that installs the `window.__browsaiInFlight`
 /// counter used by [`ServoEngine::wait_for_network_idle_blocking`].
@@ -1980,19 +1980,33 @@ impl ServoEngine {
     }
 
     /// Wait until the page is fully settled before snapshotting.
-    /// All four conditions must hold simultaneously for `idle_ms`
+    /// Five conditions must hold simultaneously for `idle_ms`
     /// continuously, or `max_ms` total elapsed:
     ///
     /// 1. `window.fetch` and `XMLHttpRequest` in-flight counts at 0
     /// 2. Every `<img>` has finished loading
     /// 3. `document.readyState === 'complete'`
-    /// 4. The DOM has not been mutated for at least `idle_ms`
-    ///    (catches `setTimeout(0)`, `requestAnimationFrame`,
-    ///    `IntersectionObserver` callbacks, and promise microtasks
-    ///    that fire after the explicit resources settle — the cases
-    ///    that simple counter-based waits miss on lazy-loaded content)
+    /// 4. The DOM has not been mutated for at least
+    ///    `idle_ms + grace_ms` (catches `setTimeout(0)`,
+    ///    `requestAnimationFrame`, `IntersectionObserver` callbacks,
+    ///    and promise microtasks that fire after the explicit
+    ///    resources settle — the cases that simple counter-based
+    ///    waits miss on lazy-loaded content)
+    /// 5. The scroll-trigger sequence has completed
+    ///    (`window.__browsaiScrollComplete === true`). The installer
+    ///    walks the page top→bottom→top in 6 steps so any
+    ///    IntersectionObserver-gated content (turbo-frame cards,
+    ///    infinite scroll, scroll-laid images) is fired *before* the
+    ///    stability check starts ticking. Without this, GitHub topic
+    ///    pages and similar scroll-triggered lists reach a stable
+    ///    DOM almost immediately because the repo cards are gated
+    ///    behind an IntersectionObserver that never observes anything
+    ///    below the fold until the user scrolls. The `grace_ms` floor
+    ///    on top of `idle_ms` covers the asymmetric case where a
+    ///    lazy-load schedules work but its first mutation lands
+    ///    slightly after we declare stability.
     ///
-    /// Returns `Ok(())` once all four conditions have been quiet, or
+    /// Returns `Ok(())` once all five conditions have been quiet, or
     /// after `max_ms` total elapsed — the caller treats both as
     /// "best effort, snapshot now".
     #[cfg(feature = "servo-runtime")]
@@ -2000,6 +2014,7 @@ impl ServoEngine {
         &self,
         page: PageId,
         idle_ms: u64,
+        grace_ms: u64,
         max_ms: u64,
     ) -> Result<(), EngineError> {
         let real_page = self
@@ -2012,8 +2027,9 @@ impl ServoEngine {
             INSTALL_NETWORK_IDLE_SCRIPT.to_string(),
             std::time::Duration::from_secs(5),
         );
-        let max = std::time::Duration::from_millis(max_ms.max(idle_ms).max(1));
+        let max = std::time::Duration::from_millis(max_ms.max(idle_ms.saturating_add(grace_ms)).max(1));
         let idle = std::time::Duration::from_millis(idle_ms.max(50));
+        let quiet_floor_ms = idle_ms.saturating_add(grace_ms);
         let started = std::time::Instant::now();
         let mut idle_since: Option<std::time::Instant> = None;
         loop {
@@ -2030,7 +2046,7 @@ impl ServoEngine {
             }
             let snapshot = real_page
                 .evaluate_javascript_bounded(
-                    "({in_flight:window.__browsaiInFlight||0,images:window.__browsaiImagesLoading||0,ready_state:window.__browsaiReadyState||'unknown',last_mutation:window.__browsaiLastMutation||Date.now()})".to_string(),
+                    "({in_flight:window.__browsaiInFlight||0,images:window.__browsaiImagesLoading||0,ready_state:window.__browsaiReadyState||'unknown',last_mutation:window.__browsaiLastMutation||Date.now(),scroll_complete:window.__browsaiScrollComplete===true})".to_string(),
                     std::time::Duration::from_secs(2),
                 )
                 .ok()
@@ -2049,6 +2065,10 @@ impl ServoEngine {
                 .get("last_mutation")
                 .and_then(|v| v.as_f64())
                 .unwrap_or(0.0);
+            let scroll_complete = snapshot
+                .get("scroll_complete")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
             // Convert JS Date.now() (ms since epoch) to a delta from
             // our polling instant. JS Date.now() is on the same wall
             // clock as the Rust SystemTime within rounding error, so
@@ -2059,10 +2079,16 @@ impl ServoEngine {
                 .map(|d| d.as_secs_f64() * 1000.0)
                 .unwrap_or(0.0);
             let since_mutation_ms = now_ms - last_mutation_ms;
-            if in_flight == 0
+            // The scroll-trigger must finish before we start counting
+            // stability — otherwise a tall page that hasn't finished
+            // its 6-step scroll yet would be declared stable the
+            // moment the initial DOM settles (which can be near-zero
+            // on IntersectionObserver-gated pages).
+            if scroll_complete
+                && in_flight == 0
                 && images == 0
                 && ready_state == "complete"
-                && since_mutation_ms >= idle_ms as f64
+                && since_mutation_ms >= quiet_floor_ms as f64
             {
                 let since = idle_since.get_or_insert_with(std::time::Instant::now);
                 if since.elapsed() >= idle {
@@ -2388,15 +2414,16 @@ impl BrowserEngine for ServoEngine {
         &mut self,
         page: PageId,
         idle_ms: u64,
+        grace_ms: u64,
         max_ms: u64,
     ) -> Result<(), EngineError> {
         #[cfg(feature = "servo-runtime")]
         {
-            self.wait_for_network_idle_blocking(page, idle_ms, max_ms)
+            self.wait_for_network_idle_blocking(page, idle_ms, grace_ms, max_ms)
         }
         #[cfg(not(feature = "servo-runtime"))]
         {
-            let _ = (page, idle_ms, max_ms);
+            let _ = (page, idle_ms, grace_ms, max_ms);
             Err(EngineError::Unsupported(
                 "network-idle wait is unavailable without the servo-runtime feature".into(),
             ))

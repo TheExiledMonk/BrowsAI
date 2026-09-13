@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- `wait_for_network_idle` now also waits for **scroll-triggered
+  lazy loads** in addition to DOM stability. The installer kicks off
+  a programmatic top→bottom→top scroll in 6 steps so any
+  `IntersectionObserver`-gated content below the fold actually fires
+  before the stability check starts ticking. Sites like GitHub topic
+  pages gate the repo-card region behind an `IntersectionObserver`
+  that never observes anything below the viewport until the user
+  scrolls — without this nudge the DOM reaches a stable "no
+  mutations" state almost immediately and the snapshot returns the
+  empty shell. The scroll sequence runs in roughly 6×120ms ≈ 720ms
+  and is short-circuited when the page fits in the viewport. A new
+  `network_idle_grace_ms` (default `1000`) is the additional quiet
+  window required after the `network_idle_ms` stability check
+  passes, so a lazy-load that schedules work on the *next* tick
+  lands its first mutation while we're still waiting instead of
+  after we've already snapshotted.
 - `wait_for_network_idle` now also waits for **DOM stability** on top
   of the fetch / images / readyState signals. A `MutationObserver`
   on `documentElement` watching `childList`, `subtree`,

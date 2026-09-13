@@ -2497,3 +2497,107 @@ fn network_idle_interceptor_balanced_parens() {
         "unbalanced parens: {opens} open vs {closes} close"
     );
 }
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_runs_scroll_trigger() {
+    // GitHub topic pages (and similar scroll-triggered sites) never
+    // mutate the repo-cards region until the user scrolls. The
+    // installer walks the page top→bottom→top in 6 steps so
+    // IntersectionObserver-gated content fires before the polling
+    // loop starts counting stability. This catches the bug without
+    // hard-coding github.com — any site that uses scroll-triggered
+    // lazy loads benefits.
+    let script = browsai_engine_servo::network_idle_install_script();
+    assert!(
+        script.contains("__browsaiScrollComplete"),
+        "missing scroll-complete tracker"
+    );
+    assert!(
+        script.contains("__browsaiScrollStarted"),
+        "missing scroll-start timestamp"
+    );
+    assert!(
+        script.contains("__browsaiScrollStep"),
+        "missing scroll-step counter"
+    );
+    assert!(
+        script.contains("scrollTo"),
+        "missing scrollTo() trigger"
+    );
+    assert!(
+        script.contains("scrollHeight"),
+        "missing scrollHeight read"
+    );
+    assert!(
+        script.contains("innerHeight"),
+        "missing innerHeight read"
+    );
+    assert!(
+        script.contains("requestAnimationFrame"),
+        "missing rAF scheduling — IO callbacks won't fire without it"
+    );
+    assert!(
+        script.contains("stepScroll"),
+        "missing stepScroll driver"
+    );
+    // The scroll trigger must NOT take forever on pages that fit in
+    // the viewport — we have a fast path that flips
+    // __browsaiScrollComplete to true immediately when there's nothing
+    // to scroll. Check the comparator we use for that decision.
+    assert!(
+        script.contains("scrollable<=0"),
+        "missing fast-path for pages that fit in the viewport"
+    );
+}
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_balanced_scroll_state_machine() {
+    // The scroll trigger has three exit conditions that all flip
+    // __browsaiScrollComplete to true. Verify each one is wired up:
+    //   1. Page fits in viewport — fast path (scrollable<=0)
+    //   2. Reached the final scroll step (step>=steps)
+    //   3. Caught an exception during scrolling
+    // Missing any of these leaves the polling loop waiting forever
+    // (until max_ms kicks in) which adds ~10s of latency on every
+    // snapshot.
+    let script = browsai_engine_servo::network_idle_install_script();
+    let flip_count = script.matches("__browsaiScrollComplete=true").count();
+    assert!(
+        flip_count >= 3,
+        "expected ≥3 __browsaiScrollComplete=true assignments (fast-path, end-of-sequence, catch-all); got {flip_count}"
+    );
+    // The polling loop reads `window.__browsaiScrollComplete===true`.
+    // Make sure the script installs the flag in the right shape —
+    // not just a truthy value but a boolean that the polling side
+    // checks with a strict triple-equals.
+    assert!(
+        script.contains("window.__browsaiScrollComplete=false"),
+        "missing initial false assignment for scroll-complete flag"
+    );
+}
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_scroll_steps_reset_mutation_timer() {
+    // Every scrollTo() bumps __browsaiLastMutation so the stability
+    // check in the polling loop doesn't fire while the scroll
+    // sequence is still in progress. Without these bumps, a tall
+    // page where the scroll takes 6×120ms ≈ 720ms would observe
+    // `since_mutation_ms >= idle_ms` immediately and return a
+    // pre-scroll snapshot.
+    let script = browsai_engine_servo::network_idle_install_script();
+    // Initial assignment at install time.
+    let init_bump = script.matches("window.__browsaiLastMutation=Date.now()").count();
+    // Per-step bumps inside stepScroll and the final step.
+    let step_bumps = script.matches("__browsaiLastMutation=Date.now()").count();
+    assert!(
+        init_bump >= 1,
+        "missing initial __browsaiLastMutation timestamp"
+    );
+    assert!(
+        step_bumps >= init_bump + 2,
+        "scroll steps should bump __browsaiLastMutation at least twice (mid-sequence + final); init={init_bump} step+={step_bumps}"
+    );
+}

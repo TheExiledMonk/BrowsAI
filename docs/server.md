@@ -18,9 +18,9 @@ encoding for streaming responses.
 | GET    | `/capabilities`    | (none)                                                               | yes     | no        |
 | GET    | `/version`         | (none)                                                               | yes     | no        |
 | GET    | `/schema`          | (none)                                                               | yes     | no        |
-| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_max_ms?, snapshot_only?, format?, auto_solve?, stream?}` | no      | yes       |
-| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
-| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
+| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_grace_ms?, network_idle_max_ms?, snapshot_only?, format?, auto_solve?, stream?}` | no      | yes       |
+| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_grace_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
+| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_grace_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
 | POST   | `/follow-link`     | `{page, node_id, stream?, fingerprint?}`                           | no      | yes       |
 | POST   | `/auto-solve`      | `{url, fingerprint?, stream?}`                                     | no      | yes       |
 
@@ -37,8 +37,9 @@ doesn't need to act on the page.
 
 `wait_for_network_idle` (default **`true`**) installs a JS interceptor
 that tracks four signals and polls until **all** of them have been
-quiet for `network_idle_ms` continuously (default `500`) or
-`network_idle_max_ms` total elapsed (default `10000`):
+quiet for `network_idle_ms + network_idle_grace_ms` continuously
+(defaults `500` + `1000` = `1500`) or `network_idle_max_ms` total
+elapsed (default `10000`):
 
 1. `window.fetch` and `XMLHttpRequest` in-flight counts (`__browsaiInFlight`)
 2. `<img>` elements still loading (`__browsaiImagesLoading`) — the
@@ -57,13 +58,34 @@ quiet for `network_idle_ms` continuously (default `500`) or
    content (turbo-frame cards, infinite scroll, fetch-on-mount
    SPAs, intersection-observer image lazy loading) doesn't make it
    into the snapshot.
+5. **Scroll trigger complete** (`__browsaiScrollComplete`) — the
+   installer kicks off a programmatic top→bottom→top scroll in
+   6 steps so any `IntersectionObserver`-gated content below the
+   fold actually fires before the stability check starts ticking.
+   Sites like GitHub topic pages gate the entire repo-card region
+   behind an `IntersectionObserver` that never observes anything
+   below the viewport until the user scrolls — without this nudge
+   the DOM reaches a stable "no mutations" state almost immediately
+   and the snapshot returns the empty shell. The scroll sequence
+   runs in roughly 6×120ms ≈ 720ms and is short-circuited when the
+   page fits in the viewport (no scrollable distance). Pages that
+   fit in the viewport are unaffected.
 
-All four must hold simultaneously for `idle_ms` continuously before
-the snapshot proceeds. Pass `wait_for_network_idle: false` to skip
-the wait for cached / fully server-rendered pages where the extra
-500ms minimum is wasteful. The deterministic backend returns
-`EngineError::Unsupported` for this method and the server silently
-ignores it — tests and offline runs are unaffected.
+All five must hold simultaneously before the snapshot proceeds.
+Pass `wait_for_network_idle: false` to skip the wait for cached /
+fully server-rendered pages where the extra 500ms minimum is
+wasteful. The deterministic backend returns `EngineError::Unsupported`
+for this method and the server silently ignores it — tests and
+offline runs are unaffected.
+
+`network_idle_grace_ms` (default `1000`) is the additional quiet
+window required *after* the `network_idle_ms` stability check passes.
+Without the grace, a scroll-triggered lazy-load that schedules work
+on the *next* tick (e.g. a chained promise microtask) can land its
+first mutation just after we declare stability, producing a
+half-populated snapshot. The grace is on top of the scroll trigger
+and the regular idle window — set it to `0` to recover the original
+behaviour.
 
 ### Response shapes
 

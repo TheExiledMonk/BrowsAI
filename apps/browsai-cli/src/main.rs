@@ -599,6 +599,7 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
     let control_cursor = bounded_option(args, "--control-cursor", 0, 10_000)?;
     let control_limit = bounded_option(args, "--control-limit", 12, 100)?;
     let network_idle_ms = bounded_option(args, "--idle-ms", 500, 30_000)?;
+    let network_idle_grace_ms = bounded_option(args, "--idle-grace-ms", 1_000, 30_000)?;
     let network_idle_max_ms = bounded_option(args, "--idle-max-ms", 10_000, 60_000)?;
     eprintln!("BROWSAI_STAGE:startup");
     std::env::set_var("BROWSAI_DIAGNOSTIC_STATUS", "1");
@@ -646,9 +647,12 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
         .pump_runtime(page, 2_000)
         .map_err(|error| format!("post-navigation event loop failed: {error}"))?;
     eprintln!("BROWSAI_STAGE:network_idle");
-    if let Err(error) =
-        engine.wait_for_network_idle(page, network_idle_ms as u64, network_idle_max_ms as u64)
-    {
+    if let Err(error) = engine.wait_for_network_idle(
+        page,
+        network_idle_ms as u64,
+        network_idle_grace_ms as u64,
+        network_idle_max_ms as u64,
+    ) {
         eprintln!("BROWSAI_NETWORK_IDLE_ERROR: {error:?}");
     }
     eprintln!("BROWSAI_STAGE:dom_projection");
