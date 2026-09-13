@@ -22,6 +22,7 @@ encoding for streaming responses.
 | POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_grace_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
 | POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_grace_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
 | POST   | `/follow-link`     | `{page, node_id, stream?, fingerprint?}`                           | no      | yes       |
+| POST   | `/native-input`    | `{url, events, fingerprint?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_grace_ms?, network_idle_max_ms?, snapshot_only?}` | no      | no        |
 | POST   | `/auto-solve`      | `{url, fingerprint?, stream?}`                                     | no      | yes       |
 
 `format` accepts `"tree"` (default, current JSON shape), `"markdown"`,
@@ -206,6 +207,74 @@ curl -s -X POST -H 'Content-Type: application/json' \
     -d '{"page":1,"node_id":"link-12"}' \
     http://127.0.0.1:8765/follow-link | jq '.events'
 ```
+
+### Dispatch a native input gesture
+
+`POST /native-input` forwards raw `NativeInputEvent`s to the live
+runtime's `WebView::notify_input_event` for the page that owns the
+supplied `url`'s host. The endpoint is the HTTP escape hatch for
+gestures that don't fit the `AgentAction` shape — wheel-driven scroll
+on IntersectionObserver-gated pages, drag-and-drop, raw key chords,
+or anything else the `ActionPlanner` doesn't have a typed verb for.
+
+The `events` array accepts any subset of these tagged variants (the
+shape is `#[serde(tag = "type", rename_all = "snake_case")]` so the
+JSON type tag uses snake_case but the Rust names are unchanged):
+
+```json
+[
+  {"type": "pointer_move", "x": 100.0, "y": 200.0},
+  {"type": "pointer_down", "button": 0},
+  {"type": "pointer_up",   "button": 0},
+  {"type": "key_down",     "key": "Enter"},
+  {"type": "key_up",       "key": "Enter"},
+  {"type": "text_input",   "text": "hello"},
+  {"type": "scroll",       "delta_x": 0.0, "delta_y": 800.0}
+]
+```
+
+`button` is the standard mouse-button index (`0` left, `1` middle,
+`2` right). `delta_x` / `delta_y` on `scroll` are pixel deltas at
+the most recent pointer position; pair with a preceding
+`pointer_move` to target a specific element. Multi-event gestures
+are dispatched in order — the runtime drains its event loop between
+each event so click handlers, scroll handlers, and key handlers all
+see the state they expect.
+
+After dispatch, the optional settling fields mirror `/browse`:
+
+- `wait_ms` — synchronous event-loop pump (default `0`).
+- `wait_for_network_idle` (default `true`) plus
+  `network_idle_ms` / `network_idle_grace_ms` / `network_idle_max_ms`
+  run the lazy-load / IO stability wait. See
+  [`wait_for_network_idle`](#response-shapes) above for what each
+  signal does.
+- `snapshot_only` — when `true`, suppress the projected `PageSnapshot`
+  from the response (the events still dispatch).
+
+Example — scroll a tall page then snapshot it:
+
+```sh
+curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"url":"https://github.com/topics/llm-evaluation","events":[
+          {"type":"scroll","delta_x":0,"delta_y":2400},
+          {"type":"scroll","delta_x":0,"delta_y":2400},
+          {"type":"scroll","delta_x":0,"delta_y":2400}
+        ]}' \
+    http://127.0.0.1:8765/native-input | jq '{dispatched,host,snapshot:.snapshot.node_count}'
+```
+
+The response carries `dispatched` (count of events forwarded),
+`host`, `url`, the echoed `events` array, and — when `snapshot_only`
+isn't set — the projected `PageSnapshot` so callers can read the
+post-gesture DOM without a second round-trip.
+
+Common errors:
+
+| Status | Cause |
+| ------ | ----- |
+| `400` | missing or invalid `url`, missing/empty `events`, unknown variant, or `{"type":…,"field":…}` mismatch (e.g. `scroll` without `delta_x`/`delta_y`) |
+| `500` | engine `dispatch_input` failed mid-sequence (response is sent anyway; the partial dispatch count is included in the error message) |
 
 ## Auth and binding
 

@@ -35,7 +35,22 @@ pub struct AgentAction {
     pub parameters: serde_json::Value,
 }
 
+/// Native input event the real runtime forwards to Servo's
+/// `WebView::notify_input_event`. Tagged JSON shape over the wire so
+/// HTTP / IPC clients can dispatch a single event (or a sequence) by
+/// serialising only the fields each variant needs:
+///
+/// ```json
+/// {"type": "pointer_move", "x": 100.0, "y": 200.0}
+/// {"type": "scroll",       "delta_x": 0.0, "delta_y": 500.0}
+/// {"type": "key_down",     "key": "Enter"}
+/// ```
+///
+/// The `tag = "type"` / `rename_all = "snake_case"` derives keep the
+/// Rust enum names stable while giving JSON callers the conventional
+/// snake_case form.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum NativeInputEvent {
     PointerMove { x: f64, y: f64 },
     PointerDown { button: u8 },
@@ -383,5 +398,70 @@ mod tests {
                 "trajectory did not settle at the end (linear={linear}, distance={d}, bound={settle_radius})"
             );
         }
+    }
+
+    #[test]
+    fn native_input_event_serialises_with_snake_case_type_tag() {
+        // The HTTP /native-input endpoint relies on the tagged
+        // internally-tagged representation: each variant emits a
+        // "type" field with snake_case names, and the variant fields
+        // are flattened into the same object. Round-trip both
+        // directions so a future change to the derive can't quietly
+        // break the wire format.
+        let cases = [
+            (
+                NativeInputEvent::PointerMove { x: 12.5, y: -3.0 },
+                r#"{"type":"pointer_move","x":12.5,"y":-3.0}"#,
+            ),
+            (
+                NativeInputEvent::PointerDown { button: 0 },
+                r#"{"type":"pointer_down","button":0}"#,
+            ),
+            (
+                NativeInputEvent::PointerUp { button: 2 },
+                r#"{"type":"pointer_up","button":2}"#,
+            ),
+            (
+                NativeInputEvent::KeyDown { key: "Enter".into() },
+                r#"{"type":"key_down","key":"Enter"}"#,
+            ),
+            (
+                NativeInputEvent::KeyUp { key: "Escape".into() },
+                r#"{"type":"key_up","key":"Escape"}"#,
+            ),
+            (
+                NativeInputEvent::TextInput { text: "hi".into() },
+                r#"{"type":"text_input","text":"hi"}"#,
+            ),
+            (
+                NativeInputEvent::Scroll {
+                    delta_x: 1.0,
+                    delta_y: -2.5,
+                },
+                r#"{"type":"scroll","delta_x":1.0,"delta_y":-2.5}"#,
+            ),
+        ];
+        for (event, expected_json) in cases {
+            let actual = serde_json::to_string(&event).expect("serialise");
+            assert_eq!(actual, expected_json, "serialised shape for {event:?}");
+            let round_tripped: NativeInputEvent =
+                serde_json::from_str(expected_json).expect("deserialise");
+            assert_eq!(round_tripped, event, "round-trip for {event:?}");
+        }
+    }
+
+    #[test]
+    fn native_input_event_unknown_variant_returns_error() {
+        // The /native-input endpoint surfaces serde_json's parse
+        // error verbatim so callers can spot a typo'd `type` value
+        // without silently dropping the request. Lock that contract
+        // in.
+        let bad = serde_json::from_str::<NativeInputEvent>(r#"{"type":"wiggle"}"#);
+        let error = bad.expect_err("unknown variant must fail");
+        let message = error.to_string();
+        assert!(
+            message.contains("wiggle") || message.contains("unknown variant"),
+            "unexpected error message: {message}"
+        );
     }
 }

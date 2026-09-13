@@ -38,6 +38,7 @@ use browsai_engine_api::{
 };
 use browsai_engine_servo::ServoEngine;
 use browsai_fingerprint::{FingerprintCatalog, FingerprintId};
+use browsai_input::NativeInputEvent;
 use browsai_sandbox::{Capability, SandboxPolicy};
 use browsai_state::PageSnapshot;
 use url::Url;
@@ -479,6 +480,9 @@ fn route(request: HttpRequest, state: &ServerState) -> Response {
     if path == "/auto-solve" && request.method == "POST" {
         return handle_auto_solve(&body, state);
     }
+    if path == "/native-input" && request.method == "POST" {
+        return handle_native_input(&body, state);
+    }
 
     let payload = serde_json::json!({
         "error": "not found",
@@ -515,7 +519,10 @@ fn capabilities_response(_state: &ServerState) -> Vec<u8> {
         "features": ["Navigation", "Snapshots", "NativeInput", "PageEvaluation"],
         "live_browser_compiled": cfg!(feature = "live-browser"),
         "commands": ["version", "capabilities", "browser-health", "navigate", "query",
-                     "render", "follow-link", "live-open", "live-search"],
+                     "render", "follow-link", "native-input", "live-open", "live-search"],
+        "endpoints": {
+            "native_input": "/native-input"
+        }
     });
     serde_json::to_vec_pretty(&payload).unwrap_or_default()
 }
@@ -533,6 +540,7 @@ fn schema_response() -> Vec<u8> {
             {"method": "POST", "path": "/query", "returns": "QueryResult"},
             {"method": "POST", "path": "/render", "returns": "RenderResult"},
             {"method": "POST", "path": "/follow-link", "returns": "FollowLinkResult"},
+            {"method": "POST", "path": "/native-input", "returns": "NativeInputResult"},
             {"method": "POST", "path": "/auto-solve", "returns": "LiveResult"}
         ],
         "doc": "docs/server.md",
@@ -1227,6 +1235,180 @@ fn handle_follow_link(_body: &Value, _state: &ServerState) -> Response {
         "error": "follow-link requires a per-page plan; not yet wired through the long-running server"
     });
     Response::json(501, serde_json::to_vec(&payload).unwrap_or_default())
+}
+
+/// Dispatch a sequence of [`NativeInputEvent`]s to the live-runtime
+/// page that owns the supplied `host`. The endpoint accepts one or
+/// more events in a single call (a JSON array under `events`) so a
+/// caller can issue a multi-step gesture — `pointer_move` →
+/// `pointer_down` → `pointer_up`, a sequence of `scroll` wheel
+/// events to traverse a tall page, or a `key_down` / `text_input` /
+/// `key_up` sequence to type into a focused textbox — without
+/// round-tripping per event.
+///
+/// Optional post-dispatch settling mirrors `/browse`: `wait_ms` spins
+/// the runtime, `wait_for_network_idle` (default true) plus
+/// `network_idle_ms` / `network_idle_grace_ms` / `network_idle_max_ms`
+/// gate the lazy-load / IntersectionObserver signals. When settling
+/// is enabled the response also includes the projected
+/// `PageSnapshot` so callers don't need a follow-up `/browse`.
+fn handle_native_input(body: &Value, state: &ServerState) -> Response {
+    let url = match body.get("url").and_then(Value::as_str) {
+        Some(raw) if !raw.trim().is_empty() => raw.trim().to_string(),
+        _ => {
+            let payload = serde_json::json!({
+                "error": "url is required (the host resolves to a per-domain PageId)"
+            });
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let parsed_url = match url::Url::parse(&url) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            let payload = serde_json::json!({"error": format!("invalid url: {error}")});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let host = match parsed_url.host_str() {
+        Some(host) => host.to_ascii_lowercase(),
+        None => {
+            let payload = serde_json::json!({"error": "url has no host"});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let events_value = match body.get("events") {
+        Some(value) => value,
+        None => {
+            let payload = serde_json::json!({
+                "error": "events is required and must be a non-empty array of NativeInputEvent objects"
+            });
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let events: Vec<NativeInputEvent> = match serde_json::from_value(events_value.clone()) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            let payload = serde_json::json!({
+                "error": format!("invalid events array: {error}"),
+                "hint": "expected tagged objects like {\"type\":\"pointer_move\",\"x\":0,\"y\":0}, {\"type\":\"scroll\",\"delta_x\":0,\"delta_y\":500}, {\"type\":\"key_down\",\"key\":\"Enter\"}, {\"type\":\"text_input\",\"text\":\"...\"}"
+            });
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    if events.is_empty() {
+        let payload = serde_json::json!({
+            "error": "events must contain at least one NativeInputEvent"
+        });
+        return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+    }
+    let fingerprint_override = match resolve_body_fingerprint(body) {
+        Ok(f) => f,
+        Err(error) => {
+            let payload = serde_json::json!({"error": error});
+            return Response::json(400, serde_json::to_vec(&payload).unwrap_or_default());
+        }
+    };
+    let wait_ms = body.get("wait_ms").and_then(Value::as_u64).unwrap_or(0);
+    let wait_for_network_idle = body
+        .get("wait_for_network_idle")
+        .and_then(Value::as_bool)
+        .unwrap_or(true);
+    let network_idle_ms = body
+        .get("network_idle_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(500);
+    let network_idle_grace_ms = body
+        .get("network_idle_grace_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(1_000);
+    let network_idle_max_ms = body
+        .get("network_idle_max_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(10_000);
+    let snapshot_only = body
+        .get("snapshot_only")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+
+    let (_ctx, page_id) = match state.get_or_create_domain(&host, fingerprint_override) {
+        Ok(ids) => ids,
+        Err(error) => return error_response(error),
+    };
+
+    // Dispatch the events one-at-a-time. The runtime's
+    // `dispatch_native_input` already drains the event loop after
+    // each event (8 spins + paint before delivery, 32 spins after) so
+    // the embedder observes a complete frame boundary between events
+    // — sufficient for click handlers, scroll handlers, and keypress
+    // handlers that read input state from `window`.
+    let mut dispatched = 0usize;
+    {
+        let mut engine = state.engine.lock().expect("engine lock");
+        for event in &events {
+            if let Err(error) = engine.dispatch_input(page_id, event.clone()) {
+                return error_response(format!(
+                    "dispatch_input failed after {dispatched}/{} events: {error:?}",
+                    events.len()
+                ));
+            }
+            dispatched += 1;
+        }
+    }
+
+    // Post-dispatch settling. `wait_ms` is the synchronous event-loop
+    // pump; `wait_for_network_idle` is the lazy-load / IO stability
+    // wait. The defaults match `/browse` so the response shape is
+    // identical to a follow-up `/browse` call — clients that want a
+    // snapshot after the gesture can read `snapshot` from this
+    // response instead of making a second round-trip.
+    if wait_ms > 0 {
+        let engine = state.engine.lock().expect("engine lock");
+        if let Err(error) = engine.pump_runtime(page_id, wait_ms) {
+            return error_response(format!("wait_ms pump failed: {error:?}"));
+        }
+    }
+    if wait_for_network_idle {
+        let mut engine = state.engine.lock().expect("engine lock");
+        if let Err(error) = engine.wait_for_network_idle(
+            page_id,
+            network_idle_ms,
+            network_idle_grace_ms,
+            network_idle_max_ms,
+        ) {
+            let unsupported = matches!(&error, EngineError::Unsupported(_));
+            if !unsupported {
+                eprintln!(
+                    "BROWSAI_NETWORK_IDLE_ERROR: {error:?} (idle_ms={network_idle_ms}, grace_ms={network_idle_grace_ms}, max_ms={network_idle_max_ms})"
+                );
+            }
+        }
+    }
+
+    let mut payload = serde_json::json!({
+        "dispatched": dispatched,
+        "host": host,
+        "url": url,
+        "events": events,
+    });
+
+    if !snapshot_only {
+        let engine = state.engine.lock().expect("engine lock");
+        match engine.snapshot(page_id) {
+            Ok(snap) => match serde_json::to_value(&snap) {
+                Ok(snap_value) => {
+                    payload["snapshot"] = snap_value;
+                }
+                Err(error) => {
+                    payload["snapshot_error"] = serde_json::Value::String(error.to_string());
+                }
+            },
+            Err(error) => {
+                payload["snapshot_error"] = serde_json::Value::String(format!("{error:?}"));
+            }
+        }
+    }
+
+    Response::json(200, serde_json::to_vec(&payload).unwrap_or_default())
 }
 
 fn handle_auto_solve(body: &Value, state: &ServerState) -> Response {

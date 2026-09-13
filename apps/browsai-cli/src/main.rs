@@ -2571,6 +2571,202 @@ mod tests {
         let _ = child.wait();
     }
 
+    #[test]
+    fn http_server_native_input_dispatches_scroll_and_echoes_events() {
+        // End-to-end smoke for the new /native-input route. The
+        // deterministic backend records dispatched events into
+        // PageRecord.input_events without forwarding to a real
+        // embedder, which is enough to prove:
+        //   1. The route accepts the body shape (url + events array)
+        //   2. The events deserialise from the tagged JSON form
+        //   3. The response echoes the dispatched count, host, and
+        //      original events
+        let Some(bin) = browsai_binary() else {
+            eprintln!("browsai binary not found; skipping native-input test");
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--no-live-browser")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        wait_for_server(port);
+
+        // Sequence: move → click → type → key Enter. Covers four
+        // distinct variants of NativeInputEvent so the deserialiser
+        // and dispatcher are both exercised.
+        let body = post_json(
+            port,
+            "/native-input",
+            &serde_json::json!({
+                "url": "https://example.test/",
+                "events": [
+                    {"type": "pointer_move", "x": 10.0, "y": 20.0},
+                    {"type": "pointer_down", "button": 0},
+                    {"type": "pointer_up",   "button": 0},
+                    {"type": "key_down",     "key": "Enter"},
+                    {"type": "key_up",       "key": "Enter"},
+                    {"type": "text_input",   "text": "hello"},
+                    {"type": "scroll",       "delta_x": 0.0, "delta_y": 800.0}
+                ],
+                "wait_for_network_idle": false,
+                "snapshot_only": true
+            })
+            .to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 200"),
+            "native-input should accept a tagged scroll/key/text sequence: {}",
+            &body[..body.len().min(160)]
+        );
+        let payload: serde_json::Value = serde_json::from_str(
+            &body[body.find("\r\n\r\n").map(|i| i + 4).unwrap_or(0)..],
+        )
+        .expect("native-input response is JSON");
+        assert_eq!(
+            payload["dispatched"].as_u64(),
+            Some(7),
+            "dispatched count mismatch: {payload}"
+        );
+        assert_eq!(payload["host"].as_str(), Some("example.test"));
+        assert_eq!(
+            payload["url"].as_str(),
+            Some("https://example.test/")
+        );
+        let echoed = payload["events"].as_array().expect("events array");
+        assert_eq!(echoed.len(), 7);
+        assert_eq!(echoed[0]["type"], "pointer_move");
+        assert_eq!(echoed[6]["type"], "scroll");
+        assert_eq!(echoed[6]["delta_y"].as_f64(), Some(800.0));
+        // snapshot_only=true means no snapshot field is included.
+        assert!(
+            payload.get("snapshot").is_none(),
+            "snapshot_only=true should suppress the snapshot field"
+        );
+
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn http_server_native_input_rejects_missing_events() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--no-live-browser")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        wait_for_server(port);
+
+        // Body with no `events` field.
+        let body = post_json(
+            port,
+            "/native-input",
+            &serde_json::json!({"url": "https://example.test/"}).to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 400"),
+            "missing events should be 400: {}",
+            &body[..body.len().min(160)]
+        );
+
+        // Body with empty `events` array.
+        let body = post_json(
+            port,
+            "/native-input",
+            &serde_json::json!({
+                "url": "https://example.test/",
+                "events": []
+            })
+            .to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 400"),
+            "empty events array should be 400: {}",
+            &body[..body.len().min(160)]
+        );
+
+        // Body with unknown event variant.
+        let body = post_json(
+            port,
+            "/native-input",
+            &serde_json::json!({
+                "url": "https://example.test/",
+                "events": [{"type": "wiggle", "magnitude": 7}]
+            })
+            .to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 400"),
+            "unknown variant should be 400: {}",
+            &body[..body.len().min(160)]
+        );
+
+        // Body with missing `url`.
+        let body = post_json(
+            port,
+            "/native-input",
+            &serde_json::json!({
+                "events": [{"type": "scroll", "delta_x": 0.0, "delta_y": 1.0}]
+            })
+            .to_string(),
+        );
+        assert!(
+            body.starts_with("HTTP/1.1 400"),
+            "missing url should be 400: {}",
+            &body[..body.len().min(160)]
+        );
+
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn http_server_schema_lists_native_input_endpoint() {
+        let Some(bin) = browsai_binary() else {
+            return;
+        };
+        let port = pick_unused_port();
+        let mut child = std::process::Command::new(&bin)
+            .arg("serve")
+            .arg("--no-live-browser")
+            .arg("--port")
+            .arg(port.to_string())
+            .arg("--bind")
+            .arg("127.0.0.1")
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .expect("spawn browsai serve");
+        wait_for_server(port);
+        let body = http_get_json(port, "/schema");
+        let endpoints = body["endpoints"].as_array().expect("endpoints array");
+        assert!(
+            endpoints.iter().any(|endpoint| {
+                endpoint["method"] == "POST" && endpoint["path"] == "/native-input"
+            }),
+            "/schema should advertise POST /native-input; got: {endpoints:?}"
+        );
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
     static TEST_PORT_COUNTER: std::sync::atomic::AtomicU32 =
         std::sync::atomic::AtomicU32::new(35_000);
 

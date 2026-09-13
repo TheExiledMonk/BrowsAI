@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- New `POST /native-input` HTTP endpoint on `browsai serve` forwards
+  raw `NativeInputEvent`s (`pointer_move`, `pointer_down`,
+  `pointer_up`, `key_down`, `key_up`, `text_input`, `scroll`) to the
+  live runtime's `WebView::notify_input_event` for the page that
+  owns the supplied `url`'s host. Lets plugins drive gestures that
+  the `ActionPlanner` doesn't have a typed verb for — wheel scrolls
+  on IntersectionObserver-gated pages, drag-and-drop, raw key chords,
+  multi-event click sequences. Body accepts an `events` array
+  (tagged JSON with snake_case `type` discriminator) plus the same
+  post-dispatch settling fields as `/browse` (`wait_ms`,
+  `wait_for_network_idle`, `network_idle_ms`,
+  `network_idle_grace_ms`, `network_idle_max_ms`) and an optional
+  `snapshot_only` flag. Response carries `dispatched`, `host`,
+  `url`, the echoed `events`, and the projected `PageSnapshot` so
+  callers don't need a follow-up `/browse`.
 - `wait_for_network_idle` now also waits for **scroll-triggered
   lazy loads** in addition to DOM stability. The installer kicks off
   a programmatic top→bottom→top scroll in 6 steps so any
