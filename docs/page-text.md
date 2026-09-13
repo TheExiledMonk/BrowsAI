@@ -316,17 +316,14 @@ underlying `AgentRenderTree`, but the markdown output is monolithic
   stash the resolved href in a non-standard field will fall through
   to the BB-code fallback without a URL.
 - **XHR-loaded content (turbo-frame, fetch-on-mount, infinite scroll)
-  may not be in the snapshot.** The projection runs once after
-  `LoadStatus::Complete` plus the configured `wait_ms`. Pages that
-  keep loading content asynchronously — GitHub topic pages with
-  turbo-frame cards, X timelines, SPAs that hydrate after first paint
-  — need either a longer `wait_ms`, the new
-  `wait_for_network_idle` server primitive, or a polling primitive
-  for a specific selector (not yet implemented). Pass
-  `"wait_for_network_idle": true` on `/browse` to install a JS
-  interceptor that tracks `fetch` and `XMLHttpRequest` in-flight
-  counts and waits until they reach zero for 500ms continuously (or
-  8s total).
+  is now in the snapshot by default.** The daemon installs a JS
+  interceptor on `/browse` that tracks `fetch` and `XMLHttpRequest`
+  in-flight counts and waits until they reach zero for 500ms
+  continuously (or 10s total). Pass `wait_for_network_idle: false`
+  on the body to opt out for cached / fully server-rendered pages.
+  `pump_runtime` (driven by `wait_ms`) still runs first to spin
+  the event loop for synchronous JS; the network-idle wait handles
+  the async XHR-driven DOM mutations that pump misses.
 
 ## Schema
 

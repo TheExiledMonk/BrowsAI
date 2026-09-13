@@ -2,17 +2,17 @@
 
 ## Unreleased
 
-- New `BrowserEngine::wait_for_network_idle` engine primitive plus a JS
-  interceptor that tracks `window.fetch` and `XMLHttpRequest`
-  in-flight counts. The daemon polls the counter until it has been
-  zero for `network_idle_ms` continuously (default 500) or
-  `network_idle_max_ms` total (default 8000), so XHR-driven DOM
-  mutations from turbo-frame / fetch-on-mount / SPA hydration are
-  visible in the snapshot. Opt in via the new
-  `wait_for_network_idle` body field on `/browse`, `/query`,
-  `/render`, or the `--wait-for-network-idle` CLI flag on
-  `live-open`. The deterministic backend returns `Unsupported` for
-  the trait method, so test fixtures and offline runs are unaffected.
+- `wait_for_network_idle` is now the default on the daemon and CLI.
+  Every `/browse`, `/query`, and `/render` request (and every
+  `browsai live-open` invocation) installs the JS interceptor that
+  tracks `window.fetch` and `XMLHttpRequest` in-flight counts and
+  waits until they reach zero for 500ms continuously (or 10s total).
+  Opt out per request with `"wait_for_network_idle": false` for
+  cached / fully server-rendered pages where the extra 500ms
+  minimum is wasteful. The deterministic backend returns
+  `EngineError::Unsupported` for the trait method and the server
+  silently ignores it, so test fixtures and offline runs are
+  unaffected.
 - `browsai-page-text`: `link_href` and `image_src` now also fall back
   to `description`, `value` as text, and `name` when the projection
   pipeline hasn't promoted the resolved URL to `AgentValue::Url`. This

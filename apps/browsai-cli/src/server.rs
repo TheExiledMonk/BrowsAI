@@ -34,7 +34,7 @@ use std::time::{Duration, Instant};
 use browsai_agent_runtime::{AgentRuntime, AgentSessionId, SolveAuditEvent, TakeoverManager};
 use browsai_agent_tree::StructuralRole;
 use browsai_engine_api::{
-    BrowserEngine, ContextId, ContextOptions, PageId, ProfileIdentity, VirtualViewport,
+    BrowserEngine, ContextId, ContextOptions, EngineError, PageId, ProfileIdentity, VirtualViewport,
 };
 use browsai_engine_servo::ServoEngine;
 use browsai_fingerprint::{FingerprintCatalog, FingerprintId};
@@ -1057,7 +1057,7 @@ fn handle_browse(
     let wait_for_network_idle = body
         .get("wait_for_network_idle")
         .and_then(Value::as_bool)
-        .unwrap_or(false);
+        .unwrap_or(true);
     let network_idle_ms = body
         .get("network_idle_ms")
         .and_then(Value::as_u64)
@@ -1065,7 +1065,7 @@ fn handle_browse(
     let network_idle_max_ms = body
         .get("network_idle_max_ms")
         .and_then(Value::as_u64)
-        .unwrap_or(8000);
+        .unwrap_or(10_000);
     let roles_filter: Vec<String> = body
         .get("filter")
         .and_then(Value::as_str)
@@ -1108,11 +1108,16 @@ fn handle_browse(
         if let Err(error) =
             engine.wait_for_network_idle(page_id, network_idle_ms, network_idle_max_ms)
         {
-            // Network-idle wait is best-effort. Log and continue with
-            // the snapshot rather than failing the whole request.
-            eprintln!(
-                "BROWSAI_NETWORK_IDLE_ERROR: {error:?} (idle_ms={network_idle_ms}, max_ms={network_idle_max_ms})"
-            );
+            // Network-idle wait is best-effort. The deterministic
+            // backend returns Unsupported by design; log the other
+            // failures and continue with the snapshot rather than
+            // failing the whole request.
+            let unsupported = matches!(&error, EngineError::Unsupported(_));
+            if !unsupported {
+                eprintln!(
+                    "BROWSAI_NETWORK_IDLE_ERROR: {error:?} (idle_ms={network_idle_ms}, max_ms={network_idle_max_ms})"
+                );
+            }
         }
     }
     if snapshot_only {

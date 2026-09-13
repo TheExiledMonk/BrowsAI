@@ -76,7 +76,7 @@ fn auto_solve_challenges(
 }
 
 fn usage() -> &'static str {
-    "browsai commands:\n  version\n  capabilities\n  profile <name>\n  workspace <profile-name>\n  headless <url>\n  open <url>\n  navigate <url>\n  render <url> [--format=tree|markdown|text]\n  query <url> [--format=tree|markdown|text] [--filter=Link,Heading,...] [--cursor=N --limit=N] [--stream]\n  action <url> <target> <kind>\n  live-open <url> [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N] [--auto-solve] [--wait-for-network-idle] [--idle-ms N --idle-max-ms N]\n  live-search <query> [--open-links] [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N]\n  serve [--port N] [--bind HOST] [--idle-shutdown-seconds N] [--fingerprint ID] [--http2-profile ID] [--no-live-browser] [--canvas-noise-seed N]\n  check site <url>\n  check corpus <sites.csv>\n  check report <run-id>\n  logs <log.json>\n  audit <journal.json>\n  replay <journal.json>\n  benchmark <result.json>\n  recovery <checkpoint.json>\n"
+    "browsai commands:\n  version\n  capabilities\n  profile <name>\n  workspace <profile-name>\n  headless <url>\n  open <url>\n  navigate <url>\n  render <url> [--format=tree|markdown|text]\n  query <url> [--format=tree|markdown|text] [--filter=Link,Heading,...] [--cursor=N --limit=N] [--stream]\n  action <url> <target> <kind>\n  live-open <url> [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N] [--auto-solve] [--idle-ms N --idle-max-ms N]\n  live-search <query> [--open-links] [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N]\n  serve [--port N] [--bind HOST] [--idle-shutdown-seconds N] [--fingerprint ID] [--http2-profile ID] [--no-live-browser] [--canvas-noise-seed N]\n  check site <url>\n  check corpus <sites.csv>\n  check report <run-id>\n  logs <log.json>\n  audit <journal.json>\n  replay <journal.json>\n  benchmark <result.json>\n  recovery <checkpoint.json>\n"
 }
 
 fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, String> {
@@ -598,9 +598,8 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
     let textbox_limit = bounded_option(args, "--textbox-limit", 50, 100)?;
     let control_cursor = bounded_option(args, "--control-cursor", 0, 10_000)?;
     let control_limit = bounded_option(args, "--control-limit", 12, 100)?;
-    let wait_for_network_idle = bool_flag(args, "--wait-for-network-idle");
     let network_idle_ms = bounded_option(args, "--idle-ms", 500, 30_000)?;
-    let network_idle_max_ms = bounded_option(args, "--idle-max-ms", 8_000, 60_000)?;
+    let network_idle_max_ms = bounded_option(args, "--idle-max-ms", 10_000, 60_000)?;
     eprintln!("BROWSAI_STAGE:startup");
     std::env::set_var("BROWSAI_DIAGNOSTIC_STATUS", "1");
     let http2_profile_id = string_option(args, "--http2-profile");
@@ -646,15 +645,13 @@ fn run_live_open(args: &[String], one_shot_live_runtime: bool) -> Result<String,
     engine
         .pump_runtime(page, 2_000)
         .map_err(|error| format!("post-navigation event loop failed: {error}"))?;
-    eprintln!("BROWSAI_STAGE:dom_projection");
-    if wait_for_network_idle {
-        eprintln!("BROWSAI_STAGE:network_idle");
-        if let Err(error) =
-            engine.wait_for_network_idle(page, network_idle_ms as u64, network_idle_max_ms as u64)
-        {
-            eprintln!("BROWSAI_NETWORK_IDLE_ERROR: {error:?}");
-        }
+    eprintln!("BROWSAI_STAGE:network_idle");
+    if let Err(error) =
+        engine.wait_for_network_idle(page, network_idle_ms as u64, network_idle_max_ms as u64)
+    {
+        eprintln!("BROWSAI_NETWORK_IDLE_ERROR: {error:?}");
     }
+    eprintln!("BROWSAI_STAGE:dom_projection");
     let initial_snapshot = engine
         .snapshot(page)
         .map_err(|error| format!("snapshot failed: {error}"))?;
