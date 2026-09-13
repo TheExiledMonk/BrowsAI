@@ -2638,33 +2638,33 @@ fn network_idle_interceptor_scroll_trigger_dispatches_wheel_events() {
 
 #[cfg(feature = "servo-runtime")]
 #[test]
-fn network_idle_interceptor_scroll_trigger_does_two_passes_with_pause() {
-    // Single-pass scroll triggers miss the case where the first pass
-    // reveals lazy-loaded content whose IO observers need a second
-    // pass to fire. The installer walks the page top→bottom twice
+fn network_idle_interceptor_scroll_trigger_does_four_passes_with_pause() {
+    // Single-pass scroll triggers miss the case where each pass
+    // reveals lazy-loaded content whose IO observers need a
+    // subsequent pass to fire. The installer walks the page
+    // top→bottom four times (4 × 6 = 24 scroll positions, ~7s)
     // with a longer pause at the end of each pass so any chained
-    // setTimeout(0) / fetch work has time to land.
+    // setTimeout(0) / fetch work has time to land before the next
+    // pass overwrites the viewport state.
     let script = browsai_engine_servo::network_idle_install_script();
-    // 2 passes × 6 steps = 12 total scroll positions, plus the
-    // final scrollTo(0,0) reset before signaling complete.
     assert!(
         script.contains("stepsPerPass=6"),
         "missing stepsPerPass constant"
     );
     assert!(
-        script.contains("totalSteps=12"),
-        "missing totalSteps constant (expecting 2 passes × 6 steps)"
+        script.contains("totalPasses=4"),
+        "missing totalPasses constant (expecting 4 passes)"
     );
     // Pass-end pause — the conditional delay at the end of each
-    // pass. Without this, pass 2 starts before pass 1's IO callbacks
-    // have had time to render their content (which may include more
-    // IO observers).
+    // pass. Without this, the next pass starts before the previous
+    // one's IO callbacks have had time to render their content
+    // (which may include more IO observers).
     assert!(
         script.contains("isEndOfPass"),
         "missing end-of-pass pause"
     );
     assert!(
-        script.contains("600:250") || script.contains("?600:250"),
-        "missing conditional pass-end delay (expecting 600ms at end of pass, 250ms between steps)"
+        script.contains("800:200") || script.contains("?800:200"),
+        "missing conditional pass-end delay (expecting 800ms at end of pass, 200ms between steps)"
     );
 }
