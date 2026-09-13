@@ -317,13 +317,15 @@ underlying `AgentRenderTree`, but the markdown output is monolithic
   to the BB-code fallback without a URL.
 - **XHR-loaded content (turbo-frame, fetch-on-mount, infinite scroll)
   is now in the snapshot by default.** The daemon installs a JS
-  interceptor on `/browse` that tracks `fetch` and `XMLHttpRequest`
-  in-flight counts and waits until they reach zero for 500ms
-  continuously (or 10s total). Pass `wait_for_network_idle: false`
-  on the body to opt out for cached / fully server-rendered pages.
-  `pump_runtime` (driven by `wait_ms`) still runs first to spin
-  the event loop for synchronous JS; the network-idle wait handles
-  the async XHR-driven DOM mutations that pump misses.
+  interceptor on `/browse` that tracks three signals and only
+  proceeds once all three have been quiet for 500ms continuously:
+  `window.fetch` and `XMLHttpRequest` in-flight counts, `<img>`
+  elements still loading, and `document.readyState` (`complete`).
+  Pass `wait_for_network_idle: false` on the body to opt out for
+  cached / fully server-rendered pages. `pump_runtime` (driven by
+  `wait_ms`) still runs first to spin the event loop for
+  synchronous JS; the network-idle wait handles the async
+  XHR / image / readyState-driven DOM mutations that pump misses.
 
 ## Schema
 

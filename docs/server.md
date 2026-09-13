@@ -36,18 +36,25 @@ remains — useful for cheaper Q&A/summarisation prompts where the LLM
 doesn't need to act on the page.
 
 `wait_for_network_idle` (default **`true`**) installs a JS interceptor
-that tracks `window.fetch` and `XMLHttpRequest` in-flight counts, then
-polls until the count has been zero for `network_idle_ms` continuously
-(default `500`) or `network_idle_max_ms` total elapsed (default
-`10000`). This is the right behaviour for sites with turbo-frame /
-fetch-on-mount / SPA hydration that need DOM mutations from XHR
-responses to be visible in the snapshot. `pump_runtime` (driven by
-`wait_ms`) only spins the event loop; it does not wait for XHR
-callbacks to commit. Pass `wait_for_network_idle: false` to skip the
-wait for cached / fully server-rendered pages where the extra 500ms
-minimum is wasteful. The deterministic backend returns
-`EngineError::Unsupported` for this method and the server silently
-ignores it — tests and offline runs are unaffected.
+that tracks three signals and polls until **all** of them have been
+quiet for `network_idle_ms` continuously (default `500`) or
+`network_idle_max_ms` total elapsed (default `10000`):
+
+1. `window.fetch` and `XMLHttpRequest` in-flight counts (`__browsaiInFlight`)
+2. `<img>` elements still loading (`__browsaiImagesLoading`) — the
+   interceptor sweeps existing images and watches
+   `MutationObserver` for dynamically-added ones
+3. `document.readyState` (`__browsaiReadyState`) — must be `complete`
+
+All three must hold simultaneously for `idle_ms` continuously before
+the snapshot proceeds. This is the safe default for sites with
+turbo-frame / fetch-on-mount / SPA hydration that need DOM mutations
+from XHR responses to be visible in the snapshot. Pass
+`wait_for_network_idle: false` to skip the wait for cached / fully
+server-rendered pages where the extra 500ms minimum is wasteful. The
+deterministic backend returns `EngineError::Unsupported` for this
+method and the server silently ignores it — tests and offline runs
+are unaffected.
 
 ### Response shapes
 

@@ -2,17 +2,15 @@
 
 ## Unreleased
 
-- `wait_for_network_idle` is now the default on the daemon and CLI.
-  Every `/browse`, `/query`, and `/render` request (and every
-  `browsai live-open` invocation) installs the JS interceptor that
-  tracks `window.fetch` and `XMLHttpRequest` in-flight counts and
-  waits until they reach zero for 500ms continuously (or 10s total).
-  Opt out per request with `"wait_for_network_idle": false` for
-  cached / fully server-rendered pages where the extra 500ms
-  minimum is wasteful. The deterministic backend returns
-  `EngineError::Unsupported` for the trait method and the server
-  silently ignores it, so test fixtures and offline runs are
-  unaffected.
+- `wait_for_network_idle` now waits for three signals simultaneously
+  before snapshotting: `window.fetch` and `XMLHttpRequest` in-flight
+  counts must be 0, every `<img>` must have finished loading
+  (existing images swept on install + `MutationObserver` for
+  dynamically-added ones), and `document.readyState` must be
+  `complete`. All three must hold for `network_idle_ms` continuously
+  (default 500) or `network_idle_max_ms` total (default 10000). The
+  page is not returned until the DOM is finished and everything has
+  been loaded — returning data mid-load is asking for trouble.
 - `browsai-page-text`: `link_href` and `image_src` now also fall back
   to `description`, `value` as text, and `name` when the projection
   pipeline hasn't promoted the resolved URL to `AgentValue::Url`. This

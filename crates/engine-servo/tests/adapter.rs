@@ -2416,6 +2416,52 @@ fn network_idle_interceptor_script_covers_fetch_and_xhr() {
 
 #[cfg(feature = "servo-runtime")]
 #[test]
+fn network_idle_interceptor_script_tracks_images_and_ready_state() {
+    let script = browsai_engine_servo::network_idle_install_script();
+    // Image tracking
+    assert!(
+        script.contains("__browsaiImagesLoading"),
+        "missing image counter"
+    );
+    assert!(
+        script.contains("querySelectorAll('img')"),
+        "missing initial image sweep"
+    );
+    assert!(
+        script.contains("MutationObserver"),
+        "missing image MutationObserver"
+    );
+    assert!(
+        script.contains("img.complete"),
+        "missing img.complete check"
+    );
+    // readyState tracking
+    assert!(
+        script.contains("__browsaiReadyState"),
+        "missing readyState tracker"
+    );
+    assert!(
+        script.contains("readystatechange"),
+        "missing readystatechange listener"
+    );
+    assert!(
+        script.contains("document.readyState"),
+        "missing document.readyState read"
+    );
+    // Image counter balance
+    let img_inc_count = script.matches("__browsaiImagesLoading++").count();
+    let img_dec_calls = script.matches("imgDec();").count();
+    let img_dec_defs = script.matches("function imgDec").count();
+    assert!(img_inc_count > 0, "no image increments");
+    assert!(
+        img_dec_calls >= img_inc_count,
+        "unbalanced image counter: {img_inc_count} inc vs {img_dec_calls} dec"
+    );
+    assert!(img_dec_defs >= 1, "missing imgDec() definition");
+}
+
+#[cfg(feature = "servo-runtime")]
+#[test]
 fn network_idle_interceptor_balanced_parens() {
     // Parens sanity check — make sure nobody breaks the script with a
     // stray bracket. A real JS parser would be better; this catches
