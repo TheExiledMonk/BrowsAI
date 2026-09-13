@@ -2419,10 +2419,13 @@ fn network_idle_interceptor_script_covers_fetch_and_xhr() {
 fn network_idle_interceptor_balanced_parens() {
     // Parens sanity check — make sure nobody breaks the script with a
     // stray bracket. A real JS parser would be better; this catches
-    // the common case.
+    // the common case. Use `str::matches` (works on `&str`) rather
+    // than `chars().filter(...)` — the vendored `potential_utf` crate
+    // used by Servo returns `PotentialCodePoint` from `chars()`, which
+    // doesn't impl `PartialEq<&str>` under newer rustc.
     let script = browsai_engine_servo::network_idle_install_script();
-    let opens = script.chars().filter(|c| *c == "(").count();
-    let closes = script.chars().filter(|c| *c == ")").count();
+    let opens = script.matches('(').count();
+    let closes = script.matches(')').count();
     assert_eq!(
         opens, closes,
         "unbalanced parens: {opens} open vs {closes} close"
