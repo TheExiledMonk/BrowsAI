@@ -24,22 +24,17 @@ pub const PAGE_TEXT_FORMAT_VERSION: u16 = 1;
 
 /// Output style. Both modes share the same node walk and the same
 /// `<page-content trust="untrusted">` envelope.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum PageTextFormat {
     /// Standard markdown with BB-code-style actionable tags. Default.
+    #[default]
     Markdown,
     /// Plain prose only — actionable nodes render as their accessible
     /// text (or `(input: name)` / `(button: name)` placeholders for
     /// self-closing widgets) so the LLM gets a cheaper prompt when it
     /// only needs to read.
     Plain,
-}
-
-impl Default for PageTextFormat {
-    fn default() -> Self {
-        Self::Markdown
-    }
 }
 
 /// Output knob set. All fields default to the safe, prose-friendly choice.

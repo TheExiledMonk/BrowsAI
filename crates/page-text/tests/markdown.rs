@@ -344,7 +344,7 @@ fn table_emits_markdown_table_with_separator() {
         NodeState::default(),
         vec!["cell-c", "cell-d"],
     );
-    for n in cells_a.into_iter().chain(cells_b.into_iter()) {
+    for n in cells_a.into_iter().chain(cells_b) {
         if !tree.nodes.iter().any(|existing| existing.id == n.id) {
             append(&mut tree, n);
         }
