@@ -2601,3 +2601,70 @@ fn network_idle_interceptor_scroll_steps_reset_mutation_timer() {
         "scroll steps should bump __browsaiLastMutation at least twice (mid-sequence + final); init={init_bump} step+={step_bumps}"
     );
 }
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_scroll_trigger_dispatches_wheel_events() {
+    // Lazy-loaders that gate on 'wheel' (rather than 'scroll') are
+    // common — `window.scrollTo()` doesn't fire wheel events, so
+    // without explicit dispatch we miss those code paths entirely.
+    // The installer must construct a synthetic WheelEvent and ship
+    // it to both `window` and `document` so listeners at any point
+    // in the capture/bubble chain observe it.
+    let script = browsai_engine_servo::network_idle_install_script();
+    assert!(
+        script.contains("new WheelEvent("),
+        "missing WheelEvent constructor"
+    );
+    assert!(
+        script.contains("'wheel'"),
+        "missing 'wheel' event-type literal"
+    );
+    assert!(
+        script.contains("deltaY:200"),
+        "missing deltaY payload — wheel listeners that gate on scroll direction would never fire"
+    );
+    // Two dispatch sites — `window` and `document` — so listeners
+    // registered at either level see the synthetic event.
+    assert!(
+        script.contains("win.dispatchEvent(wheelEvent)"),
+        "missing window-level wheel dispatch"
+    );
+    assert!(
+        script.contains("doc.dispatchEvent(wheelEvent)"),
+        "missing document-level wheel dispatch"
+    );
+}
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_scroll_trigger_does_two_passes_with_pause() {
+    // Single-pass scroll triggers miss the case where the first pass
+    // reveals lazy-loaded content whose IO observers need a second
+    // pass to fire. The installer walks the page top→bottom twice
+    // with a longer pause at the end of each pass so any chained
+    // setTimeout(0) / fetch work has time to land.
+    let script = browsai_engine_servo::network_idle_install_script();
+    // 2 passes × 6 steps = 12 total scroll positions, plus the
+    // final scrollTo(0,0) reset before signaling complete.
+    assert!(
+        script.contains("stepsPerPass=6"),
+        "missing stepsPerPass constant"
+    );
+    assert!(
+        script.contains("totalSteps=12"),
+        "missing totalSteps constant (expecting 2 passes × 6 steps)"
+    );
+    // Pass-end pause — the conditional delay at the end of each
+    // pass. Without this, pass 2 starts before pass 1's IO callbacks
+    // have had time to render their content (which may include more
+    // IO observers).
+    assert!(
+        script.contains("isEndOfPass"),
+        "missing end-of-pass pause"
+    );
+    assert!(
+        script.contains("600:250") || script.contains("?600:250"),
+        "missing conditional pass-end delay (expecting 600ms at end of pass, 250ms between steps)"
+    );
+}

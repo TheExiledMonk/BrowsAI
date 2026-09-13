@@ -17,6 +17,20 @@
   `snapshot_only` flag. Response carries `dispatched`, `host`,
   `url`, the echoed `events`, and the projected `PageSnapshot` so
   callers don't need a follow-up `/browse`.
+- `wait_for_network_idle` scroll-trigger now does **two passes of
+  6 steps each** (~3.5s total) and **dispatches a synthetic
+  `WheelEvent`** to both `window` and `document` at every step —
+  `window.scrollTo()` doesn't fire wheel events, and many
+  third-party lazy-loaders gate on `'wheel'` rather than `'scroll'`.
+  The second pass catches the chained case where the first pass
+  reveals lazy-loaded content whose own `IntersectionObserver`s
+  need a second pass to fire; a longer pause at the end of each
+  pass gives any chained `setTimeout(0)` / fetch work time to
+  land. If the heuristic still misses a particular site, the new
+  `POST /native-input` endpoint on `browsai serve` exposes raw
+  `NativeInputEvent` dispatch so a plugin can run its own
+  scroll-and-snapshot loop with full control over timing (see
+  `docs/server.md` § *Plugin-side scroll loop*).
 - `wait_for_network_idle` now also waits for **scroll-triggered
   lazy loads** in addition to DOM stability. The installer kicks off
   a programmatic top→bottom→top scroll in 6 steps so any

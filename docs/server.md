@@ -60,17 +60,31 @@ elapsed (default `10000`):
    SPAs, intersection-observer image lazy loading) doesn't make it
    into the snapshot.
 5. **Scroll trigger complete** (`__browsaiScrollComplete`) — the
-   installer kicks off a programmatic top→bottom→top scroll in
-   6 steps so any `IntersectionObserver`-gated content below the
-   fold actually fires before the stability check starts ticking.
+   installer kicks off a programmatic top→bottom scroll in **two
+   passes of 6 steps each** (~3.5s total). At every step the
+   script both calls `window.scrollTo()` *and* dispatches a
+   synthetic `WheelEvent` to both `window` and `document` so
+   lazy-loaders that gate on `'wheel'` (rather than `'scroll'`)
+   also fire — many third-party lazy-loaders watch the wheel
+   event and `scrollTo()` doesn't fire it. The second pass
+   catches the chained case where the first pass reveals
+   lazy-loaded content whose *own* `IntersectionObserver`s need
+   a second pass to fire; a longer pause at the end of each pass
+   gives any chained `setTimeout(0)` / fetch work time to land.
+   The whole sequence is short-circuited when the page fits in
+   the viewport (no scrollable distance) — pages that fit in
+   the viewport are unaffected.
+
    Sites like GitHub topic pages gate the entire repo-card region
    behind an `IntersectionObserver` that never observes anything
    below the viewport until the user scrolls — without this nudge
    the DOM reaches a stable "no mutations" state almost immediately
-   and the snapshot returns the empty shell. The scroll sequence
-   runs in roughly 6×120ms ≈ 720ms and is short-circuited when the
-   page fits in the viewport (no scrollable distance). Pages that
-   fit in the viewport are unaffected.
+   and the snapshot returns the empty shell. If the heuristic
+   still misses a particular site, `POST /native-input` exposes
+   raw `NativeInputEvent` dispatch so a plugin can drive its own
+   scroll-and-snapshot loop with full control (see
+   [Plugin-side scroll loop](#plugin-side-scroll-loop-for-stubborn-lazy-loads)
+   below).
 
 All five must hold simultaneously before the snapshot proceeds.
 Pass `wait_for_network_idle: false` to skip the wait for cached /
@@ -275,6 +289,61 @@ Common errors:
 | ------ | ----- |
 | `400` | missing or invalid `url`, missing/empty `events`, unknown variant, or `{"type":…,"field":…}` mismatch (e.g. `scroll` without `delta_x`/`delta_y`) |
 | `500` | engine `dispatch_input` failed mid-sequence (response is sent anyway; the partial dispatch count is included in the error message) |
+
+### Plugin-side scroll loop for stubborn lazy loads
+
+If the daemon-side scroll-trigger + grace + idle heuristic still
+doesn't catch a site's lazy-load (e.g. a Turbo-Frame page that
+gates its content on something other than scroll/wheel), the
+`/native-input` endpoint gives the plugin full control over
+gesture timing. The pattern is:
+
+1. `POST /browse` — navigate and read the initial snapshot.
+2. Detect the missing content (e.g. regex over the markdown /
+   count of repo URLs).
+3. `POST /native-input` — dispatch one or more scroll wheel
+   events.
+4. `POST /browse` — read the post-scroll snapshot.
+5. Repeat until the content appears or an iteration budget is
+   spent.
+
+A single scroll wheel event at `delta_y: 2000` is usually enough
+to advance the viewport past the lazy-load sentinel. For a tall
+page, a sequence of `delta_y: 800` events fires each
+`IntersectionObserver` along the way:
+
+```sh
+# Step 1: navigate
+curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"url":"https://github.com/topics/llm-evaluation"}' \
+    http://127.0.0.1:8765/browse > before.json
+
+# Step 3: scroll in 3 wheel-tick increments (advance past each
+# IntersectionObserver sentinel along the way)
+curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"url":"https://github.com/topics/llm-evaluation","events":[
+          {"type":"scroll","delta_x":0,"delta_y":800},
+          {"type":"scroll","delta_x":0,"delta_y":800},
+          {"type":"scroll","delta_x":0,"delta_y":800},
+          {"type":"scroll","delta_x":0,"delta_y":800},
+          {"type":"scroll","delta_x":0,"delta_y":800}
+        ],"snapshot_only":true}' \
+    http://127.0.0.1:8765/native-input
+
+# Step 4: re-snapshot with the same network-idle wait
+curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"url":"https://github.com/topics/llm-evaluation"}' \
+    http://127.0.0.1:8765/browse > after.json
+
+# Step 5: diff
+diff <(jq -S . before.json) <(jq -S . after.json)
+```
+
+Each `/native-input` + `/browse` round-trip costs roughly the
+network-idle wait (`network_idle_ms + network_idle_grace_ms ≈ 1.5s`
+plus any actual fetch time). On a 20-card page that translates
+to 3-5 iterations and 5-10s of plugin-controlled latency — slow
+but deterministic, and bypasses every generic heuristic.
 
 ## Auth and binding
 
