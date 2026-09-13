@@ -36,7 +36,7 @@ remains — useful for cheaper Q&A/summarisation prompts where the LLM
 doesn't need to act on the page.
 
 `wait_for_network_idle` (default **`true`**) installs a JS interceptor
-that tracks three signals and polls until **all** of them have been
+that tracks four signals and polls until **all** of them have been
 quiet for `network_idle_ms` continuously (default `500`) or
 `network_idle_max_ms` total elapsed (default `10000`):
 
@@ -45,16 +45,25 @@ quiet for `network_idle_ms` continuously (default `500`) or
    interceptor sweeps existing images and watches
    `MutationObserver` for dynamically-added ones
 3. `document.readyState` (`__browsaiReadyState`) — must be `complete`
+4. **DOM stability** (`__browsaiLastMutation`) — a `MutationObserver`
+   on `documentElement` watching `childList`, `subtree`,
+   `attributes`, and `characterData` bumps a timestamp on every
+   mutation. The polling loop also requires that no mutation has
+   happened for `idle_ms`. This catches the cases where simple
+   counter-based waits miss: `setTimeout(fn, 0)` callbacks,
+   `requestAnimationFrame` callbacks, `IntersectionObserver`
+   triggers, and promise microtasks that mutate the DOM after the
+   explicit resources have settled. Without this, lazy-loaded
+   content (turbo-frame cards, infinite scroll, fetch-on-mount
+   SPAs, intersection-observer image lazy loading) doesn't make it
+   into the snapshot.
 
-All three must hold simultaneously for `idle_ms` continuously before
-the snapshot proceeds. This is the safe default for sites with
-turbo-frame / fetch-on-mount / SPA hydration that need DOM mutations
-from XHR responses to be visible in the snapshot. Pass
-`wait_for_network_idle: false` to skip the wait for cached / fully
-server-rendered pages where the extra 500ms minimum is wasteful. The
-deterministic backend returns `EngineError::Unsupported` for this
-method and the server silently ignores it — tests and offline runs
-are unaffected.
+All four must hold simultaneously for `idle_ms` continuously before
+the snapshot proceeds. Pass `wait_for_network_idle: false` to skip
+the wait for cached / fully server-rendered pages where the extra
+500ms minimum is wasteful. The deterministic backend returns
+`EngineError::Unsupported` for this method and the server silently
+ignores it — tests and offline runs are unaffected.
 
 ### Response shapes
 

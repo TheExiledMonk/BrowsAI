@@ -2,15 +2,20 @@
 
 ## Unreleased
 
-- `wait_for_network_idle` now waits for three signals simultaneously
-  before snapshotting: `window.fetch` and `XMLHttpRequest` in-flight
-  counts must be 0, every `<img>` must have finished loading
-  (existing images swept on install + `MutationObserver` for
-  dynamically-added ones), and `document.readyState` must be
-  `complete`. All three must hold for `network_idle_ms` continuously
-  (default 500) or `network_idle_max_ms` total (default 10000). The
-  page is not returned until the DOM is finished and everything has
-  been loaded — returning data mid-load is asking for trouble.
+- `wait_for_network_idle` now also waits for **DOM stability** on top
+  of the fetch / images / readyState signals. A `MutationObserver`
+  on `documentElement` watching `childList`, `subtree`,
+  `attributes`, and `characterData` bumps a timestamp on every
+  mutation; the polling loop also requires no mutation for
+  `idle_ms` continuously. This catches lazy-loaded content that the
+  counter-based signals miss: `setTimeout(fn, 0)` callbacks,
+  `requestAnimationFrame` callbacks, `IntersectionObserver`
+  triggers, and promise microtasks that mutate the DOM after all
+  explicit resources have settled. Without it, GitHub topic pages
+  with turbo-frame cards, infinite-scroll lists, fetch-on-mount
+  SPAs, and intersection-observer lazy-loaded images would still
+  return mid-load snapshots — the page is not finished until the
+  DOM has been quiet, and we wait for that.
 - `browsai-page-text`: `link_href` and `image_src` now also fall back
   to `description`, `value` as text, and `name` when the projection
   pipeline hasn't promoted the resolved URL to `AgentValue::Url`. This

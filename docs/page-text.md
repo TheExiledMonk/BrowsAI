@@ -315,17 +315,24 @@ underlying `AgentRenderTree`, but the markdown output is monolithic
   (primary), `description`, `value` as text, and `name`. Sites that
   stash the resolved href in a non-standard field will fall through
   to the BB-code fallback without a URL.
-- **XHR-loaded content (turbo-frame, fetch-on-mount, infinite scroll)
-  is now in the snapshot by default.** The daemon installs a JS
-  interceptor on `/browse` that tracks three signals and only
-  proceeds once all three have been quiet for 500ms continuously:
-  `window.fetch` and `XMLHttpRequest` in-flight counts, `<img>`
-  elements still loading, and `document.readyState` (`complete`).
-  Pass `wait_for_network_idle: false` on the body to opt out for
-  cached / fully server-rendered pages. `pump_runtime` (driven by
+- **XHR-loaded and lazy-loaded content (turbo-frame, fetch-on-mount,
+  intersection-observer, infinite scroll, SPA hydration) is now in
+  the snapshot by default.** The daemon installs a JS interceptor on
+  `/browse` that tracks four signals and only proceeds once all four
+  have been quiet for 500ms continuously: `window.fetch` and
+  `XMLHttpRequest` in-flight counts, `<img>` elements still loading,
+  `document.readyState` (`complete`), and a `MutationObserver`-
+  driven `__browsaiLastMutation` timestamp that catches every DOM
+  mutation. The fourth signal is what covers lazy loading — JS that
+  schedules work via `setTimeout(0)`, `requestAnimationFrame`,
+  `IntersectionObserver`, or promise microtasks. Without it, the
+  three counter-based signals can all hit zero while the page is
+  still in the middle of mutating itself. Pass
+  `wait_for_network_idle: false` on the body to opt out for cached
+  / fully server-rendered pages. `pump_runtime` (driven by
   `wait_ms`) still runs first to spin the event loop for
   synchronous JS; the network-idle wait handles the async
-  XHR / image / readyState-driven DOM mutations that pump misses.
+  XHR / image / readyState / mutation-driven work that pump misses.
 
 ## Schema
 

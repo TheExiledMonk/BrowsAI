@@ -1744,7 +1744,7 @@ fn build_agent_node(
 }
 
 #[cfg(feature = "servo-runtime")]
-const INSTALL_NETWORK_IDLE_SCRIPT: &str = "(function(){if(window.__browsaiNetworkIdleInstalled)return true;window.__browsaiNetworkIdleInstalled=true;window.__browsaiInFlight=0;window.__browsaiImagesLoading=0;window.__browsaiReadyState=document.readyState;function dec(){if(window.__browsaiInFlight>0)window.__browsaiInFlight--;}function imgDec(){if(window.__browsaiImagesLoading>0)window.__browsaiImagesLoading--;}document.addEventListener('readystatechange',function(){window.__browsaiReadyState=document.readyState;});if(typeof window.fetch==='function'){var origFetch=window.fetch;window.fetch=function(){window.__browsaiInFlight++;var p;try{p=origFetch.apply(this,arguments);}catch(e){dec();throw e;}if(p&&typeof p.then==='function'){p.then(dec,dec);}else{dec();}return p;};}var XHR=window.XMLHttpRequest;if(XHR&&XHR.prototype){var origOpen=XHR.prototype.open;var origSend=XHR.prototype.send;XHR.prototype.open=function(){this.__browsaiTracked=true;return origOpen.apply(this,arguments);};XHR.prototype.send=function(){if(this.__browsaiTracked){window.__browsaiInFlight++;var done=false;function onDone(){if(done)return;done=true;dec();}this.addEventListener('loadend',onDone);this.addEventListener('error',onDone);this.addEventListener('abort',onDone);}return origSend.apply(this,arguments);};}function trackImg(img){if(!img||img.__browsaiTracked)return;img.__browsaiTracked=true;if(img.complete)return;window.__browsaiImagesLoading++;img.addEventListener('load',imgDec,{once:true});img.addEventListener('error',imgDec,{once:true});}try{var existing=document.querySelectorAll('img');for(var i=0;i<existing.length;i++)trackImg(existing[i]);}catch(_){}if(typeof MutationObserver==='function'){try{var imgObserver=new MutationObserver(function(muts){for(var m=0;m<muts.length;m++){var added=muts[m].addedNodes;for(var n=0;n<added.length;n++){var node=added[n];if(!node)continue;if(node.tagName==='IMG'){trackImg(node);}else if(node.querySelectorAll){var nested=node.querySelectorAll('img');for(var k=0;k<nested.length;k++)trackImg(nested[k]);}}}});imgObserver.observe(document.documentElement||document,{childList:true,subtree:true});}catch(_){}}return true;})()";
+const INSTALL_NETWORK_IDLE_SCRIPT: &str = "(function(){if(window.__browsaiNetworkIdleInstalled)return true;window.__browsaiNetworkIdleInstalled=true;window.__browsaiInFlight=0;window.__browsaiImagesLoading=0;window.__browsaiReadyState=document.readyState;window.__browsaiLastMutation=Date.now();function dec(){if(window.__browsaiInFlight>0)window.__browsaiInFlight--;}function imgDec(){if(window.__browsaiImagesLoading>0)window.__browsaiImagesLoading--;}document.addEventListener('readystatechange',function(){window.__browsaiReadyState=document.readyState;});if(typeof window.fetch==='function'){var origFetch=window.fetch;window.fetch=function(){window.__browsaiInFlight++;var p;try{p=origFetch.apply(this,arguments);}catch(e){dec();throw e;}if(p&&typeof p.then==='function'){p.then(dec,dec);}else{dec();}return p;};}var XHR=window.XMLHttpRequest;if(XHR&&XHR.prototype){var origOpen=XHR.prototype.open;var origSend=XHR.prototype.send;XHR.prototype.open=function(){this.__browsaiTracked=true;return origOpen.apply(this,arguments);};XHR.prototype.send=function(){if(this.__browsaiTracked){window.__browsaiInFlight++;var done=false;function onDone(){if(done)return;done=true;dec();}this.addEventListener('loadend',onDone);this.addEventListener('error',onDone);this.addEventListener('abort',onDone);}return origSend.apply(this,arguments);};}function trackImg(img){if(!img||img.__browsaiTracked)return;img.__browsaiTracked=true;if(img.complete)return;window.__browsaiImagesLoading++;img.addEventListener('load',imgDec,{once:true});img.addEventListener('error',imgDec,{once:true});}try{var existing=document.querySelectorAll('img');for(var i=0;i<existing.length;i++)trackImg(existing[i]);}catch(_){}if(typeof MutationObserver==='function'){try{var domObserver=new MutationObserver(function(){window.__browsaiLastMutation=Date.now();});domObserver.observe(document.documentElement||document,{childList:true,subtree:true,attributes:true,characterData:true,attributeOldValue:false,characterDataOldValue:false});var imgObserver=new MutationObserver(function(muts){for(var m=0;m<muts.length;m++){var added=muts[m].addedNodes;for(var n=0;n<added.length;n++){var node=added[n];if(!node)continue;if(node.tagName==='IMG'){trackImg(node);}else if(node.querySelectorAll){var nested=node.querySelectorAll('img');for(var k=0;k<nested.length;k++)trackImg(nested[k]);}}}});imgObserver.observe(document.documentElement||document,{childList:true,subtree:true});}catch(_){}}return true;})()";
 
 /// Returns the JS source that installs the `window.__browsaiInFlight`
 /// counter used by [`ServoEngine::wait_for_network_idle_blocking`].
@@ -1979,13 +1979,21 @@ impl ServoEngine {
         Ok(())
     }
 
-    /// Wait until the page is fully settled before snapshotting:
-    /// `window.fetch` and `XMLHttpRequest` counts at 0, every
-    /// `<img>` complete, and `document.readyState === 'complete'`,
-    /// all held steady for `idle_ms` continuously. The image and
-    /// readyState trackers are installed by the same JS interceptor
-    /// that tracks fetch/XHR. Returns `Ok(())` once idle is observed
-    /// or after `max_ms` total elapsed — the caller treats both as
+    /// Wait until the page is fully settled before snapshotting.
+    /// All four conditions must hold simultaneously for `idle_ms`
+    /// continuously, or `max_ms` total elapsed:
+    ///
+    /// 1. `window.fetch` and `XMLHttpRequest` in-flight counts at 0
+    /// 2. Every `<img>` has finished loading
+    /// 3. `document.readyState === 'complete'`
+    /// 4. The DOM has not been mutated for at least `idle_ms`
+    ///    (catches `setTimeout(0)`, `requestAnimationFrame`,
+    ///    `IntersectionObserver` callbacks, and promise microtasks
+    ///    that fire after the explicit resources settle — the cases
+    ///    that simple counter-based waits miss on lazy-loaded content)
+    ///
+    /// Returns `Ok(())` once all four conditions have been quiet, or
+    /// after `max_ms` total elapsed — the caller treats both as
     /// "best effort, snapshot now".
     #[cfg(feature = "servo-runtime")]
     pub fn wait_for_network_idle_blocking(
@@ -2013,15 +2021,16 @@ impl ServoEngine {
                 return Ok(());
             }
             // Spin the event loop + drain the queue so any pending
-            // XHR callbacks can fire and decrement the counters before
+            // XHR / rAF / IO / microtask callbacks can fire and
+            // decrement counters / bump the mutation timestamp before
             // we read them.
-            for _ in 0..5 {
+            for _ in 0..10 {
                 real_page.runtime.spin_event_loop();
                 std::thread::sleep(std::time::Duration::from_millis(2));
             }
             let snapshot = real_page
                 .evaluate_javascript_bounded(
-                    "({in_flight:window.__browsaiInFlight||0,images:window.__browsaiImagesLoading||0,ready_state:window.__browsaiReadyState||'unknown'})".to_string(),
+                    "({in_flight:window.__browsaiInFlight||0,images:window.__browsaiImagesLoading||0,ready_state:window.__browsaiReadyState||'unknown',last_mutation:window.__browsaiLastMutation||Date.now()})".to_string(),
                     std::time::Duration::from_secs(2),
                 )
                 .ok()
@@ -2036,7 +2045,25 @@ impl ServoEngine {
                 .get("ready_state")
                 .and_then(|v| v.as_str())
                 .unwrap_or("loading");
-            if in_flight == 0 && images == 0 && ready_state == "complete" {
+            let last_mutation_ms = snapshot
+                .get("last_mutation")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
+            // Convert JS Date.now() (ms since epoch) to a delta from
+            // our polling instant. JS Date.now() is on the same wall
+            // clock as the Rust SystemTime within rounding error, so
+            // we use the absolute delta as a coarse signal of
+            // "how long since anything touched the DOM".
+            let now_ms = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs_f64() * 1000.0)
+                .unwrap_or(0.0);
+            let since_mutation_ms = now_ms - last_mutation_ms;
+            if in_flight == 0
+                && images == 0
+                && ready_state == "complete"
+                && since_mutation_ms >= idle_ms as f64
+            {
                 let since = idle_since.get_or_insert_with(std::time::Instant::now);
                 if since.elapsed() >= idle {
                     return Ok(());

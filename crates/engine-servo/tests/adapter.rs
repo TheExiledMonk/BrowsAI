@@ -2448,6 +2448,23 @@ fn network_idle_interceptor_script_tracks_images_and_ready_state() {
         script.contains("document.readyState"),
         "missing document.readyState read"
     );
+    // DOM-stability tracker — the missing piece for lazy-loaded
+    // content. A plain MutationObserver that bumps a timestamp on
+    // every DOM change lets the polling loop detect "JS is still
+    // mutating the page even though no fetch / image / readyState
+    // signal is firing".
+    assert!(
+        script.contains("__browsaiLastMutation"),
+        "missing __browsaiLastMutation tracker"
+    );
+    assert!(
+        script.contains("Date.now()"),
+        "missing Date.now() timestamp"
+    );
+    assert!(
+        script.contains("childList:true,subtree:true,attributes:true,characterData:true"),
+        "missing comprehensive MutationObserver options"
+    );
     // Image counter balance. Decrement goes through an event-listener
     // reference (`img.addEventListener('load', imgDec, { once: true })`)
     // rather than a `imgDec()` call site, so match the `--` operator
