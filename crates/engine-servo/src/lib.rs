@@ -1754,14 +1754,6 @@ pub fn network_idle_install_script() -> &'static str {
     INSTALL_NETWORK_IDLE_SCRIPT
 }
 
-/// Returns the JS source that installs the `window.__browsaiInFlight`
-/// counter used by [`ServoEngine::wait_for_network_idle_blocking`].
-/// Exposed for tests; the live engine calls the constant directly.
-#[cfg(feature = "servo-runtime")]
-pub fn network_idle_install_script() -> &'static str {
-    INSTALL_NETWORK_IDLE_SCRIPT
-}
-
 #[cfg(feature = "servo-runtime")]
 fn role_for_tag(tag: &str, explicit_role: Option<&str>) -> StructuralRole {
     match explicit_role.unwrap_or(tag) {

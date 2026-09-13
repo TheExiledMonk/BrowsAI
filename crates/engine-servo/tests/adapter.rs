@@ -2448,14 +2448,17 @@ fn network_idle_interceptor_script_tracks_images_and_ready_state() {
         script.contains("document.readyState"),
         "missing document.readyState read"
     );
-    // Image counter balance
+    // Image counter balance. Decrement goes through an event-listener
+    // reference (`img.addEventListener('load', imgDec, { once: true })`)
+    // rather than a `imgDec()` call site, so match the `--` operator
+    // directly rather than looking for the function invocation.
     let img_inc_count = script.matches("__browsaiImagesLoading++").count();
-    let img_dec_calls = script.matches("imgDec();").count();
+    let img_dec_count = script.matches("__browsaiImagesLoading--").count();
     let img_dec_defs = script.matches("function imgDec").count();
     assert!(img_inc_count > 0, "no image increments");
     assert!(
-        img_dec_calls >= img_inc_count,
-        "unbalanced image counter: {img_inc_count} inc vs {img_dec_calls} dec"
+        img_dec_count >= img_inc_count,
+        "unbalanced image counter: {img_inc_count} inc vs {img_dec_count} dec"
     );
     assert!(img_dec_defs >= 1, "missing imgDec() definition");
 }
