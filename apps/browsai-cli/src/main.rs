@@ -301,8 +301,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
                     format: page_text_format,
                     ..Default::default()
                 };
-                let view =
-                    browsai_page_text::MarkdownEmitter::new(&snapshot.tree).emit(&opts);
+                let view = browsai_page_text::MarkdownEmitter::new(&snapshot.tree).emit(&opts);
                 if stream {
                     emit_event(serde_json::json!({
                         "type": "text-frame",

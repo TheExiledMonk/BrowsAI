@@ -48,11 +48,14 @@ fn page_title_becomes_level_one_heading() {
     let opts = MarkdownOptions::default();
     let view = MarkdownEmitter::new(&tree).emit(&opts);
     assert!(
-        view.content.contains("[heading level=\"1\"]Example Domain[/heading]"),
+        view.content
+            .contains("[heading level=\"1\"]Example Domain[/heading]"),
         "got: {}",
         view.content
     );
-    assert!(view.content.starts_with("<page-content trust=\"untrusted\">"));
+    assert!(view
+        .content
+        .starts_with("<page-content trust=\"untrusted\">"));
     assert!(view.content.ends_with("</page-content>"));
 }
 
@@ -72,11 +75,7 @@ fn link_emits_bb_code_with_id_and_href() {
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
     let expected =
         "[link id=\"link-1\" name=\"More information\" href=\"https://example.test/about\"]More information[/link]";
-    assert!(
-        view.content.contains(expected),
-        "got: {}",
-        view.content
-    );
+    assert!(view.content.contains(expected), "got: {}", view.content);
     let span = view
         .node_index
         .iter()
@@ -101,7 +100,8 @@ fn textbox_with_empty_value_is_self_closing() {
     tree.nodes[0].children.push("tb-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
     assert!(
-        view.content.contains("[textbox id=\"tb-1\" name=\"Search box\"][/textbox]"),
+        view.content
+            .contains("[textbox id=\"tb-1\" name=\"Search box\"][/textbox]"),
         "got: {}",
         view.content
     );
@@ -123,7 +123,8 @@ fn disabled_button_emits_disabled_attribute() {
     tree.nodes[0].children.push("btn-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
     assert!(
-        view.content.contains("[button id=\"btn-1\" name=\"Submit\" disabled=\"true\"]Submit[/button]"),
+        view.content
+            .contains("[button id=\"btn-1\" name=\"Submit\" disabled=\"true\"]Submit[/button]"),
         "got: {}",
         view.content
     );
@@ -208,17 +209,20 @@ fn select_with_options_emits_nested_option_tags() {
     tree.nodes[0].children.push("sel-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
     assert!(
-        view.content.contains("[select id=\"sel-1\" name=\"region\"]"),
+        view.content
+            .contains("[select id=\"sel-1\" name=\"region\"]"),
         "got: {}",
         view.content
     );
     assert!(
-        view.content.contains("[option id=\"opt-1\" value=\"US\" selected=\"true\"]US[/option]"),
+        view.content
+            .contains("[option id=\"opt-1\" value=\"US\" selected=\"true\"]US[/option]"),
         "got: {}",
         view.content
     );
     assert!(
-        view.content.contains("[option id=\"opt-2\" value=\"CA\"]CA[/option]"),
+        view.content
+            .contains("[option id=\"opt-2\" value=\"CA\"]CA[/option]"),
         "got: {}",
         view.content
     );
@@ -289,8 +293,22 @@ fn table_emits_markdown_table_with_separator() {
     let mut tree = AgentRenderTree::new_page("Table");
     let mut cells_a = vec![];
     let mut cells_b = vec![];
-    let cell_a = node("cell-a", StructuralRole::Cell, Some("Name"), None, NodeState::default(), vec![]);
-    let cell_b = node("cell-b", StructuralRole::Cell, Some("Price"), None, NodeState::default(), vec![]);
+    let cell_a = node(
+        "cell-a",
+        StructuralRole::Cell,
+        Some("Name"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    let cell_b = node(
+        "cell-b",
+        StructuralRole::Cell,
+        Some("Price"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
     cells_a.push(cell_a);
     cells_a.push(cell_b.clone());
     cells_b.push(node(
@@ -344,9 +362,21 @@ fn table_emits_markdown_table_with_separator() {
     append(&mut tree, table);
     tree.nodes[0].children.push("tbl-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
-    assert!(view.content.contains("| Name | Price |"), "got: {}", view.content);
-    assert!(view.content.contains("| --- | --- |"), "got: {}", view.content);
-    assert!(view.content.contains("| Widget | $5 |"), "got: {}", view.content);
+    assert!(
+        view.content.contains("| Name | Price |"),
+        "got: {}",
+        view.content
+    );
+    assert!(
+        view.content.contains("| --- | --- |"),
+        "got: {}",
+        view.content
+    );
+    assert!(
+        view.content.contains("| Widget | $5 |"),
+        "got: {}",
+        view.content
+    );
 }
 
 #[test]
@@ -471,7 +501,11 @@ fn geometry_drives_heading_level_fallback() {
     append(&mut tree, h);
     tree.nodes[0].children.push("h-1".into());
     let view = MarkdownEmitter::new(&tree).emit(&MarkdownOptions::default());
-    assert!(view.content.contains("[heading level=\"5\"]"), "got: {}", view.content);
+    assert!(
+        view.content.contains("[heading level=\"5\"]"),
+        "got: {}",
+        view.content
+    );
 }
 
 #[test]
@@ -494,7 +528,10 @@ fn plain_format_strips_bb_code_tags() {
     let view = MarkdownEmitter::new(&tree).emit(&opts);
     assert!(!view.content.contains("[link"), "got: {}", view.content);
     assert!(view.content.contains("More info"), "got: {}", view.content);
-    assert!(view.content.contains("<page-content"), "envelope still present");
+    assert!(
+        view.content.contains("<page-content"),
+        "envelope still present"
+    );
 }
 
 #[test]
@@ -542,7 +579,11 @@ fn plain_format_renders_checkbox_with_mark() {
         ..Default::default()
     };
     let view = MarkdownEmitter::new(&tree).emit(&opts);
-    assert!(view.content.contains("[x] Subscribe"), "got: {}", view.content);
+    assert!(
+        view.content.contains("[x] Subscribe"),
+        "got: {}",
+        view.content
+    );
 }
 
 #[test]
@@ -625,10 +666,38 @@ fn plain_format_surfaces_challenge_marker() {
 #[test]
 fn plain_format_renders_table_without_separator() {
     let mut tree = AgentRenderTree::new_page("Page");
-    let cell_a = node("cell-a", StructuralRole::Cell, Some("Name"), None, NodeState::default(), vec![]);
-    let cell_b = node("cell-b", StructuralRole::Cell, Some("Price"), None, NodeState::default(), vec![]);
-    let cell_c = node("cell-c", StructuralRole::Cell, Some("Widget"), None, NodeState::default(), vec![]);
-    let cell_d = node("cell-d", StructuralRole::Cell, Some("$5"), None, NodeState::default(), vec![]);
+    let cell_a = node(
+        "cell-a",
+        StructuralRole::Cell,
+        Some("Name"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    let cell_b = node(
+        "cell-b",
+        StructuralRole::Cell,
+        Some("Price"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    let cell_c = node(
+        "cell-c",
+        StructuralRole::Cell,
+        Some("Widget"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
+    let cell_d = node(
+        "cell-d",
+        StructuralRole::Cell,
+        Some("$5"),
+        None,
+        NodeState::default(),
+        vec![],
+    );
     let row_h = node(
         "row-h",
         StructuralRole::Row,
@@ -666,9 +735,20 @@ fn plain_format_renders_table_without_separator() {
         ..Default::default()
     };
     let view = MarkdownEmitter::new(&tree).emit(&opts);
-    assert!(view.content.contains("Name | Price"), "got: {}", view.content);
-    assert!(view.content.contains("Widget | $5"), "got: {}", view.content);
-    assert!(!view.content.contains("---"), "no markdown separator in plain mode");
+    assert!(
+        view.content.contains("Name | Price"),
+        "got: {}",
+        view.content
+    );
+    assert!(
+        view.content.contains("Widget | $5"),
+        "got: {}",
+        view.content
+    );
+    assert!(
+        !view.content.contains("---"),
+        "no markdown separator in plain mode"
+    );
 }
 
 #[test]

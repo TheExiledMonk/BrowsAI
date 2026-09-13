@@ -256,9 +256,7 @@ impl<'a> MarkdownEmitter<'a> {
         match node.structural_role {
             StructuralRole::Page => self.emit_page(node, opts),
             StructuralRole::Heading => self.emit_heading_node(node, opts),
-            StructuralRole::Paragraph | StructuralRole::Text => {
-                self.emit_text_block(node, opts)
-            }
+            StructuralRole::Paragraph | StructuralRole::Text => self.emit_text_block(node, opts),
             StructuralRole::Link => self.emit_actionable(node, MarkdownTag::Link, opts),
             StructuralRole::Button => self.emit_actionable(node, MarkdownTag::Button, opts),
             StructuralRole::Textbox => self.emit_actionable(node, MarkdownTag::Textbox, opts),
@@ -283,10 +281,7 @@ impl<'a> MarkdownEmitter<'a> {
                 self.out.push('\n');
             }
             StructuralRole::Video => {
-                let label = node
-                    .name
-                    .clone()
-                    .unwrap_or_else(|| "(video)".into());
+                let label = node.name.clone().unwrap_or_else(|| "(video)".into());
                 let body = truncate(&label, opts.max_text_bytes);
                 if Self::is_plain(opts) {
                     self.out.push_str(&format!("(video: {})\n", body));
@@ -341,12 +336,7 @@ impl<'a> MarkdownEmitter<'a> {
         self.out.push('\n');
     }
 
-    fn emit_actionable(
-        &mut self,
-        node: &AgentNode,
-        tag: MarkdownTag,
-        opts: &MarkdownOptions,
-    ) {
+    fn emit_actionable(&mut self, node: &AgentNode, tag: MarkdownTag, opts: &MarkdownOptions) {
         if Self::is_plain(opts) {
             self.emit_actionable_plain(node, tag, opts);
             return;
@@ -407,7 +397,8 @@ impl<'a> MarkdownEmitter<'a> {
                 if body_text.is_empty() {
                     self.out.push_str(&format!("(input: {})\n", name));
                 } else {
-                    self.out.push_str(&format!("(input: {}) {}\n", name, body_text));
+                    self.out
+                        .push_str(&format!("(input: {}) {}\n", name, body_text));
                 }
             }
             MarkdownTag::Checkbox | MarkdownTag::Radio => {
@@ -533,7 +524,8 @@ impl<'a> MarkdownEmitter<'a> {
                 if option_count == 0 {
                     self.out.push_str(&format!("({}: (empty))\n", label));
                 } else {
-                    self.out.push_str(&format!("({}: {} options)\n", label, option_count));
+                    self.out
+                        .push_str(&format!("({}: {} options)\n", label, option_count));
                 }
             }
         }
@@ -664,8 +656,7 @@ impl<'a> MarkdownEmitter<'a> {
         if Self::is_plain(opts) {
             if node.semantic_role == Some(SemanticRole::Challenge) {
                 let provider = node.description.as_deref().unwrap_or("unknown");
-                self.out
-                    .push_str(&format!("(challenge: {})\n", provider));
+                self.out.push_str(&format!("(challenge: {})\n", provider));
             }
             for child_id in &node.children {
                 self.emit_child(child_id, opts);
@@ -697,8 +688,7 @@ impl<'a> MarkdownEmitter<'a> {
         if Self::is_plain(opts) {
             if node.semantic_role == Some(SemanticRole::Challenge) {
                 let provider = node.description.as_deref().unwrap_or("unknown");
-                self.out
-                    .push_str(&format!("(challenge: {})\n", provider));
+                self.out.push_str(&format!("(challenge: {})\n", provider));
             }
             if let Some(name) = node.name.as_deref() {
                 self.out.push_str(&format!("(dialog: {})\n", name));
@@ -786,10 +776,7 @@ fn emit_extra_attrs(out: &mut String, node: &AgentNode, tag: MarkdownTag) {
     // Surface the semantic challenge marker regardless of structural role,
     // so a challenge rendered as a region/div still carries provider info.
     if node.semantic_role == Some(SemanticRole::Challenge) {
-        let provider = node
-            .description
-            .as_deref()
-            .unwrap_or("unknown");
+        let provider = node.description.as_deref().unwrap_or("unknown");
         push_attr(out, "provider", provider);
     }
 }

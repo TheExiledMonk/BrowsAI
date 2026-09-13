@@ -1053,10 +1053,7 @@ fn handle_browse(
         .and_then(Value::as_u64)
         .unwrap_or(100)
         .max(1) as usize;
-    let format = body
-        .get("format")
-        .and_then(Value::as_str)
-        .unwrap_or("tree");
+    let format = body.get("format").and_then(Value::as_str).unwrap_or("tree");
     let roles_filter: Vec<String> = body
         .get("filter")
         .and_then(Value::as_str)
