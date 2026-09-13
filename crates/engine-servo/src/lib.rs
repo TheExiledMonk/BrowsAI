@@ -1744,6 +1744,17 @@ fn build_agent_node(
 }
 
 #[cfg(feature = "servo-runtime")]
+const INSTALL_NETWORK_IDLE_SCRIPT: &str = "(function(){if(window.__browsaiNetworkIdleInstalled)return true;window.__browsaiNetworkIdleInstalled=true;window.__browsaiInFlight=0;function dec(){if(window.__browsaiInFlight>0)window.__browsaiInFlight--;}if(typeof window.fetch==='function'){var origFetch=window.fetch;window.fetch=function(){window.__browsaiInFlight++;var p;try{p=origFetch.apply(this,arguments);}catch(e){dec();throw e;}if(p&&typeof p.then==='function'){p.then(dec,dec);}else{dec();}return p;};}var XHR=window.XMLHttpRequest;if(XHR&&XHR.prototype){var origOpen=XHR.prototype.open;var origSend=XHR.prototype.send;XHR.prototype.open=function(){this.__browsaiTracked=true;return origOpen.apply(this,arguments);};XHR.prototype.send=function(){if(this.__browsaiTracked){window.__browsaiInFlight++;var done=false;function onDone(){if(done)return;done=true;dec();}this.addEventListener('loadend',onDone);this.addEventListener('error',onDone);this.addEventListener('abort',onDone);}return origSend.apply(this,arguments);};}return true;})()";
+
+/// Returns the JS source that installs the `window.__browsaiInFlight`
+/// counter used by [`ServoEngine::wait_for_network_idle_blocking`].
+/// Exposed for tests; the live engine calls the constant directly.
+#[cfg(feature = "servo-runtime")]
+pub fn network_idle_install_script() -> &'static str {
+    INSTALL_NETWORK_IDLE_SCRIPT
+}
+
+#[cfg(feature = "servo-runtime")]
 fn role_for_tag(tag: &str, explicit_role: Option<&str>) -> StructuralRole {
     match explicit_role.unwrap_or(tag) {
         "button" => StructuralRole::Button,
@@ -1966,6 +1977,66 @@ impl ServoEngine {
             }
         }
         Ok(())
+    }
+
+    /// Wait until the page's network is idle by polling the counter
+    /// maintained by the JS interceptor installed by the daemon. The
+    /// interceptor wraps `window.fetch` and `XMLHttpRequest.prototype`
+    /// so every XHR / fetch increments on send and decrements on
+    /// loadend / error / abort. Returns `Ok(())` once the counter has
+    /// been 0 for `idle_ms` continuously, or after `max_ms` total
+    /// elapsed — the caller treats both as "best effort, snapshot
+    /// now".
+    #[cfg(feature = "servo-runtime")]
+    pub fn wait_for_network_idle_blocking(
+        &self,
+        page: PageId,
+        idle_ms: u64,
+        max_ms: u64,
+    ) -> Result<(), EngineError> {
+        let real_page = self
+            .real_pages
+            .get(&page)
+            .ok_or_else(|| EngineError::Other("page has no live runtime".into()))?;
+        // Re-install the interceptor in case the page navigated since
+        // last call. The script is idempotent.
+        let _ = real_page.evaluate_javascript_bounded(
+            INSTALL_NETWORK_IDLE_SCRIPT.to_string(),
+            std::time::Duration::from_secs(5),
+        );
+        let max = std::time::Duration::from_millis(max_ms.max(idle_ms).max(1));
+        let idle = std::time::Duration::from_millis(idle_ms.max(50));
+        let started = std::time::Instant::now();
+        let mut idle_since: Option<std::time::Instant> = None;
+        loop {
+            if started.elapsed() >= max {
+                return Ok(());
+            }
+            // Spin the event loop + drain the queue so any pending
+            // XHR callbacks can fire and decrement the counter before
+            // we read it.
+            for _ in 0..5 {
+                real_page.runtime.spin_event_loop();
+                std::thread::sleep(std::time::Duration::from_millis(2));
+            }
+            let count = real_page
+                .evaluate_javascript_bounded(
+                    "(window.__browsaiInFlight||0)".to_string(),
+                    std::time::Duration::from_secs(2),
+                )
+                .ok()
+                .and_then(|v| v.as_i64())
+                .unwrap_or(0);
+            if count == 0 {
+                let since = idle_since.get_or_insert_with(std::time::Instant::now);
+                if since.elapsed() >= idle {
+                    return Ok(());
+                }
+            } else {
+                idle_since = None;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
     }
 
     pub fn context_capabilities(
@@ -2275,6 +2346,25 @@ impl BrowserEngine for ServoEngine {
         })?;
         *clock = clock.saturating_add(millis);
         Ok(*clock)
+    }
+
+    fn wait_for_network_idle(
+        &mut self,
+        page: PageId,
+        idle_ms: u64,
+        max_ms: u64,
+    ) -> Result<(), EngineError> {
+        #[cfg(feature = "servo-runtime")]
+        {
+            self.wait_for_network_idle_blocking(page, idle_ms, max_ms)
+        }
+        #[cfg(not(feature = "servo-runtime"))]
+        {
+            let _ = (page, idle_ms, max_ms);
+            Err(EngineError::Unsupported(
+                "network-idle wait is unavailable without the servo-runtime feature".into(),
+            ))
+        }
     }
 }
 

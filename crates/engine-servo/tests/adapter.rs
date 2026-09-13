@@ -2378,3 +2378,53 @@ fn selected_engine_runtime_reports_truncated_large_agent_tree_projection() {
     assert!(snapshot.tree.truncated);
     assert!(snapshot.tree.nodes.len() <= 5_002);
 }
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_script_covers_fetch_and_xhr() {
+    let script = browsai_engine_servo::network_idle_install_script();
+    // Idempotency guard
+    assert!(
+        script.contains("__browsaiNetworkIdleInstalled"),
+        "missing install guard"
+    );
+    assert!(script.contains("__browsaiInFlight"), "missing counter");
+    // Fetch hook
+    assert!(
+        script.contains("origFetch") && script.contains("window.fetch"),
+        "missing fetch interceptor"
+    );
+    // XHR hooks
+    assert!(script.contains("XMLHttpRequest"), "missing XHR interceptor");
+    assert!(
+        script.contains("loadend") && script.contains("error") && script.contains("abort"),
+        "missing XHR completion listeners"
+    );
+    // Counter balance: every increment must have a matching decrement
+    // path. Count `__browsaiInFlight++` occurrences (increments) and
+    // ensure the same number of decrements via `dec()`.
+    let inc_count = script.matches("__browsaiInFlight++").count();
+    let dec_calls = script.matches("dec();").count();
+    let dec_defs = script.matches("function dec").count();
+    assert!(inc_count > 0, "no increments");
+    assert!(
+        dec_calls >= inc_count,
+        "unbalanced counter: {inc_count} inc vs {dec_calls} dec calls"
+    );
+    assert!(dec_defs >= 1, "missing dec() definition");
+}
+
+#[cfg(feature = "servo-runtime")]
+#[test]
+fn network_idle_interceptor_balanced_parens() {
+    // Parens sanity check — make sure nobody breaks the script with a
+    // stray bracket. A real JS parser would be better; this catches
+    // the common case.
+    let script = browsai_engine_servo::network_idle_install_script();
+    let opens = script.chars().filter(|c| *c == "(").count();
+    let closes = script.chars().filter(|c| *c == ")").count();
+    assert_eq!(
+        opens, closes,
+        "unbalanced parens: {opens} open vs {closes} close"
+    );
+}

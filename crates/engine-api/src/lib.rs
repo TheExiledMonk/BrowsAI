@@ -301,6 +301,26 @@ pub trait BrowserEngine {
         }
         self.evaluate_page_script(page, request.source)
     }
+
+    /// Wait until the page's network is idle: no in-flight XHR or fetch
+    /// requests for `idle_ms` continuously, or `max_ms` total elapsed.
+    /// Returns `Ok(())` either way — the caller treats timeout as "best
+    /// effort, take the snapshot anyway".
+    ///
+    /// Engines that don't track in-flight network state return
+    /// `EngineError::Unsupported`. The default impl does this so the
+    /// deterministic backend compiles without dragging in a real
+    /// network stack.
+    fn wait_for_network_idle(
+        &mut self,
+        _page: PageId,
+        _idle_ms: u64,
+        _max_ms: u64,
+    ) -> Result<(), EngineError> {
+        Err(EngineError::Unsupported(
+            "network-idle wait is unavailable for this engine".into(),
+        ))
+    }
 }
 
 #[cfg(test)]

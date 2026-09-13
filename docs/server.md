@@ -18,9 +18,9 @@ encoding for streaming responses.
 | GET    | `/capabilities`    | (none)                                                               | yes     | no        |
 | GET    | `/version`         | (none)                                                               | yes     | no        |
 | GET    | `/schema`          | (none)                                                               | yes     | no        |
-| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, snapshot_only?, format?, auto_solve?, stream?}` | no      | yes       |
-| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, format?, stream?}`                            | no      | yes       |
-| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, format?, stream?}`                            | no      | yes       |
+| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_max_ms?, snapshot_only?, format?, auto_solve?, stream?}` | no      | yes       |
+| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
+| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, wait_for_network_idle?, network_idle_ms?, network_idle_max_ms?, format?, stream?}`                            | no      | yes       |
 | POST   | `/follow-link`     | `{page, node_id, stream?, fingerprint?}`                           | no      | yes       |
 | POST   | `/auto-solve`      | `{url, fingerprint?, stream?}`                                     | no      | yes       |
 
@@ -34,6 +34,15 @@ page and resolve actionable elements back through the existing
 set to `"text"`, the BB-code tags are stripped and only the prose
 remains — useful for cheaper Q&A/summarisation prompts where the LLM
 doesn't need to act on the page.
+
+`wait_for_network_idle` (default `false`) installs a JS interceptor
+that tracks `window.fetch` and `XMLHttpRequest` in-flight counts, then
+polls until the count has been zero for `network_idle_ms` continuously
+(default `500`) or `network_idle_max_ms` total elapsed (default
+`8000`). Opt in for sites with turbo-frame / fetch-on-mount / SPA
+hydration that need DOM mutations from XHR responses to be visible in
+the snapshot. `pump_runtime` (driven by `wait_ms`) only spins the
+event loop; it does not wait for XHR callbacks to commit.
 
 ### Response shapes
 

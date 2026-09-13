@@ -1054,6 +1054,18 @@ fn handle_browse(
         .unwrap_or(100)
         .max(1) as usize;
     let format = body.get("format").and_then(Value::as_str).unwrap_or("tree");
+    let wait_for_network_idle = body
+        .get("wait_for_network_idle")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let network_idle_ms = body
+        .get("network_idle_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(500);
+    let network_idle_max_ms = body
+        .get("network_idle_max_ms")
+        .and_then(Value::as_u64)
+        .unwrap_or(8000);
     let roles_filter: Vec<String> = body
         .get("filter")
         .and_then(Value::as_str)
@@ -1089,6 +1101,18 @@ fn handle_browse(
         let engine = state.engine.lock().expect("engine lock");
         if let Err(error) = engine.pump_runtime(page_id, wait_ms) {
             return error_response(format!("wait_ms pump failed: {error:?}"));
+        }
+    }
+    if wait_for_network_idle {
+        let mut engine = state.engine.lock().expect("engine lock");
+        if let Err(error) =
+            engine.wait_for_network_idle(page_id, network_idle_ms, network_idle_max_ms)
+        {
+            // Network-idle wait is best-effort. Log and continue with
+            // the snapshot rather than failing the whole request.
+            eprintln!(
+                "BROWSAI_NETWORK_IDLE_ERROR: {error:?} (idle_ms={network_idle_ms}, max_ms={network_idle_max_ms})"
+            );
         }
     }
     if snapshot_only {

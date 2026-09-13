@@ -320,9 +320,13 @@ underlying `AgentRenderTree`, but the markdown output is monolithic
   `LoadStatus::Complete` plus the configured `wait_ms`. Pages that
   keep loading content asynchronously — GitHub topic pages with
   turbo-frame cards, X timelines, SPAs that hydrate after first paint
-  — need either a longer `wait_ms` or a polling primitive for a
-  specific selector (not yet implemented). The current workaround is
-  to pass `"wait_ms": 5000` and accept the latency.
+  — need either a longer `wait_ms`, the new
+  `wait_for_network_idle` server primitive, or a polling primitive
+  for a specific selector (not yet implemented). Pass
+  `"wait_for_network_idle": true` on `/browse` to install a JS
+  interceptor that tracks `fetch` and `XMLHttpRequest` in-flight
+  counts and waits until they reach zero for 500ms continuously (or
+  8s total).
 
 ## Schema
 
