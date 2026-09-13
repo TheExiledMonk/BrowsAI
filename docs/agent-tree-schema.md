@@ -24,6 +24,7 @@ The CLI emits one of these top-level shapes depending on the command:
 | `NavigationResult`      | `browsai headless / navigate / open`           |
 | `QueryResult`           | `browsai query`                               |
 | `RenderResult`          | `browsai render`                              |
+| `MarkdownView`          | `browsai query --format=markdown\|text` / same on `render`           |
 | `ActionPlanResult`      | `browsai action`                              |
 | `FollowLinkResult`      | `browsai follow-link`                         |
 | `LiveResult`            | `browsai live-open / live-search` (deterministic & live) |
@@ -136,6 +137,79 @@ response is wrapped:
 }
 ```
 
+### `MarkdownView`
+
+`browsai query --format=markdown <url>` (and `render --format=markdown`)
+return a prose rendering of the page plus a sidecar index of all
+actionable nodes. The body is wrapped in a
+`<page-content trust="untrusted">` envelope so the host prompt can
+distinguish page data from instructions. The LLM resolves actionable
+elements through their `id="…"` attribute using the existing
+`/follow-link` and `/action` endpoints — markdown is just a different
+view onto the same `AgentRenderTree`.
+
+`--format=text` produces the same envelope but strips every BB-code
+tag. Links render as their visible text, inputs as `(input: name)` or
+`(input: name) value`, selects as `(label: selected)`, checkboxes as
+`[x] label` or `[ ] label`, challenges as `(challenge: provider)`,
+regions/dialogs as plain prose. The `node_index` is empty in text mode
+because there are no actionable tags to point at.
+
+```jsonc
+{
+  "format": "markdown" | "text",        // string
+  "format_version": 1,                  // u16 — bumps on backward-incompatible changes
+  "content": "<page-content trust=\"untrusted\">\n# Title\n\n[link id=\"n3\" href=\"/about\"]Learn more[/link]\n</page-content>",
+  "node_index": [NodeSpan, ...],        // array — every actionable tag, byte offsets into content (markdown mode only)
+  "skipped_nodes": 3                    // u64 — invisible/empty nodes omitted from output
+}
+```
+
+`NodeSpan`:
+
+```jsonc
+{
+  "id": "n3",                           // string — AgentNodeId, valid for /follow-link + /action
+  "tag": "link",                        // string — MarkdownTag (link, button, textbox, checkbox,
+                                        //          radio, select, option, image, heading,
+                                        //          region, dialog, challenge, form, list,
+                                        //          listitem, table, row, cell)
+  "start": 42,                          // u64 — byte offset of the opening "[" in content
+  "end": 78,                            // u64 — byte offset one past the closing "]"
+  "href": "/about",                     // string|null — only present on link/option/image
+  "name": "Learn more"                  // string|null — accessible name when present
+}
+```
+
+Tag conventions:
+
+- Actionable nodes use BB-code-style wrappers so the LLM picks them
+  up with a single regex. Examples:
+  `[link id="n3" href="/about"]Learn more[/link]`,
+  `[button id="n5" disabled="true"]Submit[/button]`,
+  `[textbox id="n7" name="q" placeholder="Search…"]current value[/textbox]`,
+  `[select id="n9"]\n  [option id="n9-1" value="us" selected="true"]US[/option]\n[/select]`.
+- Structural nodes use standard markdown: `# H1`, `## H2`, `| a | b |` tables, `- item` lists.
+- A `[region name="…"]…[/region]` and `[dialog name="…"]…[/dialog]`
+  wrap landmarks and modal dialogs respectively.
+- A node with `SemanticRole::Challenge` carries a `provider="…"`
+  attribute on whatever tag wraps it.
+- Self-closing form is used for inputs without a value:
+  `[textbox id="n11" name="q"]` — no body between the tags.
+
+Markdown output is intended for LLM consumption only; the BB-code tags
+are not standard markdown and will not round-trip through an HTML
+renderer.
+
+### Streaming event type
+
+When `--format=markdown --stream` is set, the CLI emits one extra
+event before `snapshot-complete`:
+
+| `type`       | Fields                                                                  | Emitted when |
+| ------------ | ----------------------------------------------------------------------- | ------------ |
+| `text-frame` | `command`, `format_version`, `content`, `node_count`, `skipped_nodes`   | after snapshot projection, before `snapshot-complete` |
+
 ### `ActionPlanResult`
 
 ```jsonc
@@ -230,6 +304,7 @@ line-delimited JSON from stdout.
 | `page-pending`     | `command`, `url`                                       | right before navigation |
 | `page`              | `command`, `page`, `url`                               | right after navigation completes |
 | `node`              | `page`, `node_id`, `name`, `role`, `semantic_role`, `geometry`, `confidence` | per node, after confidence pass |
+| `text-frame`        | `command`, `format_version`, `content`, `node_count`, `skipped_nodes` | once, when `--format=markdown --stream` is set |
 | `snapshot-complete` | `command`, `page`, `node_count`, plus `result_count` for filtered queries, `snapshot` if available | once, after the final snapshot |
 
 ### Example stream

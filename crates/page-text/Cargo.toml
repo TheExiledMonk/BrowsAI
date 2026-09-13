@@ -1,0 +1,13 @@
+[package]
+name = "browsai-page-text"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+browsai-agent-tree = { path = "../agent-tree" }
+
+[dev-dependencies]
+browsai-provenance = { path = "../provenance" }

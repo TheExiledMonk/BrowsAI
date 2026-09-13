@@ -724,6 +724,7 @@ dependencies = [
  "browsai-input",
  "browsai-layout-observer",
  "browsai-logging",
+ "browsai-page-text",
  "browsai-profiles",
  "browsai-provenance",
  "browsai-recovery",
@@ -999,6 +1000,15 @@ dependencies = [
  "serde_json",
  "url",
  "uuid",
+]
+
+[[package]]
+name = "browsai-page-text"
+version = "0.1.0"
+dependencies = [
+ "browsai-agent-tree",
+ "browsai-provenance",
+ "serde",
 ]
 
 [[package]]

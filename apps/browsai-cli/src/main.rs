@@ -76,7 +76,7 @@ fn auto_solve_challenges(
 }
 
 fn usage() -> &'static str {
-    "browsai commands:\n  version\n  capabilities\n  profile <name>\n  workspace <profile-name>\n  headless <url>\n  open <url>\n  navigate <url>\n  render <url>\n  query <url>\n  action <url> <target> <kind>\n  live-open <url> [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N] [--auto-solve]\n  live-search <query> [--open-links] [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N]\n  serve [--port N] [--bind HOST] [--idle-shutdown-seconds N] [--fingerprint ID] [--http2-profile ID] [--no-live-browser] [--canvas-noise-seed N]\n  check site <url>\n  check corpus <sites.csv>\n  check report <run-id>\n  logs <log.json>\n  audit <journal.json>\n  replay <journal.json>\n  benchmark <result.json>\n  recovery <checkpoint.json>\n"
+    "browsai commands:\n  version\n  capabilities\n  profile <name>\n  workspace <profile-name>\n  headless <url>\n  open <url>\n  navigate <url>\n  render <url> [--format=tree|markdown|text]\n  query <url> [--format=tree|markdown|text] [--filter=Link,Heading,...] [--cursor=N --limit=N] [--stream]\n  action <url> <target> <kind>\n  live-open <url> [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N] [--auto-solve]\n  live-search <query> [--open-links] [--link-cursor N --link-limit N --link-max-bytes N --link-max-duration-ms N]\n  serve [--port N] [--bind HOST] [--idle-shutdown-seconds N] [--fingerprint ID] [--http2-profile ID] [--no-live-browser] [--canvas-noise-seed N]\n  check site <url>\n  check corpus <sites.csv>\n  check report <run-id>\n  logs <log.json>\n  audit <journal.json>\n  replay <journal.json>\n  benchmark <result.json>\n  recovery <checkpoint.json>\n"
 }
 
 fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, String> {
@@ -247,6 +247,7 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             let command_name = args.get(1).map(String::as_str).unwrap_or("query");
             let mut engine = ServoEngine::new();
             let stream = bool_flag(args, "--stream");
+            let format = string_option(args, "--format").unwrap_or_else(|| "tree".to_string());
             let context = engine
                 .create_context(ContextOptions {
                     headless: true,
@@ -290,7 +291,43 @@ fn run_internal(args: &[String], one_shot_live_runtime: bool) -> Result<String, 
             }
             let cursor = bounded_option(args, "--cursor", 0, 100_000)?;
             let limit = bounded_option(args, "--limit", 100, 1_000)?.max(1);
-            if command_name == "query" {
+            if format == "markdown" || format == "text" {
+                let page_text_format = if format == "text" {
+                    browsai_page_text::PageTextFormat::Plain
+                } else {
+                    browsai_page_text::PageTextFormat::Markdown
+                };
+                let opts = browsai_page_text::MarkdownOptions {
+                    format: page_text_format,
+                    ..Default::default()
+                };
+                let view =
+                    browsai_page_text::MarkdownEmitter::new(&snapshot.tree).emit(&opts);
+                if stream {
+                    emit_event(serde_json::json!({
+                        "type": "text-frame",
+                        "command": command_name,
+                        "format": format,
+                        "format_version": view.format_version,
+                        "content": view.content,
+                        "node_count": view.node_index.len(),
+                        "skipped_nodes": view.skipped_nodes,
+                    }));
+                    emit_event(serde_json::json!({
+                        "type": "snapshot-complete",
+                        "command": command_name,
+                        "node_count": snapshot.tree.nodes.len(),
+                    }));
+                }
+                serde_json::to_string(&serde_json::json!({
+                    "format": format,
+                    "format_version": view.format_version,
+                    "content": view.content,
+                    "node_index": view.node_index,
+                    "skipped_nodes": view.skipped_nodes,
+                }))
+                .map_err(|error| error.to_string())
+            } else if command_name == "query" {
                 if !roles_filter.is_empty() {
                     let view = PageQuery::new(&snapshot.tree).render_page(cursor, limit);
                     let mut results = view.results;

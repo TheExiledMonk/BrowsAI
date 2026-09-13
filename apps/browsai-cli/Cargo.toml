@@ -23,6 +23,7 @@ browsai-engine-servo = { path = "../../crates/engine-servo" }
 browsai-input = { path = "../../crates/input" }
 browsai-layout-observer = { path = "../../crates/layout-observer" }
 browsai-logging = { path = "../../crates/logging" }
+browsai-page-text = { path = "../../crates/page-text" }
 browsai-profiles = { path = "../../crates/profiles" }
 browsai-provenance = { path = "../../crates/provenance" }
 browsai-recovery = { path = "../../crates/recovery" }

@@ -51,6 +51,7 @@ members = [
     "crates/structural-ir",
     "crates/semantic-ir",
     "crates/application-ir",
+    "crates/page-text",
     "crates/provenance",
     "crates/state",
     "crates/diff",

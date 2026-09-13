@@ -18,11 +18,22 @@ encoding for streaming responses.
 | GET    | `/capabilities`    | (none)                                                               | yes     | no        |
 | GET    | `/version`         | (none)                                                               | yes     | no        |
 | GET    | `/schema`          | (none)                                                               | yes     | no        |
-| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, snapshot_only?, auto_solve?, stream?}` | no      | yes       |
-| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, stream?}`                            | no      | yes       |
-| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, stream?}`                            | no      | yes       |
+| POST   | `/browse`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, snapshot_only?, format?, auto_solve?, stream?}` | no      | yes       |
+| POST   | `/query`           | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, format?, stream?}`                            | no      | yes       |
+| POST   | `/render`          | `{url, fingerprint?, query?, filter?, cursor?, limit?, wait_ms?, format?, stream?}`                            | no      | yes       |
 | POST   | `/follow-link`     | `{page, node_id, stream?, fingerprint?}`                           | no      | yes       |
 | POST   | `/auto-solve`      | `{url, fingerprint?, stream?}`                                     | no      | yes       |
+
+`format` accepts `"tree"` (default, current JSON shape), `"markdown"`,
+or `"text"`. When set to `"markdown"`, the response body is a
+[`MarkdownView`](agent-tree-schema.md#markdownview) — a prose rendering
+of the page with BB-code-style actionable tags (`[link id="…"]`,
+`[button id="…"]`, `[textbox id="…"]`) so the LLM can both read the
+page and resolve actionable elements back through the existing
+`/follow-link` and `/action` endpoints using the `id` attribute. When
+set to `"text"`, the BB-code tags are stripped and only the prose
+remains — useful for cheaper Q&A/summarisation prompts where the LLM
+doesn't need to act on the page.
 
 ### Response shapes
 

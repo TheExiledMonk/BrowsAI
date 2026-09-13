@@ -1053,6 +1053,10 @@ fn handle_browse(
         .and_then(Value::as_u64)
         .unwrap_or(100)
         .max(1) as usize;
+    let format = body
+        .get("format")
+        .and_then(Value::as_str)
+        .unwrap_or("tree");
     let roles_filter: Vec<String> = body
         .get("filter")
         .and_then(Value::as_str)
@@ -1130,6 +1134,28 @@ fn handle_browse(
             "truncated": view.next_offset.is_some(),
             "next_cursor": view.next_offset.map(|offset| offset.to_string()),
             "filter": roles_filter,
+        });
+        return Response::json(200, serde_json::to_vec_pretty(&payload).unwrap_or_default());
+    }
+    if format == "markdown" || format == "text" {
+        let page_text_format = if format == "text" {
+            browsai_page_text::PageTextFormat::Plain
+        } else {
+            browsai_page_text::PageTextFormat::Markdown
+        };
+        let opts = browsai_page_text::MarkdownOptions {
+            format: page_text_format,
+            ..Default::default()
+        };
+        let view = browsai_page_text::MarkdownEmitter::new(&snapshot.tree).emit(&opts);
+        let payload = serde_json::json!({
+            "format": format,
+            "format_version": view.format_version,
+            "page": page_id,
+            "url": navigation.url,
+            "content": view.content,
+            "node_index": view.node_index,
+            "skipped_nodes": view.skipped_nodes,
         });
         return Response::json(200, serde_json::to_vec_pretty(&payload).unwrap_or_default());
     }
