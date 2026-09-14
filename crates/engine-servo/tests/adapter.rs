@@ -2521,26 +2521,14 @@ fn network_idle_interceptor_runs_scroll_trigger() {
         script.contains("__browsaiScrollStep"),
         "missing scroll-step counter"
     );
-    assert!(
-        script.contains("scrollTo"),
-        "missing scrollTo() trigger"
-    );
-    assert!(
-        script.contains("scrollHeight"),
-        "missing scrollHeight read"
-    );
-    assert!(
-        script.contains("innerHeight"),
-        "missing innerHeight read"
-    );
+    assert!(script.contains("scrollTo"), "missing scrollTo() trigger");
+    assert!(script.contains("scrollHeight"), "missing scrollHeight read");
+    assert!(script.contains("innerHeight"), "missing innerHeight read");
     assert!(
         script.contains("requestAnimationFrame"),
         "missing rAF scheduling — IO callbacks won't fire without it"
     );
-    assert!(
-        script.contains("stepScroll"),
-        "missing stepScroll driver"
-    );
+    assert!(script.contains("stepScroll"), "missing stepScroll driver");
     // The scroll trigger must NOT take forever on pages that fit in
     // the viewport — we have a fast path that flips
     // __browsaiScrollComplete to true immediately when there's nothing
@@ -2589,7 +2577,9 @@ fn network_idle_interceptor_scroll_steps_reset_mutation_timer() {
     // pre-scroll snapshot.
     let script = browsai_engine_servo::network_idle_install_script();
     // Initial assignment at install time.
-    let init_bump = script.matches("window.__browsaiLastMutation=Date.now()").count();
+    let init_bump = script
+        .matches("window.__browsaiLastMutation=Date.now()")
+        .count();
     // Per-step bumps inside stepScroll and the final step.
     let step_bumps = script.matches("__browsaiLastMutation=Date.now()").count();
     assert!(
@@ -2659,10 +2649,7 @@ fn network_idle_interceptor_scroll_trigger_does_four_passes_with_pause() {
     // pass. Without this, the next pass starts before the previous
     // one's IO callbacks have had time to render their content
     // (which may include more IO observers).
-    assert!(
-        script.contains("isEndOfPass"),
-        "missing end-of-pass pause"
-    );
+    assert!(script.contains("isEndOfPass"), "missing end-of-pass pause");
     assert!(
         script.contains("800:200") || script.contains("?800:200"),
         "missing conditional pass-end delay (expecting 800ms at end of pass, 200ms between steps)"

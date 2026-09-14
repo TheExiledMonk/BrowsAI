@@ -422,11 +422,15 @@ mod tests {
                 r#"{"type":"pointer_up","button":2}"#,
             ),
             (
-                NativeInputEvent::KeyDown { key: "Enter".into() },
+                NativeInputEvent::KeyDown {
+                    key: "Enter".into(),
+                },
                 r#"{"type":"key_down","key":"Enter"}"#,
             ),
             (
-                NativeInputEvent::KeyUp { key: "Escape".into() },
+                NativeInputEvent::KeyUp {
+                    key: "Escape".into(),
+                },
                 r#"{"type":"key_up","key":"Escape"}"#,
             ),
             (

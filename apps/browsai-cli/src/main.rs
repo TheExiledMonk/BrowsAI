@@ -2626,20 +2626,16 @@ mod tests {
             "native-input should accept a tagged scroll/key/text sequence: {}",
             &body[..body.len().min(160)]
         );
-        let payload: serde_json::Value = serde_json::from_str(
-            &body[body.find("\r\n\r\n").map(|i| i + 4).unwrap_or(0)..],
-        )
-        .expect("native-input response is JSON");
+        let payload: serde_json::Value =
+            serde_json::from_str(&body[body.find("\r\n\r\n").map(|i| i + 4).unwrap_or(0)..])
+                .expect("native-input response is JSON");
         assert_eq!(
             payload["dispatched"].as_u64(),
             Some(7),
             "dispatched count mismatch: {payload}"
         );
         assert_eq!(payload["host"].as_str(), Some("example.test"));
-        assert_eq!(
-            payload["url"].as_str(),
-            Some("https://example.test/")
-        );
+        assert_eq!(payload["url"].as_str(), Some("https://example.test/"));
         let echoed = payload["events"].as_array().expect("events array");
         assert_eq!(echoed.len(), 7);
         assert_eq!(echoed[0]["type"], "pointer_move");

@@ -2038,7 +2038,8 @@ impl ServoEngine {
             INSTALL_NETWORK_IDLE_SCRIPT.to_string(),
             std::time::Duration::from_secs(5),
         );
-        let max = std::time::Duration::from_millis(max_ms.max(idle_ms.saturating_add(grace_ms)).max(1));
+        let max =
+            std::time::Duration::from_millis(max_ms.max(idle_ms.saturating_add(grace_ms)).max(1));
         let idle = std::time::Duration::from_millis(idle_ms.max(50));
         let quiet_floor_ms = idle_ms.saturating_add(grace_ms);
         let started = std::time::Instant::now();
